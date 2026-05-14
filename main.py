@@ -7,8 +7,7 @@ import sys
 import time
 from datetime import datetime
 
-from PyQt5.QtCore import (Qt, QTimer, QPoint, QRect, QRectF, pyqtSignal,
-                          QPropertyAnimation, QParallelAnimationGroup, QEasingCurve)
+from PyQt5.QtCore import (Qt, QTimer, QPoint, QRectF, pyqtSignal)
 from PyQt5.QtGui import (QPainter, QIcon, QCursor, QColor, QFont,
                          QLinearGradient, QBrush, QFontMetrics)
 from PyQt5.QtWidgets import (
@@ -1005,9 +1004,9 @@ class PetWindow(QWidget):
             r = max(2, int(round(EYE_R)))
             painter.drawEllipse(int(ex - r), int(ey - r), r * 2, r * 2)
             # 高光
-            painter.setBrush(QColor(255, 255, 255, 90))
-            hr = max(1, int(round(4.0 * S)))
-            painter.drawEllipse(int(ex + 2.5 * S), int(ey - 5.0 * S), hr, hr)
+            painter.setBrush(QColor(255, 255, 255, 110))
+            hr = 3
+            painter.drawEllipse(int(ex + 2.5 * S + actual_gx * 3.0 * S), int(ey - 5.0 * S), hr, hr)
 
         # ── 嘴巴（1.2×） ────────────────────────────────────────────
         MOUTH_SHIFT_X = 5.0 * S
@@ -1015,7 +1014,7 @@ class PetWindow(QWidget):
         mouth_bx, mouth_by = -3.5 * S, -612.0 * S
         mx = mouth_bx + actual_gx * MOUTH_SHIFT_X
         my = mouth_by + gy * MOUTH_SHIFT_Y
-        mouth_w = 48.5 * S
+        mouth_w = 46.0 * S
         curve   = -gy * 11.52 * S
         path = QPainterPath()
         path.moveTo(QPointF(mx - mouth_w, my))
@@ -1059,6 +1058,9 @@ class PetWindow(QWidget):
                 self._drag_offset     = event.globalPos() - QPoint(int(self._pet_x), int(self._pet_y))
                 self._drag_history.clear()
                 self.state.current_action = PetAction.DRAG
+                # 立即打断随机动画，切换到 drag 动画（道具动画播放中不打断）
+                if not self._item_playing:
+                    self.renderer.switch_loop("drag")
                 self._say(_pick("drag"))
                 self.setCursor(QCursor(Qt.ClosedHandCursor))
         elif event.button() == Qt.RightButton:
@@ -1532,21 +1534,21 @@ class PetWindow(QWidget):
         self._opacity_pct = val; self.update()
 
     def _show_panel(self):
-        """在桌宠左上方弹出个人中心，确保不超出屏幕"""
+        """在桌宠右上方弹出个人中心，确保不超出屏幕"""
         pw = self.panel.width()
         ph = self.panel.height()
         gap = 15
 
-        # 面板 x：桌宠左边
-        px = int(self._pet_x) - pw - gap
-        # 面板 y：底部与桌宠底部对齐（面板在桌宠左上方）
+        # 面板 x：桌宠右边
+        px = int(self._pet_x) + PET_SIZE + gap
+        # 面板 y：底部与桌宠底部对齐
         py = int(self._pet_y) + PET_SIZE - ph
 
-        # 防止超出屏幕左/上/下边缘
+        # 防止超出屏幕右/上/下边缘
         screen = QApplication.primaryScreen().geometry()
-        if px < 10:
-            # 左边放不下就放右边
-            px = int(self._pet_x) + PET_SIZE + gap
+        if px + pw > screen.width() - 10:
+            # 右边放不下就放左边
+            px = int(self._pet_x) - pw - gap
         py = max(10, min(py, screen.height() - ph - 10))
 
         self.panel.move(px, py)
