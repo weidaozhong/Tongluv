@@ -73,5 +73,10 @@
     "frames": 24,
     "fps": 20.0,
     "loop": false
+  },
+  "item_star": {
+    "frames": 24,
+    "fps": 20.0,
+    "loop": false
   }
 }

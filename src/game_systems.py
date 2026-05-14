@@ -12,6 +12,11 @@ from src.user_data import game_data_path
 DATA_FILE = game_data_path()
 
 # ══════════════════════════════════════════════════════════════════════
+#  🧪 测试开关 — 完成测试后将下面改回 False
+# ══════════════════════════════════════════════════════════════════════
+_TEST_UNLIMITED_COINS: bool = True   # True = 无限金币测试模式
+
+# ══════════════════════════════════════════════════════════════════════
 #  默认数据结构
 # ══════════════════════════════════════════════════════════════════════
 def _default_data():
@@ -114,6 +119,8 @@ class GameSystems:
 
     @property
     def coins(self) -> int:
+        if _TEST_UNLIMITED_COINS:
+            return 99999
         return self._data["coins"]
 
     def _add_coins(self, n: int):
@@ -297,9 +304,10 @@ class GameSystems:
     def buy_item(self, item_id: str) -> str:
         for si in SHOP_ITEMS:
             if si["id"] == item_id:
-                if self._data["coins"] < si["price"]:
-                    return f"金币不足！需要 {si['price']}，当前 {self._data['coins']}"
-                self._data["coins"] -= si["price"]
+                if not _TEST_UNLIMITED_COINS:
+                    if self._data["coins"] < si["price"]:
+                        return f"金币不足！需要 {si['price']}，当前 {self._data['coins']}"
+                    self._data["coins"] -= si["price"]
                 self.add_item(item_id)
                 return f"购买成功！获得 {si['name']}"
         return "物品不存在"

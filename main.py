@@ -7,8 +7,10 @@ import sys
 import time
 from datetime import datetime
 
-from PyQt5.QtCore import Qt, QTimer, QPoint, QRect, pyqtSignal
-from PyQt5.QtGui import QPainter, QIcon, QCursor, QColor
+from PyQt5.QtCore import (Qt, QTimer, QPoint, QRect, QRectF, pyqtSignal,
+                          QPropertyAnimation, QParallelAnimationGroup, QEasingCurve)
+from PyQt5.QtGui import (QPainter, QIcon, QCursor, QColor, QFont,
+                         QLinearGradient, QBrush, QFontMetrics)
 from PyQt5.QtWidgets import (
     QApplication, QWidget, QMenu, QAction,
     QSystemTrayIcon, QSlider, QWidgetAction, QLabel,
@@ -82,6 +84,231 @@ def _mood_to_str(mood: PetMood) -> str:
     return {PetMood.HAPPY: "happy", PetMood.NORMAL: "normal",
             PetMood.SAD: "sad", PetMood.HUNGRY: "hungry",
             PetMood.SLEEPY: "sleepy", PetMood.SLEEPING: "sleepy"}.get(mood, "normal")
+
+
+# (emoji, stat_label, num_delta, badge_text, badge_color_or_"rainbow", orbit_dot_colors)
+_ITEM_FLOAT: dict[str, tuple] = {
+    "apple":    ("🍎", "饱食度", "+15", "饱食", "#f4922a", ("#f4922a", "#ffcf80", "#ff6b35")),
+    "cake":     ("🍰", "饱食度", "+30", "饱食", "#f4922a", ("#f4922a", "#ffcf80", "#ff6b35")),
+    "candy":    ("🍬", "心情值", "+15", "心情", "#d4a800", ("#ffd600", "#ff9de2", "#ffe899")),
+    "coffee":   ("☕",  "体力值", "+20", "体力", "#20a8b8", ("#4db6c4", "#a0e8f0", "#007c90")),
+    "plush":    ("🧸", "亲密度", "+10", "亲密", "#e0608a", ("#f06292", "#ffb3cc", "#c2185b")),
+    "star":     ("⭐", "经验值", "+50", "经验", "#7b52d0", ("#9c6fff", "#c9aaff", "#5a3aaa")),
+    "gift_box": ("🎁", "全属性", "+10", "🌈",  "rainbow",  ("#ff6b6b", "#6be084", "#40b0ff")),
+}
+
+
+class FloatLabel(QWidget):
+    """RPG 斜角爆出浮动数值标签 — 从角色右侧弹出向右上飞散"""
+
+    _DURATION_MS = 2000  # 总动画时长 2.0 s
+
+    # keyframes: (progress 0~1, tx px, ty px, rotation deg, scale, opacity)
+    _KF = (
+        (0.00,  0.0,  8.0, -6.0, 0.55, 0.0),
+        (0.20, 31.0, -26.0,  5.0, 1.18, 1.0),
+        (0.60, 57.0, -49.0, -2.0, 1.00, 1.0),
+        (1.00, 86.0, -86.0,  4.0, 0.80, 0.0),
+    )
+
+    _W, _H = 200, 130  # widget fixed size (generous to accommodate max-scale clipping)
+
+    def __init__(self, item_id: str, pet_x: float, pet_y: float, pet_size: int):
+        super().__init__(None)
+        self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint | Qt.Tool)
+        self.setAttribute(Qt.WA_TranslucentBackground)
+        self.setAttribute(Qt.WA_ShowWithoutActivating)
+        self.setFixedSize(self._W, self._H)
+
+        cfg = _ITEM_FLOAT.get(item_id,
+              ("❓", "属性", "+?", "?", "#888888", ("#888", "#888", "#888")))
+        self._emoji, self._stat, self._num_text, self._badge_text, self._badge_color, _ = cfg
+
+        # Origin: right side of pet torso, roughly mid-height
+        self._ox = int(pet_x + pet_size * 0.58)
+        self._oy = int(pet_y + pet_size * 0.38)
+
+        # Current render state (updated per tick)
+        self._rot   = -6.0
+        self._scale =  0.55
+        self._t_ms  =  0.0
+        self._last_perf: float | None = None
+
+        # Timer drives ~60 fps animation
+        self._timer = QTimer(self)
+        self._timer.setInterval(16)
+        self._timer.timeout.connect(self._tick)
+
+        # Initial position (keyframe 0)
+        self._apply_kf(0.0, 8.0)
+        self.setWindowOpacity(0.0)
+
+    # ── interpolation helpers ─────────────────────────────────────────────
+    @staticmethod
+    def _lerp(a: float, b: float, t: float) -> float:
+        return a + (b - a) * t
+
+    def _interp(self, progress: float):
+        kf = self._KF
+        for i in range(len(kf) - 1):
+            p0, tx0, ty0, r0, s0, o0 = kf[i]
+            p1, tx1, ty1, r1, s1, o1 = kf[i + 1]
+            if p0 <= progress <= p1:
+                a = (progress - p0) / (p1 - p0)
+                L = self._lerp
+                return L(tx0, tx1, a), L(ty0, ty1, a), L(r0, r1, a), L(s0, s1, a), L(o0, o1, a)
+        last = kf[-1]
+        return last[1], last[2], last[3], last[4], last[5]
+
+    def _apply_kf(self, tx: float, ty: float) -> None:
+        x = self._ox - self._W // 2 + int(tx)
+        y = self._oy - self._H // 2 + int(ty)
+        self.move(x, y)
+
+    # ── animation tick ────────────────────────────────────────────────────
+    def _tick(self) -> None:
+        now = time.perf_counter() * 1000.0
+        if self._last_perf is None:
+            self._last_perf = now
+        self._t_ms += now - self._last_perf
+        self._last_perf = now
+
+        progress = min(self._t_ms / self._DURATION_MS, 1.0)
+        tx, ty, rot, scale, opacity = self._interp(progress)
+
+        self._rot   = rot
+        self._scale = scale
+        self._apply_kf(tx, ty)
+        self.setWindowOpacity(max(0.0, min(1.0, opacity)))
+        self.update()
+
+        if progress >= 1.0:
+            self._timer.stop()
+            self.close()
+
+    # ── public entry ──────────────────────────────────────────────────────
+    def show_float(self) -> None:
+        self.show()
+        self._t_ms     = 0.0
+        self._last_perf = None
+        self._timer.start()
+
+    # ── painting ──────────────────────────────────────────────────────────
+    def paintEvent(self, event) -> None:  # noqa: N802
+        p = QPainter(self)
+        p.setRenderHint(QPainter.Antialiasing)
+        p.setRenderHint(QPainter.TextAntialiasing)
+
+        W, H = self._W, self._H
+        cx, cy = W / 2.0, H / 2.0
+
+        # Apply rotation + scale around widget center
+        p.translate(cx, cy)
+        p.rotate(self._rot)
+        p.scale(self._scale, self._scale)
+        p.translate(-cx, -cy)
+
+        # ── Large gold number (+XX) ───────────────────────────────────────
+        num_font = QFont()
+        num_font.setFamily("Impact")
+        num_font.setPixelSize(40)
+        num_font.setBold(True)
+        num_font.setLetterSpacing(QFont.AbsoluteSpacing, 2)
+        p.setFont(num_font)
+        nfm = p.fontMetrics()
+        nw  = nfm.horizontalAdvance(self._num_text)
+        nh  = nfm.height()
+        na  = nfm.ascent()
+
+        # Position: slightly left of center to leave room for the badge
+        nx = int(cx - nw / 2.0 - 14)
+        ny = int(cy - nh / 2.0 + 4)   # rect top
+        nb = ny + na                    # baseline
+
+        # Outline — 8 offsets at ±3 px
+        p.setPen(QColor(0, 0, 0, 215))
+        for ddx, ddy in ((-3,-3),(0,-3),(3,-3),(-3,0),(3,0),(-3,3),(0,3),(3,3)):
+            p.drawText(nx + ddx, nb + ddy, self._num_text)
+
+        # Gold fill
+        p.setPen(QColor("#ffe566"))
+        p.drawText(nx, nb, self._num_text)
+
+        # ── Attribute badge (top-right corner of number block) ────────────
+        badge_font = QFont()
+        badge_font.setFamily("Microsoft YaHei")
+        badge_font.setPixelSize(12)
+        badge_font.setBold(True)
+        p.setFont(badge_font)
+        bfm  = p.fontMetrics()
+        btw  = bfm.horizontalAdvance(self._badge_text)
+        bth  = bfm.height()
+        bpx, bpy = 6, 3              # inner padding
+        brect = QRectF(nx + nw + 0, ny - 8,
+                       btw + bpx * 2, bth + bpy * 2)
+
+        p.setPen(Qt.NoPen)
+        if self._badge_color == "rainbow":
+            grad = QLinearGradient(brect.left(), 0, brect.right(), 0)
+            for pos, col in ((0.0,"#ff6b6b"),(0.2,"#ffa640"),(0.4,"#ffe140"),
+                             (0.6,"#6be084"),(0.8,"#40b0ff"),(1.0,"#c06bff")):
+                grad.setColorAt(pos, QColor(col))
+            p.setBrush(QBrush(grad))
+        else:
+            p.setBrush(QColor(self._badge_color))
+        p.drawRoundedRect(brect, 6, 6)
+
+        # Badge text (white, centered inside badge)
+        p.setPen(QColor("white"))
+        p.setFont(badge_font)
+        inner = QRectF(brect.left() + bpx, brect.top() + bpy,
+                       btw, bth)
+        p.drawText(inner.toRect(), Qt.AlignCenter, self._badge_text)
+
+        # ── Bottom row: emoji  +  "stat_label num_text" ──────────────────
+        row_y_top = ny + nh + 4    # a few px below number bottom
+
+        emoji_font = QFont()
+        emoji_font.setFamily("Segoe UI Emoji")
+        emoji_font.setPixelSize(16)
+        p.setFont(emoji_font)
+        efm = p.fontMetrics()
+        ew  = efm.horizontalAdvance(self._emoji)
+        ea  = efm.ascent()
+
+        stat_text = f"{self._stat} {self._num_text}"
+        stat_font = QFont()
+        stat_font.setFamily("Microsoft YaHei")
+        stat_font.setPixelSize(12)
+        stat_font.setBold(True)
+        sfm = QFontMetrics(stat_font)
+        sw  = sfm.horizontalAdvance(stat_text)
+        sa  = sfm.ascent()
+
+        gap     = 5
+        row_w   = ew + gap + sw
+        row_x   = int(cx - row_w / 2.0)
+        # align baselines of emoji and stat text
+        max_a   = max(ea, sa)
+        e_y     = row_y_top + max_a
+        s_y     = row_y_top + max_a
+
+        # Emoji with subtle glow shadow
+        p.setFont(emoji_font)
+        p.setPen(QColor(255, 200, 0, 100))
+        for ddx, ddy in ((-1, 1), (1, 1), (0, 2)):
+            p.drawText(row_x + ddx, e_y + ddy, self._emoji)
+        p.setPen(QColor(255, 240, 180))
+        p.drawText(row_x, e_y, self._emoji)
+
+        # Stat text with thin shadow
+        p.setFont(stat_font)
+        p.setPen(QColor(0, 0, 0, 160))
+        p.drawText(row_x + ew + gap + 1, s_y + 1, stat_text)
+        p.setPen(QColor("#ffd070"))
+        p.drawText(row_x + ew + gap, s_y, stat_text)
+
+        p.end()
 
 
 class PetWindow(QWidget):
@@ -189,6 +416,7 @@ class PetWindow(QWidget):
         self._opacity_pct    = 100
         self._auto_walk_timer= random.uniform(20.0, 40.0)
         self._last_action_time = time.time()
+        self._item_playing   = False   # True while item animation is running
         self._last_time      = time.time()
         self._save_timer     = 0.0
         self._dialogue_timer = random.uniform(15.0, 35.0)
@@ -308,11 +536,13 @@ class PetWindow(QWidget):
             self._auto_sleep_cd -= dt
 
         renderer_busy = (
+            self._item_playing or (
             hasattr(self.renderer, '_action') and (
                 self.renderer._action in getattr(self.renderer, 'ONESHOT_ALL', set()) or
                 getattr(self.renderer, '_frozen_sleep', False) or
-                bool(getattr(self.renderer, '_pending', []))
-            )
+                bool(getattr(self.renderer, '_pending', [])) or
+                getattr(self.renderer, '_freeze_idle_timer', 0) > 0
+            ))
         )
         if not renderer_busy:
             self.animator.update(dt, self.state)
@@ -416,6 +646,10 @@ class PetWindow(QWidget):
 
     def _tick_auto_walk(self, dt: float):
         if self.state.is_sleeping or self._is_thrown or self._is_falling:
+            return
+        # 道具动画期间完全跳过 auto_walk
+        if self._item_playing:
+            self._auto_walk_timer = random.uniform(20.0, 40.0)
             return
         if hasattr(self.renderer, '_action') and \
            self.renderer._action in getattr(self.renderer, 'ONESHOT_ALL', set()):
@@ -585,7 +819,20 @@ class PetWindow(QWidget):
         cur_action = getattr(self.renderer, '_action', 'idle')
         frozen_sleep = getattr(self.renderer, '_frozen_sleep', False)
         # idle 且非物理状态 → 画眼睛跟随；睡觉冻结 → 交给 renderer 保持最后一帧
-        is_idle = cur_action == 'idle' and not is_physics and not frozen_sleep and not self.state.is_sleeping
+        freeze_active = getattr(self.renderer, '_freeze_idle_timer', 0) > 0
+        is_item_anim = cur_action.startswith('item_')
+
+        # 道具动画 / freeze 期间锁定 transform，消除 squash/bob 带来的跳动
+        if freeze_active or is_item_anim:
+            transform = {
+                "scale_x": 1.0, "scale_y": 1.0,
+                "rotation": 0.0, "offset_y": 0.0,
+                "facing": 1.0, "gaze_x": 0.0, "gaze_y": 0.0,
+            }
+
+        is_idle = (cur_action == 'idle' and not is_physics
+                   and not frozen_sleep and not self.state.is_sleeping
+                   and not freeze_active and not is_item_anim)
 
         if is_idle:
             if self._idle_noeyes_px is not None:
@@ -930,24 +1177,38 @@ class PetWindow(QWidget):
         self._say(_pick("study"), mood="normal")
 
     def _on_item_used(self, item_id: str, msg: str):
-        """使用背包物品后：播放专属动作 → 气泡弹出效果文字"""
+        """使用背包物品：播放道具动画(.pak 已含底图) + RPG浮动数值标签"""
         _ITEM_ANIM = {
-            "apple":    ("item_apple",  "happy",  "苹果好甜！咔嚓咔嚓~"),
-            "cake":     ("item_cake",   "happy",  "蛋糕太好吃了！好满足~"),
-            "candy":    ("item_candy",  "happy",  "糖果！甜甜的心情变好了~"),
-            "coffee":   ("item_coffee", "normal", "咖啡提神！精力充沛！"),
-            "plush":    ("item_plush",  "happy",  "玩偶好软好舒服~抱紧！"),
-            "star":     ("play",        "happy",  "经验星！感觉自己变强了！"),
-            "gift_box": ("item_gift",   "happy",  "礼物盒！哇全身都暖暖的~"),
+            "apple":    "item_apple",
+            "cake":     "item_cake",
+            "candy":    "item_candy",
+            "coffee":   "item_coffee",
+            "plush":    "item_plush",
+            "star":     "item_star",
+            "gift_box": "item_gift",
         }
-        anim, mood, line = _ITEM_ANIM.get(item_id, ("play", "happy", msg))
         if self.state.is_sleeping:
             self._say("Zzz...先让我睡醒再用吧...", mood="sleepy")
             return
-        self.state.current_action = PetAction.EAT if "apple" in anim or "cake" in anim else PetAction.PLAY
-        self.renderer.trigger(anim)
+
+        anim = _ITEM_ANIM.get(item_id, "play")
+
+        self.state.current_action = PetAction.EAT
+        # 高优先级触发：清除 pending 队列 + 打断当前非道具 oneshot
+        self.renderer.trigger_priority(anim)
         self._reset_walk_timer()
-        self._say(line, mood=mood)
+
+        # 道具动画期间压制：自动对话 + 关键词动画 + 气泡 + auto_walk
+        self._item_playing = True
+        QTimer.singleShot(2200, self._clear_item_playing)
+
+        # 显示 RPG 斜角爆出数值标签（不弹气泡，避免视觉干扰）
+        # 必须保持引用，否则 CPython 立即 GC → QTimer 被销毁 → 动画不播放
+        self._active_float_label = FloatLabel(item_id, self._pet_x, self._pet_y, PET_SIZE)
+        self._active_float_label.show_float()
+
+    def _clear_item_playing(self) -> None:
+        self._item_playing = False
 
     def _on_rename(self, new_name: str):
         self.state.name = new_name
@@ -956,6 +1217,9 @@ class PetWindow(QWidget):
         self._say(f"以后就叫我 {new_name} 吧！", mood="happy")
 
     def _tick_dialogue(self, dt: float):
+        # 道具动画播放期间暂停自动对话，避免气泡遮挡特效
+        if self._item_playing:
+            return
         self._dialogue_timer -= dt
         if self._dialogue_timer <= 0:
             self._dialogue_timer = random.uniform(20.0, 45.0)
@@ -1032,6 +1296,9 @@ class PetWindow(QWidget):
         # NOTE: 睡觉状态下不弹出任何文字气泡，保持安静沉浸感
         if self.state.is_sleeping:
             return
+        # 道具动画播放期间完全静默：不弹气泡、不触发关键词动画
+        if self._item_playing:
+            return
         self.bubble.show_message(text, duration=3200, mood=mood)
         # NOTE: 根据气泡文字关键词触发对应动画，增强拟人感。
         # renderer 的 ONESHOT_RETURN 动作播完后会自动回 idle，无需手动还原。
@@ -1067,6 +1334,9 @@ class PetWindow(QWidget):
         """
         # 睡觉时不打断
         if self.state.is_sleeping:
+            return
+        # 道具动画期间不触发关键词动画
+        if self._item_playing:
             return
         # NOTE: 打字状态中不触发关键词动画，避免与键盘互动效果冲突。
         # 关键词动画只适用于鼠标跟随的安静 idle 中。
