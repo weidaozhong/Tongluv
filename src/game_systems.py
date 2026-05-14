@@ -5,7 +5,7 @@
 import json
 import os
 import time
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 
 from src.user_data import game_data_path
 
@@ -138,7 +138,7 @@ class GameSystems:
         if si["last_date"] == today:
             return {"coins": 0, "streak": si["streak"], "msg": "今天已经签到过了~"}
 
-        yesterday = str(date.today().replace(day=date.today().day - 1)) if date.today().day > 1 else ""
+        yesterday = str(date.today() - timedelta(days=1))
         if si["last_date"] == yesterday:
             si["streak"] += 1
         else:

@@ -137,19 +137,21 @@ class SpriteRenderer:
     --------
     LOOP_ONLY      : idle               —— 循环，由 state_action 驱动
     ONESHOT_FREEZE : sleep              —— 一次性，播完冻结最后一帧等待 wake
+    ONESHOT_STAY   : study              —— 一次性，播完冻结最后一帧，任意新动作解除
     ONESHOT_RETURN : walk/eat/pet/wake/play —— 一次性，播完回 idle 并触发 on_action_done
 
-    优先级：frozen_sleep > 正在播 ONESHOT > 队列中有待播 > 普通 idle
+    优先级：frozen_sleep > frozen_stay > 正在播 ONESHOT > 队列中有待播 > 普通 idle
     """
 
     BLEND_FRAMES   = 5
     ONESHOT_FREEZE = frozenset({"sleep"})
+    ONESHOT_STAY   = frozenset({"study"})
     ONESHOT_RETURN = frozenset({"walk", "eat", "pet", "wake", "play",
-                                "cat", "study",
+                                "cat",
                                 "item_apple", "item_cake", "item_candy",
                                 "item_coffee", "item_plush", "item_gift",
                                 "item_star"})
-    ONESHOT_ALL    = ONESHOT_FREEZE | ONESHOT_RETURN
+    ONESHOT_ALL    = ONESHOT_FREEZE | ONESHOT_STAY | ONESHOT_RETURN
 
     def __init__(self, size: int = 320):
         self.size  = size
@@ -170,6 +172,7 @@ class SpriteRenderer:
 
         self._pending: list[str] = []
         self._frozen_sleep: bool = False
+        self._frozen_stay:  bool = False
         self._freeze_idle_timer: float = 0.0
 
         # 道具使用底图：icon_tray.png，缩放到与动画帧相同尺寸
@@ -207,7 +210,7 @@ class SpriteRenderer:
 
     def _scan_dir(self) -> dict:
         cfg: dict = {}
-        anim_prefixes = ["idle", "walk", "pet", "eat", "sleep", "wake", "play"]
+        anim_prefixes = ["idle", "walk", "pet", "eat", "sleep", "wake", "play", "cat", "study"]
         item_prefixes = ["item_apple", "item_cake", "item_candy",
                          "item_coffee", "item_plush", "item_gift",
                          "item_star"]
@@ -310,16 +313,26 @@ class SpriteRenderer:
                 self._blend_remain -= 1
             return
 
+        # A2: cat/study 停留冻结 — 任意新动作解除 ─────────────────────────
+        if self._frozen_stay:
+            if self._pending:
+                self._frozen_stay = False
+                self._switch(self._pending.pop(0))
+                self._advance(dt)
+            if self._blend_remain > 0:
+                self._blend_remain -= 1
+            return
+
         # B: 一次性动画正在播 ───────────────────────────────────────────────
         if self._action in self.ONESHOT_ALL:
             done = self._advance(dt)
             if done:
                 finished = self._action
                 if finished in self.ONESHOT_FREEZE:
-                    # sleep 播完 → 冻结
                     self._frozen_sleep = True
+                elif finished in self.ONESHOT_STAY:
+                    self._frozen_stay = True
                 else:
-                    # 其余 → 回 idle，并立即推进首帧消除停顿
                     self._switch("idle")
                     self._advance(dt)
                 if self.on_action_done:

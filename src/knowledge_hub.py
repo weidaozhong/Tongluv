@@ -833,14 +833,6 @@ class KnowledgeHub(QWidget):
         total = mi.get("facts_count", 0)
         self._total_badge.setText(f"{total} 条记忆")
 
-        # 更新侧栏计数
-        for key, btn in self._sb_btns.items():
-            text = btn.text().split("  ")
-            if len(text) >= 2:
-                base = text[0] + "  " + text[1].split(" ")[0]
-            else:
-                base = btn.text().strip()
-
     def _render_timeline(self):
         """渲染时间线"""
         # 清空

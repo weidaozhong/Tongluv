@@ -540,6 +540,7 @@ class PetWindow(QWidget):
             hasattr(self.renderer, '_action') and (
                 self.renderer._action in getattr(self.renderer, 'ONESHOT_ALL', set()) or
                 getattr(self.renderer, '_frozen_sleep', False) or
+                getattr(self.renderer, '_frozen_stay', False) or
                 bool(getattr(self.renderer, '_pending', [])) or
                 getattr(self.renderer, '_freeze_idle_timer', 0) > 0
             ))
@@ -979,8 +980,8 @@ class PetWindow(QWidget):
                 self._physics_click_timer.timeout.connect(self._on_physics_single_click)
                 self._physics_click_timer.start(220)   # 220ms 内没有双击就确认为单击
                 return   # 不进入拖拽流程
-            # NOTE: 睡觉时允许拖动改变位置，但不改 action、不弹气泡、不触发抳物理
-            if self.state.is_sleeping:
+            _quiet = self.state.is_sleeping or getattr(self.renderer, '_frozen_stay', False)
+            if _quiet:
                 self._drag_from_physics = False
                 self._dragging        = True
                 self._drag_start_time = time.time()
@@ -1029,6 +1030,9 @@ class PetWindow(QWidget):
                 self._drag_from_physics = False
                 if held < 0.2:
                     self._sleep_nudge()
+                return
+            if getattr(self.renderer, '_frozen_stay', False):
+                self._drag_from_physics = False
                 return
             if held < 0.2 and not self._drag_from_physics:
                 self._handle_body_click(event.pos())
@@ -1101,6 +1105,8 @@ class PetWindow(QWidget):
         if action == "sleep":
             self.state.is_sleeping     = True
             self.state.current_action  = PetAction.SLEEP
+        elif action == "study":
+            pass
         else:
             self.state.is_sleeping    = False
             self.state.current_action = PetAction.IDLE
@@ -1320,12 +1326,6 @@ class PetWindow(QWidget):
         (("学习", "读书", "看书", "知识", "作业", "考试", "上课",
           "复习", "预习", "研究"), "study"),
     ]
-
-    # NOTE: anim名 → PetAction 映射，触发时同步 state.current_action，
-    # 让 animator._NO_AUTO 保护生效，防止动画播放中途被随机动作打断。
-    # _on_anim_done 回调会在播完后把 state.current_action 归回 PetAction.IDLE，
-    # 进而让 paintEvent 的 is_idle=True 分支（眼睛跟随鼠标）接管。
-    _ANIM_TO_ACTION: dict[str, "PetAction"] = {}  # 在 __init__ 后延迟填充
 
     def _try_trigger_by_text(self, text: str):
         """

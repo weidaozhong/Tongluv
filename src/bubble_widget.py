@@ -1,4 +1,3 @@
-# ...existing code...
 from PyQt5.QtWidgets import QWidget
 from PyQt5.QtCore import Qt, QTimer, QRect
 from PyQt5.QtGui import QPainter, QColor, QFont, QPainterPath, QBrush, QPen
@@ -102,4 +101,3 @@ class BubbleWidget(QWidget):
     def update_position(self, pet_x, pet_y, pet_w):
         self.move(int(pet_x + pet_w / 2 - self.width() / 2),
                   int(pet_y - self.height() - 5))
-# ...existing code...
