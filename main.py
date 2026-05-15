@@ -367,8 +367,8 @@ class PetWindow(QWidget):
         self.monitor.start()
 
         screen = QApplication.primaryScreen().geometry()
-        self._pet_x = float(screen.width()  - PET_SIZE - 60)
-        self._pet_y = float(screen.height() - PET_SIZE - 80)
+        self._pet_x = float(screen.width()  - PET_SIZE - 194)
+        self._pet_y = float(screen.height() - PET_SIZE - 182)
         self._sync_window_pos()
 
         # ── 视线跟踪 ──────────────────────────────────────────────────
@@ -799,8 +799,8 @@ class PetWindow(QWidget):
             self._snap_target_type = ""
             self._snap_target_hwnd = None
             screen = QApplication.primaryScreen().geometry()
-            self._pet_x = float(screen.width() - PET_SIZE - 60)
-            self._pet_y = float(screen.height() - PET_SIZE - 80)
+            self._pet_x = float(screen.width() - PET_SIZE - 194)
+            self._pet_y = float(screen.height() - PET_SIZE - 182)
             self.state.current_action = PetAction.IDLE
             return
         left, top, right, bottom = rect
@@ -812,8 +812,8 @@ class PetWindow(QWidget):
             self._snap_target_type = ""
             self._snap_target_hwnd = None
             screen = QApplication.primaryScreen().geometry()
-            self._pet_x = float(screen.width() - PET_SIZE - 60)
-            self._pet_y = float(screen.height() - PET_SIZE - 80)
+            self._pet_x = float(screen.width() - PET_SIZE - 194)
+            self._pet_y = float(screen.height() - PET_SIZE - 182)
             self.state.current_action = PetAction.IDLE
             return
         # 更新吸附位置：截图窗口完全在上方，普通窗口一半一半
