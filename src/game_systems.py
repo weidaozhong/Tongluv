@@ -276,12 +276,12 @@ class GameSystems:
         if attr == "exp":
             return True, ""
         if attr == "all":
-            full = all(getattr(pet_state, a, 0) > 100 - val
+            full = all(int(getattr(pet_state, a, 0)) > 100 - val
                        for a in ("hunger", "happiness", "energy", "intimacy"))
             if full:
                 return False, "所有属性都很充沛，不需要使用~"
             return True, ""
-        cur = getattr(pet_state, attr, 0)
+        cur = int(getattr(pet_state, attr, 0))
         if cur > 100 - val:
             _ATTR_CN = {"hunger": "饱食度", "happiness": "心情",
                         "energy": "体力", "intimacy": "亲密度"}
