@@ -32,10 +32,25 @@ class SnapTarget:
 class SnapSystem:
     """Detects snap targets from screen edges and visible windows."""
 
-    def __init__(self):
+    def __init__(self, dpr: float = 1.0):
         self._window_cache: list[dict] = []
         self._cache_time: float = 0.0
         self._cache_interval: float = 0.5  # refresh window list every 500ms
+        self._dpr: float = dpr  # device pixel ratio for coordinate conversion
+
+    def set_dpr(self, dpr: float):
+        """更新 DPR（设备像素比），高 DPI 缩放启用后需要将
+        Win32 物理像素转换为 Qt 逻辑像素。"""
+        self._dpr = dpr
+
+    # ------------------------------------------------------------------
+    # Internal: coordinate conversion
+    # ------------------------------------------------------------------
+
+    def _to_logical(self, *values: int | float) -> tuple[float, ...]:
+        """Win32 物理像素 → Qt 逻辑像素"""
+        d = self._dpr
+        return tuple(v / d for v in values)
 
     # ------------------------------------------------------------------
     # Public API
@@ -91,8 +106,9 @@ class SnapSystem:
 
         return best_target
 
-    def get_window_rect(self, hwnd: int) -> tuple[int, int, int, int] | None:
-        """Get current rect of a window by handle. Returns None if window is gone."""
+    def get_window_rect(self, hwnd: int) -> tuple[float, float, float, float] | None:
+        """Get current rect of a window by handle (Qt 逻辑像素).
+        Returns None if window is gone."""
         rect = ctypes.wintypes.RECT()
         if not user32.GetWindowRect(hwnd, ctypes.byref(rect)):
             return None
@@ -100,7 +116,8 @@ class SnapSystem:
             return None
         if user32.IsIconic(hwnd):
             return None
-        return (rect.left, rect.top, rect.right, rect.bottom)
+        l, t, r, b = self._to_logical(rect.left, rect.top, rect.right, rect.bottom)
+        return (l, t, r, b)
 
     # ------------------------------------------------------------------
     # Internal
@@ -113,6 +130,7 @@ class SnapSystem:
             return self._window_cache
 
         windows: list[dict] = []
+        dpr = self._dpr
 
         def enum_callback(hwnd: int, _lparam: int) -> bool:
             if hwnd == self_hwnd:
@@ -139,9 +157,11 @@ class SnapSystem:
 
             ex_style = user32.GetWindowLongW(hwnd, GWL_EXSTYLE)
             is_tool = bool(ex_style & WS_EX_TOOLWINDOW) and not bool(ex_style & WS_EX_APPWINDOW)
+            # Win32 物理像素 → Qt 逻辑像素
             windows.append({
                 "hwnd": hwnd,
-                "rect": (rect.left, rect.top, rect.right, rect.bottom),
+                "rect": (rect.left / dpr, rect.top / dpr,
+                         rect.right / dpr, rect.bottom / dpr),
                 "is_tool": is_tool,
             })
             return True

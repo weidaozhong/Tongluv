@@ -26,6 +26,11 @@ if sys.platform == "win32":
         except Exception:
             pass
 
+# Qt 高 DPI 缩放：让控件随 DPI 等比放大，避免打包后文字裁切
+# 必须在 QApplication 创建前调用
+QApplication.setAttribute(Qt.AA_EnableHighDpiScaling, True)
+QApplication.setAttribute(Qt.AA_UseHighDpiPixmaps, True)
+
 from src.user_data import migrate_old_data
 migrate_old_data()  # 首次启动：旧数据迁移到用户目录
 
@@ -339,7 +344,7 @@ class PetWindow(QWidget):
         # 优先从 idle_noeyes.pak 读取，回退到散装 PNG
         from PyQt5.QtGui import QPixmap
         from PyQt5.QtCore import QByteArray as _QBA
-        _base_dir  = os.path.dirname(os.path.abspath(__file__))
+        _base_dir  = sys._MEIPASS if getattr(sys, "frozen", False) else os.path.dirname(os.path.abspath(__file__))
         _anim_dir  = os.path.join(_base_dir, "assets", "animations")
         _raw = QPixmap()
         _pak_path  = os.path.join(_anim_dir, "idle_noeyes.pak")
@@ -415,7 +420,8 @@ class PetWindow(QWidget):
         self._land_squash_timer  = 0.0
 
         # ── 吸附系统 ────────────────────────────────────────────────
-        self._snap_system = SnapSystem()
+        dpr = QApplication.primaryScreen().devicePixelRatio()
+        self._snap_system = SnapSystem(dpr=dpr)
         self._is_snapped       = False
         self._snap_target_type = ""
         self._snap_target_hwnd: int | None = None
@@ -821,13 +827,13 @@ class PetWindow(QWidget):
         else:
             self._pet_y = float(top - PET_SIZE / 2)
         self._pet_x = max(float(left), min(float(right) - PET_SIZE, self._pet_x))
-        # 确保不超出屏幕
+        # 确保不完全超出屏幕（吸附状态允许部分超出顶部，保持跟随窗口）
         screen = QApplication.primaryScreen().geometry()
         sw, sh = float(screen.width()), float(screen.height())
         min_x, max_x = 0.0, sw - PET_SIZE
-        min_y, max_y = 0.0, sh - PET_SIZE - TASKBAR_MARGIN
+        max_y = sh - PET_SIZE - TASKBAR_MARGIN
         self._pet_x = max(min_x, min(max_x, self._pet_x))
-        self._pet_y = max(min_y, min(max_y, self._pet_y))
+        self._pet_y = min(max_y, self._pet_y)
 
     # ── 绘制 ─────────────────────────────────────────────────────────
     def paintEvent(self, event):
@@ -1226,6 +1232,9 @@ class PetWindow(QWidget):
                 self.animator.auto_action_timer = random.uniform(5.0, 10.0)
 
     def _on_feed(self):
+        if self.state.is_sleeping:
+            self._say("Zzz...正在睡觉呢...", mood="sleepy")
+            return
         msg = self.state.feed()
         self.state.current_action = PetAction.EAT
         self.renderer.trigger_priority("eat")
@@ -1235,6 +1244,9 @@ class PetWindow(QWidget):
         self.panel.notify_action("feed")
 
     def _on_pet(self):
+        if self.state.is_sleeping:
+            self._say("嗯...别闹...在睡觉...", mood="sleepy")
+            return
         msg = self.state.pet_touch()
         self.state.current_action = PetAction.PLAY
         self.renderer.trigger_priority("pet")
@@ -1486,7 +1498,7 @@ class PetWindow(QWidget):
     def _make_tray_icon(self) -> QIcon:
         from PyQt5.QtGui import QPixmap
         icon = QIcon()
-        base_dir = os.path.dirname(os.path.abspath(__file__))
+        base_dir = sys._MEIPASS if getattr(sys, "frozen", False) else os.path.dirname(os.path.abspath(__file__))
         # 优先使用裁剪后的紧凑托盘图标（无多余留白）
         for name in ("icon_tray.ico", "icon_tray.png", "icon.ico", "icon.png"):
             src_path = os.path.join(base_dir, "icons", name)
@@ -1553,22 +1565,27 @@ class PetWindow(QWidget):
         self._opacity_pct = val; self.update()
 
     def _show_panel(self):
-        """在桌宠右上方弹出个人中心，确保不超出屏幕"""
+        """在桌宠旁弹出个人中心，确保不超出屏幕且不遮挡桌宠"""
         pw = self.panel.width()
         ph = self.panel.height()
-        gap = 15
+        gap = 25  # 大于桌宠窗口边距(20)，避免窗口重叠
 
-        # 面板 x：桌宠右边
-        px = int(self._pet_x) + PET_SIZE + gap
-        # 面板 y：底部与桌宠底部对齐
-        py = int(self._pet_y) + PET_SIZE - ph
-
-        # 防止超出屏幕右/上/下边缘
         screen = QApplication.primaryScreen().geometry()
+        pet_ix = int(self._pet_x)
+        pet_iy = int(self._pet_y)
+
+        # 面板 x：优先放桌宠右边，放不下就放左边
+        px = pet_ix + PET_SIZE + gap
         if px + pw > screen.width() - 10:
-            # 右边放不下就放左边
-            px = int(self._pet_x) - pw - gap
-        py = max(10, min(py, screen.height() - ph - 10))
+            px = pet_ix - pw - gap
+        px = max(10, min(px, screen.width() - pw - 10))
+
+        # 面板 y：优先底部与桌宠底部对齐
+        py = pet_iy + PET_SIZE - ph
+        if py < 10:
+            # 桌宠在屏幕上方，面板顶部与桌宠顶部对齐（而非被推到覆盖桌宠）
+            py = max(10, pet_iy)
+        py = min(py, screen.height() - ph - 10)
 
         self.panel.move(px, py)
         self.panel.show()

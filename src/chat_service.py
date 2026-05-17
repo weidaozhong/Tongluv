@@ -20,7 +20,7 @@ import threading
 from urllib.request import Request, urlopen
 
 from src.user_data import (
-    config_path, memory_path, default_persona_path, PROJECT_ROOT,
+    config_path, memory_path, default_persona_path, get_user_file, PROJECT_ROOT,
 )
 
 CONFIG_FILE = config_path()
@@ -131,14 +131,40 @@ class ChatService:
         )
 
     def _ensure_default_persona(self):
-        """首次启动时自动注册项目内置的角色设定文档"""
-        dp = default_persona_path()
+        """注册内置角色设定文档，并确保用户编辑可持久保存。
+
+        内置 default_persona.txt 捆绑在 EXE 内部（_MEIPASS 临时目录），
+        直接写入该路径会在关闭后丢失。因此首次启动时复制到用户数据目录
+        geren/default_persona.txt，后续所有读写都指向这个可写副本。
+        """
+        import shutil
+        # 用户数据目录下的可写副本（geren/default_persona.txt）
+        user_dp = get_user_file("default_persona.txt")
+        # EXE 内捆绑的只读原件（_MEIPASS/data/default_persona.txt）
+        bundled_dp = default_persona_path()
+
+        # 首次启动：将内置文档复制到用户目录
+        if not os.path.exists(user_dp) and os.path.exists(bundled_dp):
+            try:
+                shutil.copy2(bundled_dp, user_dp)
+            except Exception:
+                pass
+
+        # 实际使用的路径：优先用户目录（可写），回退到内置（只读）
+        dp = user_dp if os.path.exists(user_dp) else bundled_dp
         if not os.path.exists(dp):
             return
+
         docs = self._memory.get("persona_docs", [])
-        # 已经注册过就跳过（按文件名匹配）
-        if any(os.path.basename(d.get("path", "")) == "default_persona.txt" for d in docs):
-            return
+        for d in docs:
+            if os.path.basename(d.get("path", "")) == "default_persona.txt":
+                # 路径可能指向旧的 _MEIPASS 或用户目录，统一刷新
+                if d["path"] != dp:
+                    d["path"] = dp
+                    d["mtime"] = os.path.getmtime(dp)
+                    self._save_memory()
+                return
+        # 全新注册
         mtime = os.path.getmtime(dp)
         docs.insert(0, {"path": dp, "name": "default_persona.txt", "mtime": mtime})
         self._memory["persona_docs"] = docs

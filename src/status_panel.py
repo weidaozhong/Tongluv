@@ -41,7 +41,6 @@ CH = ("#f0b060","#f8d090"); CHP = ("#f0c850","#f8e080")
 CE = ("#70c8c8","#a0e8e8"); CI = ("#f080a8","#f8b0c8"); CX = ("#c4a8d8","#a088c8")
 MC = {"happy":"#7cc8a0","normal":"#5ba8d4","sad":"#7070c0",
       "hungry":"#e0a060","sleepy":"#c488d8","sleeping":"#c488d8"}
-_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 from src.user_data import avatar_path as _avatar_path
 AVATAR_SAVE = _avatar_path()
 ATTR_W = 96
@@ -300,7 +299,8 @@ class StatusPanel(QWidget):
     _test_result_signal=pyqtSignal(str)    # status text
     _action_reply_signal=pyqtSignal(str, str)  # reply, error (动作触发的 AI 回复)
 
-    PW, PH = 420, 820
+    PW = 420
+    PH_DEFAULT = 820   # 理想高度（100% DPI + 1080p）
 
     # ── 聊天内容 → 期待动作 关键词映射 ──
     _ACTION_KEYWORDS: dict[str, list[str]] = {
@@ -325,6 +325,11 @@ class StatusPanel(QWidget):
         super().__init__(parent)
         self.setWindowFlags(Qt.WindowStaysOnTopHint|Qt.Tool|Qt.FramelessWindowHint)
         self.setAttribute(Qt.WA_TranslucentBackground)
+        # 动态面板高度：高 DPI 缩放会压缩逻辑屏幕像素，
+        # 1080p+150% 时逻辑高度仅 720px，固定 820 会溢出屏幕
+        screen = QApplication.primaryScreen()
+        avail_h = screen.availableGeometry().height() if screen else 1080
+        self.PH = min(self.PH_DEFAULT, avail_h - 60)
         self.setFixedSize(self.PW, self.PH)
         self._dp=QPoint(); self._dg=False
         self._gs=game_systems; self._cs=chat_service; self._ps=None
@@ -352,7 +357,7 @@ class StatusPanel(QWidget):
         # 标题
         h=QHBoxLayout(); h.addWidget(_lbl("个人中心",12,T3))
         h.addStretch()
-        self._coin=_lbl("🪙 0",12,TB,True); h.addWidget(self._coin); h.addSpacing(8)
+        self._coin=_lbl("💰 0",12,TB,True); h.addWidget(self._coin); h.addSpacing(8)
         cb=QPushButton("✕"); cb.setFixedSize(28,28)
         cb.setStyleSheet(f"QPushButton{{background:transparent;color:{T3};border:none;font-size:14px;border-radius:14px;}}"
                          f"QPushButton:hover{{background:{CARD2};color:{T2};}}")
@@ -489,7 +494,7 @@ class StatusPanel(QWidget):
             nl.setFixedWidth(ATTR_W)
             nl.setAlignment(Qt.AlignLeft|Qt.AlignVCenter)
             bar=GradBar(*colors)
-            vl=_lbl("80",10,T2); vl.setFixedWidth(32); vl.setAlignment(Qt.AlignRight|Qt.AlignVCenter)
+            vl=_lbl("80",10,T2); vl.setMinimumWidth(32); vl.setAlignment(Qt.AlignRight|Qt.AlignVCenter)
             self._bars[key]=bar; self._vl[key]=vl
             row.addWidget(nl); row.addWidget(bar,1); row.addWidget(vl)
             S.addLayout(row); S.addSpacing(4)
@@ -520,6 +525,13 @@ class StatusPanel(QWidget):
     # ════════════════════  任务页  ════════════════════════════
     def _pg_tasks(self):
         L=self._cl
+        sa=QScrollArea(); sa.setWidgetResizable(True)
+        sa.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        sa.setStyleSheet(
+            f"QScrollArea{{border:none;background:transparent;}}"
+            f"QScrollBar:vertical{{width:5px;background:{CARD2};}}"
+            f"QScrollBar::handle:vertical{{background:{BD};border-radius:2px;}}"
+            f"QScrollBar::add-line:vertical,QScrollBar::sub-line:vertical{{height:0px;}}")
         w=QWidget(); w.setStyleSheet("background:transparent;border:none;")
         sl=QVBoxLayout(w); sl.setContentsMargins(0,2,4,0); sl.setSpacing(14)
         sl.addWidget(_lbl("📋 每日任务",13,T1,True))
@@ -532,7 +544,7 @@ class StatusPanel(QWidget):
                     self._gs.claim_task(t["id"])
                     t["claimed"] = True
             if any(t["done"] for t in tasks):
-                self._coin.setText(f"🪙 {self._gs.coins}")
+                self._coin.setText(f"💰 {self._gs.coins}")
             tasks.sort(key=lambda t: 1 if t["done"] else 0)
             for t in tasks:
                 done = t["done"]
@@ -554,18 +566,20 @@ class StatusPanel(QWidget):
                 if done:
                     dr.addWidget(_lbl(t['desc'],9,"#b0c4b4"))
                     dr.addStretch()
-                    dr.addWidget(_lbl(f"🪙+{t['reward']}",9,"#b0c4b4"))
+                    dr.addWidget(_lbl(f"💰+{t['reward']}",9,"#b0c4b4"))
                 else:
                     dr.addWidget(_lbl(t['desc'],9,T2))
                     dr.addStretch()
-                    dr.addWidget(_lbl(f"🪙+{t['reward']}",9,TB))
+                    dr.addWidget(_lbl(f"💰+{t['reward']}",9,TB))
                 cl.addLayout(dr)
                 if not done:
                     bar=GradBar("#f0b060","#f8d090"); bar.setFixedHeight(7)
                     bar.set_value(int(t["progress"]/t["target"]*100) if t["target"]>0 else 0)
                     cl.addWidget(bar)
                 sl.addWidget(c)
-        L.addWidget(w,1)
+            sl.addStretch()
+        sa.setWidget(w)
+        L.addWidget(sa,1)
 
     # ════════════════════  背包页  ════════════════════════════
     def _pg_bag(self):
@@ -730,7 +744,7 @@ class StatusPanel(QWidget):
             rl.addLayout(info, 1); rl.addSpacing(10)
 
             # 购买按钮
-            bb = QPushButton(f"🪙 {s['price']}"); bb.setFixedSize(60, 34)
+            bb = QPushButton(f"💰 {s['price']}"); bb.setFixedSize(60, 34)
             if can_buy:
                 bb.setStyleSheet(
                     f"QPushButton{{background:#fff8e1;color:#9a7000;"
@@ -790,7 +804,7 @@ class StatusPanel(QWidget):
             dr=QHBoxLayout(); dr.setSpacing(0)
             dr.addWidget(_lbl(a['desc'],9,T2 if a["unlocked"] else T3))
             dr.addStretch()
-            dr.addWidget(_lbl(f"+{a['reward']}🪙",9,"#c8960a" if a["unlocked"] else T3))
+            dr.addWidget(_lbl(f"+{a['reward']}💰",9,"#c8960a" if a["unlocked"] else T3))
             iv.addLayout(dr)
             cl.addLayout(iv,1); sl.addWidget(c)
         sl.addStretch()
@@ -1097,18 +1111,34 @@ class StatusPanel(QWidget):
     # ════════════════════  设置页  ════════════════════════════
     def _pg_settings(self):
         L=self._cl
+
+        # 包在可滚动区域中，避免小窗/高 DPI 下内容被挤压
+        scroll_area = QScrollArea()
+        scroll_area.setWidgetResizable(True)
+        scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        scroll_area.setStyleSheet(
+            f"QScrollArea{{border:none;background:transparent;}}"
+            f"QScrollBar:vertical{{width:5px;background:{CARD2};}}"
+            f"QScrollBar::handle:vertical{{background:{BD};border-radius:2px;}}"
+            f"QScrollBar::add-line:vertical,QScrollBar::sub-line:vertical{{height:0px;}}")
+        scroll_content = QWidget()
+        scroll_content.setStyleSheet("background:transparent;border:none;")
+        S = QVBoxLayout(scroll_content)
+        S.setContentsMargins(0, 0, 4, 0)
+        S.setSpacing(0)
+
         is_first = self._cs and self._cs.is_first_launch
         title = "首次使用 — 配置 API" if is_first else "API 设置"
-        L.addWidget(_lbl(title,13,T1,True)); L.addSpacing(6)
+        S.addWidget(_lbl(title,13,T1,True)); S.addSpacing(6)
 
         if is_first:
             hint = _lbl("欢迎使用桌宠！请先配置你的 AI 接口信息：",10,"#c4784a")
-            hint.setWordWrap(True); L.addWidget(hint); L.addSpacing(6)
+            hint.setWordWrap(True); S.addWidget(hint); S.addSpacing(6)
 
         config = self._cs.config if self._cs else {"api_url":"","api_key":"","model":""}
 
         def _input(label, value, placeholder="", is_password=False):
-            L.addWidget(_lbl(label,11,T2)); L.addSpacing(2)
+            S.addWidget(_lbl(label,11,T2)); S.addSpacing(2)
             row=QHBoxLayout(); row.setSpacing(4)
             inp=QLineEdit(value)
             inp.setPlaceholderText(placeholder)
@@ -1128,7 +1158,7 @@ class StatusPanel(QWidget):
                 f"QPushButton:hover{{color:#c06060;background:#fde8e8;}}")
             clr.clicked.connect(inp.clear)
             row.addWidget(clr)
-            L.addLayout(row); L.addSpacing(8)
+            S.addLayout(row); S.addSpacing(8)
             return inp
 
         url_ph = "首次使用，请输入你的 API 地址" if is_first else "https://api.openai.com/v1 或中转站地址"
@@ -1137,7 +1167,7 @@ class StatusPanel(QWidget):
         self._cfg_key=_input("API Key", config.get("api_key",""), key_ph, is_password=True)
         self._cfg_model=_input("模型名称", config.get("model",""),
                                "gpt-3.5-turbo / deepseek-chat / claude-3.5-sonnet")
-        L.addSpacing(12)
+        S.addSpacing(12)
         br=QHBoxLayout(); br.setSpacing(10)
         save_btn=QPushButton("保存设置"); save_btn.setFixedHeight(38)
         save_btn.setFont(QFont("Microsoft YaHei",11,QFont.Bold))
@@ -1154,15 +1184,15 @@ class StatusPanel(QWidget):
             f"QPushButton:hover{{background:{BGB};}}")
         test_btn.clicked.connect(self._test_api)
         br.addWidget(test_btn)
-        L.addLayout(br)
+        S.addLayout(br)
 
-        L.addSpacing(8)
+        S.addSpacing(8)
         status = "已配置" if (self._cs and self._cs.enabled) else "未配置"
         self._cfg_status=_lbl(f"当前状态：{status}",10,T2)
         self._cfg_status.setWordWrap(True)
-        L.addWidget(self._cfg_status)
+        S.addWidget(self._cfg_status)
 
-        L.addSpacing(20); L.addWidget(_div()); L.addSpacing(16)
+        S.addSpacing(20); S.addWidget(_div()); S.addSpacing(16)
 
         # 记忆管理入口按钮
         mem_btn=QPushButton("📝 记忆管理"); mem_btn.setFixedHeight(42)
@@ -1172,14 +1202,14 @@ class StatusPanel(QWidget):
             f"QPushButton:hover{{background:{BGB};border-color:{BD2};}}"
             f"QPushButton:pressed{{background:{CARD2};}}")
         mem_btn.clicked.connect(self._open_memory_window)
-        L.addWidget(mem_btn)
+        S.addWidget(mem_btn)
         if self._cs:
             mi=self._cs.get_memory_info()
-            L.addSpacing(4)
-            L.addWidget(_lbl(f"{mi['facts_count']} 条记忆  ·  {mi['recent_count']//2} 轮对话",9,T3))
+            S.addSpacing(4)
+            S.addWidget(_lbl(f"{mi['facts_count']} 条记忆  ·  {mi['recent_count']//2} 轮对话",9,T3))
 
         # ── 赞赏 + 关于（左右两栏）──
-        L.addSpacing(20); L.addWidget(_div()); L.addSpacing(14)
+        S.addSpacing(20); S.addWidget(_div()); S.addSpacing(14)
         footer = QHBoxLayout(); footer.setContentsMargins(10, 0, 10, 0)
 
         # 左栏：赞赏
@@ -1188,9 +1218,8 @@ class StatusPanel(QWidget):
         tip_title = _lbl("☕ 请作者喝杯咖啡", 9, T2)
         tip_title.setAlignment(Qt.AlignCenter)
         left_col.addWidget(tip_title)
-        import os as _os
-        _qr_path = _os.path.join(_os.path.dirname(_os.path.dirname(__file__)), "shoukuanma.jpg")
-        if _os.path.exists(_qr_path):
+        _qr_path = _asset("shoukuanma.jpg")
+        if os.path.exists(_qr_path):
             qr_img = QImage(_qr_path)
             bg_c = QColor(BG)
             for y in range(qr_img.height()):
@@ -1252,8 +1281,11 @@ class StatusPanel(QWidget):
         right_col.addLayout(wx_row)
         footer.addLayout(right_col)
 
-        L.addLayout(footer)
-        L.addStretch()
+        S.addLayout(footer)
+        S.addStretch()
+
+        scroll_area.setWidget(scroll_content)
+        L.addWidget(scroll_area, 1)
 
     def _open_memory_window(self):
         if not self._cs:
@@ -1364,24 +1396,24 @@ class StatusPanel(QWidget):
         if ok and n.strip(): nm=n.strip()[:12]; self.name_label.setText(nm); self.rename_requested.emit(nm)
     def _sign(self):
         if not self._gs: return
-        r=self._gs.do_sign_in(); self._si.setText(r["msg"]); self._upd_sign(); self._coin.setText(f"🪙 {self._gs.coins}")
+        r=self._gs.do_sign_in(); self._si.setText(r["msg"]); self._upd_sign(); self._coin.setText(f"💰 {self._gs.coins}")
     def _upd_sign(self):
         if self._gs and not self._gs.can_sign_in(): self._sb.setEnabled(False); self._sb.setText("已签到")
         else: self._sb.setEnabled(True); self._sb.setText("签到")
     def _claim(self,tid):
-        if self._gs: self._gs.claim_task(tid); self._coin.setText(f"🪙 {self._gs.coins}"); self._go("tasks")
+        if self._gs: self._gs.claim_task(tid); self._coin.setText(f"💰 {self._gs.coins}"); self._go("tasks")
     def _use(self,iid):
         if self._gs and self._ps:
             msg = self._gs.use_item(iid, self._ps)
             self.item_used.emit(iid, msg)
             self._go("bag")
     def _buy(self,iid):
-        if self._gs: self._gs.buy_item(iid); self._coin.setText(f"🪙 {self._gs.coins}"); self._go("shop")
+        if self._gs: self._gs.buy_item(iid); self._coin.setText(f"💰 {self._gs.coins}"); self._go("shop")
 
     # ════════════════════  刷新  ══════════════════════════════
     def update_status(self,state):
         self._ps=state
-        if self._gs: self._coin.setText(f"🪙 {self._gs.coins}")
+        if self._gs: self._coin.setText(f"💰 {self._gs.coins}")
         if self._tab!="status": return
         if not hasattr(self,'name_label'): return
         self.name_label.setText(state.name)
@@ -1393,7 +1425,7 @@ class StatusPanel(QWidget):
         em=state.level*100; self._ev.setText(f"{int(state.exp)}/{em}"); self._eb.set_value(int(state.exp/em*100))
         for k,v in [("hunger",state.hunger),("happy",state.happiness),("energy",state.energy),("intimacy",state.intimacy)]:
             self._bars[k].set_value(int(v)); self._vl[k].setText(str(int(v)))
-        self.info_label.setText(f"出生 {int(state.age_days)} 天  ·  喂食 {getattr(state,'total_feed_times',0)} 次")
+        self.info_label.setText(f"出生 {int(state.age_days)+1} 天  ·  喂食 {getattr(state,'total_feed_times',0)} 次")
         self._upd_sign()
 
     def paintEvent(self,_): pass
