@@ -657,7 +657,7 @@ class KnowledgeHub(QWidget):
         self._total_badge.setFont(QFont("Microsoft YaHei", _fs(9)))
         self._total_badge.setFixedHeight(_s(22))
         self._total_badge.setStyleSheet(
-            f"background:#e8d0c0;color:{T1};border-radius:11px;"
+            f"background:#e8d0c0;color:{T1};border-radius:{_s(11)}px;"
             f"padding:0 10px;font-weight:bold;")
         lay.addWidget(self._total_badge)
 
@@ -665,7 +665,7 @@ class KnowledgeHub(QWidget):
         cb = QPushButton("✕"); cb.setFixedSize(_s(28), _s(28))
         cb.setStyleSheet(
             f"QPushButton{{background:transparent;color:{T3};border:none;"
-            f"font-size:13px;border-radius:14px;}}"
+            f"font-size:{_s(13)}px;border-radius:{_s(14)}px;}}"
             f"QPushButton:hover{{background:{CARD2};color:{T2};}}")
         cb.clicked.connect(self._close_hub)
         lay.addWidget(cb)
@@ -705,7 +705,7 @@ class KnowledgeHub(QWidget):
         # 分隔线
         div = QFrame()
         div.setFixedHeight(_s(1))
-        div.setStyleSheet(f"background:{BD};border:none;margin:0 14px;")
+        div.setStyleSheet(f"background:{BD};border:none;margin:0 {_s(14)}px;")
         lay.addSpacing(_s(8))
         lay.addWidget(div)
         lay.addSpacing(_s(8))
@@ -725,13 +725,13 @@ class KnowledgeHub(QWidget):
         # 底部危险操作
         div2 = QFrame()
         div2.setFixedHeight(_s(1))
-        div2.setStyleSheet(f"background:{BD};border:none;margin:0 14px;")
+        div2.setStyleSheet(f"background:{BD};border:none;margin:0 {_s(14)}px;")
         lay.addWidget(div2)
         lay.addSpacing(_s(4))
         clear_btn = self._make_sb_action("🗑", "清除全部")
         clear_btn.setStyleSheet(
             f"QPushButton{{background:transparent;color:#c0a0a0;border:none;"
-            f"text-align:left;padding:6px 10px;font-size:10px;}}"
+            f"text-align:left;padding:{_s(6)}px {_s(10)}px;}}"
             f"QPushButton:hover{{color:#c06060;background:rgba(192,96,96,15);}}")
         clear_btn.clicked.connect(self._clear_all)
         lay.addWidget(clear_btn)
@@ -742,7 +742,7 @@ class KnowledgeHub(QWidget):
         lbl = QLabel(text)
         lbl.setFont(QFont("Microsoft YaHei", _fs(8)))
         lbl.setStyleSheet(f"color:{ACC};background:transparent;border:none;"
-                          f"padding:4px 14px 2px;letter-spacing:1px;")
+                          f"padding:{_s(4)}px {_s(14)}px {_s(2)}px;letter-spacing:1px;")
         return lbl
 
     def _make_sb_item(self, icon, label, key):
@@ -761,7 +761,7 @@ class KnowledgeHub(QWidget):
         btn.setCursor(Qt.PointingHandCursor)
         btn.setStyleSheet(
             f"QPushButton{{background:transparent;color:{ACC};border:none;"
-            f"text-align:left;padding:6px 10px;}}"
+            f"text-align:left;padding:{_s(6)}px {_s(10)}px;}}"
             f"QPushButton:hover{{background:rgba(176,148,128,20);color:{T1};}}")
         return btn
 
@@ -770,14 +770,14 @@ class KnowledgeHub(QWidget):
             if key == self._filter:
                 btn.setStyleSheet(
                     f"QPushButton{{background:rgba(176,148,128,35);color:{T1};"
-                    f"border:none;border-left:3px solid {ACC};"
-                    f"text-align:left;padding:6px 10px;font-weight:bold;}}"
+                    f"border:none;border-left:{_s(3)}px solid {ACC};"
+                    f"text-align:left;padding:{_s(6)}px {_s(10)}px;font-weight:bold;}}"
                     f"QPushButton:hover{{background:rgba(176,148,128,35);}}")
             else:
                 btn.setStyleSheet(
                     f"QPushButton{{background:transparent;color:{T2};"
-                    f"border:none;border-left:3px solid transparent;"
-                    f"text-align:left;padding:6px 10px;}}"
+                    f"border:none;border-left:{_s(3)}px solid transparent;"
+                    f"text-align:left;padding:{_s(6)}px {_s(10)}px;}}"
                     f"QPushButton:hover{{background:rgba(176,148,128,20);}}")
 
     def _build_timeline(self, parent_lay):
@@ -798,8 +798,8 @@ class KnowledgeHub(QWidget):
         self._tl_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self._tl_scroll.setStyleSheet(
             f"QScrollArea{{border:none;background:transparent;}}"
-            f"QScrollBar:vertical{{width:5px;background:transparent;}}"
-            f"QScrollBar::handle:vertical{{background:{BD};border-radius:2px;}}"
+            f"QScrollBar:vertical{{width:{_s(5)}px;background:transparent;}}"
+            f"QScrollBar::handle:vertical{{background:{BD};border-radius:{_s(2)}px;}}"
             f"QScrollBar::add-line:vertical,QScrollBar::sub-line:vertical{{height:0px;}}")
         self._tl_scroll.setWidget(self._tl_widget)
         area_lay.addWidget(self._tl_scroll, 1)
@@ -861,7 +861,7 @@ class KnowledgeHub(QWidget):
                 empty.setAlignment(Qt.AlignCenter)
                 empty.setWordWrap(True)
                 empty.setStyleSheet(f"color:{T3};background:transparent;border:none;"
-                                    f"padding:40px 20px;")
+                                    f"padding:{_s(40)}px {_s(20)}px;")
                 self._tl_layout.addWidget(empty)
             self._tl_layout.addStretch()
             return
@@ -872,7 +872,7 @@ class KnowledgeHub(QWidget):
         if not filtered:
             empty = _lbl("没有匹配的记忆", 10, T3)
             empty.setAlignment(Qt.AlignCenter)
-            empty.setStyleSheet(f"color:{T3};background:transparent;border:none;padding:30px;")
+            empty.setStyleSheet(f"color:{T3};background:transparent;border:none;padding:{_s(30)}px;")
             self._tl_layout.addWidget(empty)
             self._tl_layout.addStretch()
             return
@@ -936,7 +936,7 @@ class KnowledgeHub(QWidget):
         if not groups:
             empty = _lbl("没有匹配的记忆", 10, T3)
             empty.setAlignment(Qt.AlignCenter)
-            empty.setStyleSheet(f"color:{T3};background:transparent;border:none;padding:30px;")
+            empty.setStyleSheet(f"color:{T3};background:transparent;border:none;padding:{_s(30)}px;")
             self._tl_layout.addWidget(empty)
             return
 
@@ -978,7 +978,7 @@ class KnowledgeHub(QWidget):
 
         folder = QWidget()
         folder.setStyleSheet(
-            f"background:{CARD2};border-radius:14px;border:1px solid {BD};")
+            f"background:{CARD2};border-radius:{_s(14)}px;border:1px solid {BD};")
         fl = QVBoxLayout(folder)
         fl.setContentsMargins(_s(10), _s(8), _s(10), _s(10))
         fl.setSpacing(_s(4))
@@ -990,7 +990,7 @@ class KnowledgeHub(QWidget):
         fold_btn = QPushButton("▼")
         fold_btn.setFixedSize(_s(20), _s(20))
         fold_btn.setStyleSheet(
-            f"QPushButton{{background:transparent;color:{T2};border:none;font-size:10px;}}"
+            f"QPushButton{{background:transparent;color:{T2};border:none;font-size:{_s(10)}px;}}"
             f"QPushButton:hover{{color:{T1};}}")
         header.addWidget(fold_btn)
 
@@ -1008,7 +1008,7 @@ class KnowledgeHub(QWidget):
                 f"QLineEdit{{color:{T1};background:transparent;border:none;"
                 f"font-weight:bold;padding:0;margin:0;}}"
                 f"QLineEdit:!read-only{{background:{CARD};border:1.5px solid {ACC};"
-                f"border-radius:8px;padding:2px 6px;}}")
+                f"border-radius:{_s(8)}px;padding:{_s(2)}px {_s(6)}px;}}")
 
             edit_name_btn = QPushButton("✎")
             edit_name_btn.setFixedSize(_s(20), _s(20))
@@ -1016,7 +1016,7 @@ class KnowledgeHub(QWidget):
             edit_name_btn.setToolTip("修改文件夹名称")
             edit_name_btn.setStyleSheet(
                 f"QPushButton{{background:transparent;color:{ACC};border:none;"
-                f"border-radius:10px;}}"
+                f"border-radius:{_s(10)}px;}}"
                 f"QPushButton:hover{{color:{T1};background:{CARD};}}")
 
             _old_origin = title  # capture for closure
@@ -1049,7 +1049,7 @@ class KnowledgeHub(QWidget):
         count_lbl.setFont(QFont("Microsoft YaHei", _fs(9)))
         count_lbl.setFixedHeight(_s(18))
         count_lbl.setStyleSheet(
-            f"background:{CARD};color:{T2};border-radius:9px;"
+            f"background:{CARD};color:{T2};border-radius:{_s(9)}px;"
             f"padding:0 8px;border:none;")
         header.addWidget(count_lbl)
 
@@ -1058,7 +1058,7 @@ class KnowledgeHub(QWidget):
         add_btn.setFont(QFont("Arial", _fs(13)))
         add_btn.setStyleSheet(
             f"QPushButton{{background:transparent;color:{ACC};border:none;"
-            f"border-radius:11px;font-weight:bold;}}"
+            f"border-radius:{_s(11)}px;font-weight:bold;}}"
             f"QPushButton:hover{{background:{CARD};color:{T1};}}")
         add_btn.setToolTip(f"向「{title}」添加内容")
         header.addWidget(add_btn)
@@ -1070,7 +1070,7 @@ class KnowledgeHub(QWidget):
         del_folder_btn.setToolTip(f"删除整个「{title}」文件夹")
         del_folder_btn.setStyleSheet(
             f"QPushButton{{background:transparent;color:{T3};border:none;"
-            f"border-radius:11px;}}"
+            f"border-radius:{_s(11)}px;}}"
             f"QPushButton:hover{{background:#f5ddd0;color:#a04030;}}")
 
         _folder_src = group_facts[0].get("source", "manual") if group_facts else "manual"
@@ -1128,7 +1128,7 @@ class KnowledgeHub(QWidget):
         ok_btn.setFont(QFont("Microsoft YaHei", _fs(9)))
         ok_btn.setStyleSheet(
             f"QPushButton{{background:#e8d0c0;color:{T1};border:none;"
-            f"border-radius:10px;font-weight:bold;}}"
+            f"border-radius:{_s(10)}px;font-weight:bold;}}"
             f"QPushButton:hover{{background:#dcc0b0;}}")
         ir.addWidget(ok_btn, 0, Qt.AlignTop)
 
@@ -1194,7 +1194,7 @@ class KnowledgeHub(QWidget):
         """文件夹内的紧凑卡片 — 支持双击编辑文本"""
         card = QWidget()
         card.setStyleSheet(
-            f"background:{CARD};border-radius:10px;"
+            f"background:{CARD};border-radius:{_s(10)}px;"
             f"border:1px solid {BD};border-left:3px solid {_source_color(src)};")
         lay = QHBoxLayout(card)
         lay.setContentsMargins(_s(8), _s(6), _s(6), _s(6))
@@ -1217,7 +1217,7 @@ class KnowledgeHub(QWidget):
             safe = _hl.escape(text)
             kw   = _hl.escape(self._search_text)
             highlighted = safe.replace(
-                kw, f'<span style="background:#ffe0a0;border-radius:2px;'
+                kw, f'<span style="background:#ffe0a0;border-radius:{_s(2)}px;'
                     f'padding:0 2px;">{kw}</span>')
             txt_lbl.setTextFormat(Qt.RichText)
             txt_lbl.setText(highlighted)
@@ -1256,7 +1256,7 @@ class KnowledgeHub(QWidget):
         edit_btn.setFont(QFont("Arial", _fs(10)))
         edit_btn.setToolTip("编辑内容")
         edit_btn.setStyleSheet(
-            f"QPushButton{{background:transparent;color:{ACC};border:none;border-radius:10px;}}"
+            f"QPushButton{{background:transparent;color:{ACC};border:none;border-radius:{_s(10)}px;}}"
             f"QPushButton:hover{{color:{T1};background:{CARD2};}}")
         btn_col.addWidget(edit_btn)
 
@@ -1264,7 +1264,7 @@ class KnowledgeHub(QWidget):
         del_btn.setFixedSize(_s(20), _s(20))
         del_btn.setFont(QFont("Arial", _fs(11)))
         del_btn.setStyleSheet(
-            f"QPushButton{{background:transparent;color:{BD};border:none;border-radius:10px;}}"
+            f"QPushButton{{background:transparent;color:{BD};border:none;border-radius:{_s(10)}px;}}"
             f"QPushButton:hover{{background:#fde8e8;color:#c06060;}}")
         del_btn.clicked.connect(lambda checked=False, i=real_idx, ft=folder_title: self._delete_fact(i, ft))
         btn_col.addWidget(del_btn)
@@ -1330,7 +1330,7 @@ class KnowledgeHub(QWidget):
         """渲染置顶文档区"""
         section = QWidget()
         section.setStyleSheet(
-            f"background:{CARD2};border-radius:14px;border:1px solid {BD};")
+            f"background:{CARD2};border-radius:{_s(14)}px;border:1px solid {BD};")
         sl = QVBoxLayout(section)
         sl.setContentsMargins(_s(12), _s(10), _s(12), _s(10))
         sl.setSpacing(_s(4))
@@ -1357,7 +1357,7 @@ class KnowledgeHub(QWidget):
 
             row = QWidget()
             row.setStyleSheet(
-                f"background:{CARD};border-radius:10px;border:1px solid {BD};")
+                f"background:{CARD};border-radius:{_s(10)}px;border:1px solid {BD};")
             rl = QHBoxLayout(row)
             rl.setContentsMargins(_s(10), _s(7), _s(8), _s(7))
             rl.setSpacing(_s(8))
@@ -1418,7 +1418,7 @@ class KnowledgeHub(QWidget):
                 edit_btn.setToolTip("编辑内置人设内容")
                 edit_btn.setStyleSheet(
                     f"QPushButton{{background:transparent;color:{ACC};border:none;"
-                    f"border-radius:11px;}}"
+                    f"border-radius:{_s(11)}px;}}"
                     f"QPushButton:hover{{color:{T1};background:{CARD2};}}")
                 rl.addWidget(edit_btn)
 
@@ -1431,7 +1431,7 @@ class KnowledgeHub(QWidget):
                 del_btn.setFont(QFont("Arial", _fs(11)))
                 del_btn.setStyleSheet(
                     f"QPushButton{{background:transparent;color:{T3};border:none;"
-                    f"border-radius:11px;}}"
+                    f"border-radius:{_s(11)}px;}}"
                     f"QPushButton:hover{{background:#fde8e8;color:#c06060;}}")
                 del_btn.clicked.connect(lambda _, idx=i: self._remove_doc(idx))
                 rl.addWidget(del_btn)
@@ -1442,7 +1442,7 @@ class KnowledgeHub(QWidget):
                 # 可折叠编辑区
                 edit_area = QWidget()
                 edit_area.setStyleSheet(
-                    f"background:{CARD};border-radius:10px;border:1px solid {BD};")
+                    f"background:{CARD};border-radius:{_s(10)}px;border:1px solid {BD};")
                 edit_area.hide()
                 eal = QVBoxLayout(edit_area)
                 eal.setContentsMargins(_s(10), _s(8), _s(10), _s(8))
@@ -1454,10 +1454,10 @@ class KnowledgeHub(QWidget):
                 persona_edit.setMaximumHeight(220)
                 persona_edit.setStyleSheet(
                     f"QTextEdit{{background:{BG};border:1.5px solid {BD};"
-                    f"border-radius:8px;padding:6px;color:{T1};}}"
+                    f"border-radius:{_s(8)}px;padding:{_s(6)}px;color:{T1};}}"
                     f"QTextEdit:focus{{border-color:{ACC};}}"
-                    f"QScrollBar:vertical{{width:4px;background:{CARD2};}}"
-                    f"QScrollBar::handle:vertical{{background:{BD};border-radius:2px;}}"
+                    f"QScrollBar:vertical{{width:{_s(4)}px;background:{CARD2};}}"
+                    f"QScrollBar::handle:vertical{{background:{BD};border-radius:{_s(2)}px;}}"
                     f"QScrollBar::add-line:vertical,QScrollBar::sub-line:vertical{{height:0px;}}")
                 eal.addWidget(persona_edit)
 
@@ -1539,7 +1539,7 @@ class KnowledgeHub(QWidget):
     def _make_card(self, text, src, ts, origin, real_idx):
         card = QWidget()
         card.setStyleSheet(
-            f"background:{CARD};border-radius:12px;"
+            f"background:{CARD};border-radius:{_s(12)}px;"
             f"border:1px solid {BD};border-left:3.5px solid {_source_color(src)};")
         lay = QHBoxLayout(card)
         lay.setContentsMargins(_s(10), _s(8), _s(8), _s(8))
@@ -1580,7 +1580,7 @@ class KnowledgeHub(QWidget):
         tag = QLabel(_source_label(src))
         tag.setFont(QFont("Microsoft YaHei", _fs(8)))
         tag.setFixedHeight(_s(16))
-        tag.setStyleSheet(f"{_source_tag_style(src)}border-radius:8px;padding:0 6px;"
+        tag.setStyleSheet(f"{_source_tag_style(src)}border-radius:{_s(8)}px;padding:0 6px;"
                           f"border:none;")
         meta.addWidget(tag)
 
@@ -1588,7 +1588,7 @@ class KnowledgeHub(QWidget):
             otag = QLabel(origin)
             otag.setFont(QFont("Microsoft YaHei", _fs(8)))
             otag.setFixedHeight(_s(16))
-            otag.setStyleSheet(f"background:{CARD2};color:{T2};border-radius:8px;"
+            otag.setStyleSheet(f"background:{CARD2};color:{T2};border-radius:{_s(8)}px;"
                                f"padding:0 6px;border:none;")
             meta.addWidget(otag)
 
@@ -1602,7 +1602,7 @@ class KnowledgeHub(QWidget):
         del_btn.setFont(QFont("Arial", _fs(12)))
         del_btn.setStyleSheet(
             f"QPushButton{{background:transparent;color:{BD};border:none;"
-            f"border-radius:11px;}}"
+            f"border-radius:{_s(11)}px;}}"
             f"QPushButton:hover{{background:#fde8e8;color:#c06060;}}")
         del_btn.clicked.connect(lambda _, i=real_idx: self._delete_fact(i))
         lay.addWidget(del_btn, 0, Qt.AlignTop)

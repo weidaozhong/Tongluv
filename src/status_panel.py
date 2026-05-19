@@ -140,7 +140,7 @@ def _lbl(t="",sz=12,c=T1,bold=False):
 def _ibtn(icon,label):
     b=QPushButton(f"{icon}\n{label}"); b.setFixedHeight(_s(52)); b.setFont(QFont("Microsoft YaHei", _fs(9)))
     b.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-    b.setStyleSheet(f"QPushButton{{background:{CARD};color:{T2};border:1.5px solid {BD};border-radius:10px;padding:4px 0;}}"
+    b.setStyleSheet(f"QPushButton{{background:{CARD};color:{T2};border:1.5px solid {BD};border-radius:{_s(10)}px;padding:{_s(4)}px 0;}}"
                     f"QPushButton:hover{{background:{BGB};border-color:{BD2};color:{T1};}}"
                     f"QPushButton:pressed{{background:{CARD2};}}")
     return b
@@ -196,7 +196,7 @@ class MemoryWindow(QWidget):
 
     def _build(self):
         root = QWidget(self); root.setGeometry(0, 0, self.MW, self.MH); root.setObjectName("MR")
-        root.setStyleSheet(f"QWidget#MR{{background:{BG};border-radius:20px;border:1.5px solid {BD};}}")
+        root.setStyleSheet(f"QWidget#MR{{background:{BG};border-radius:{_s(20)}px;border:1.5px solid {BD};}}")
         ml = QVBoxLayout(root); ml.setContentsMargins(_s(16), _s(14), _s(16), _s(12)); ml.setSpacing(0)
 
         # 标题栏
@@ -206,7 +206,7 @@ class MemoryWindow(QWidget):
         self._stat_lbl = _lbl(f"{mi['facts_count']} 条记忆", 10, T3)
         h.addWidget(self._stat_lbl); h.addSpacing(_s(8))
         cb = QPushButton("✕"); cb.setFixedSize(_s(28), _s(28))
-        cb.setStyleSheet(f"QPushButton{{background:transparent;color:{T3};border:none;font-size:14px;border-radius:14px;}}"
+        cb.setStyleSheet(f"QPushButton{{background:transparent;color:{T3};border:none;font-size:{_s(14)}px;border-radius:{_s(14)}px;}}"
                          f"QPushButton:hover{{background:{CARD2};color:{T2};}}")
         cb.clicked.connect(self.close); h.addWidget(cb)
         ml.addLayout(h); ml.addSpacing(_s(10))
@@ -221,9 +221,9 @@ class MemoryWindow(QWidget):
         sa = QScrollArea(); sa.setWidgetResizable(True)
         sa.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         sa.setStyleSheet(
-            f"QScrollArea{{border:1px solid {BD};border-radius:12px;background:{CARD};}}"
-            f"QScrollBar:vertical{{width:5px;background:{CARD2};}}"
-            f"QScrollBar::handle:vertical{{background:{BD};border-radius:2px;}}"
+            f"QScrollArea{{border:1px solid {BD};border-radius:{_s(12)}px;background:{CARD};}}"
+            f"QScrollBar:vertical{{width:{_s(5)}px;background:{CARD2};}}"
+            f"QScrollBar::handle:vertical{{background:{BD};border-radius:{_s(2)}px;}}"
             f"QScrollBar::add-line:vertical,QScrollBar::sub-line:vertical{{height:0px;}}")
         sa.setWidget(self._mem_widget)
         ml.addWidget(sa, 1)
@@ -240,7 +240,7 @@ class MemoryWindow(QWidget):
         ab = QPushButton("添加"); ab.setFixedSize(_s(56), _s(36))
         ab.setFont(QFont("Microsoft YaHei", _fs(10), QFont.Bold))
         ab.setStyleSheet(
-            f"QPushButton{{background:#e8d0c0;color:{T1};border:none;border-radius:10px;}}"
+            f"QPushButton{{background:#e8d0c0;color:{T1};border:none;border-radius:{_s(10)}px;}}"
             f"QPushButton:hover{{background:#dcc0b0;}}")
         ab.clicked.connect(self._add); ar.addWidget(ab)
         ml.addLayout(ar)
@@ -251,7 +251,7 @@ class MemoryWindow(QWidget):
         clr.setFont(QFont("Microsoft YaHei", _fs(10)))
         clr.setStyleSheet(
             f"QPushButton{{background:#fbe9e7;color:#c62828;border:1px solid #ef9a9a;"
-            f"border-radius:10px;padding:0 16px;}}"
+            f"border-radius:{_s(10)}px;padding:0 {_s(16)}px;}}"
             f"QPushButton:hover{{background:#ffcdd2;}}")
         clr.clicked.connect(self._clear_all)
         cr = QHBoxLayout(); cr.addWidget(clr); cr.addStretch()
@@ -282,12 +282,12 @@ class MemoryWindow(QWidget):
                 del_btn.setFont(QFont("Arial", _fs(12), QFont.Bold))
                 del_btn.setStyleSheet(
                     f"QPushButton{{background:transparent;color:{T3};border:none;"
-                    f"border-radius:12px;}}"
+                    f"border-radius:{_s(12)}px;}}"
                     f"QPushButton:hover{{background:#fde8e8;color:#c62828;}}")
                 del_btn.clicked.connect(lambda _, i=real_idx: self._del(i))
                 row.addWidget(txt, 1); row.addWidget(del_btn, 0, Qt.AlignTop)
                 w = QWidget()
-                w.setStyleSheet(f"background:{CARD};border-radius:10px;border:none;")
+                w.setStyleSheet(f"background:{CARD};border-radius:{_s(10)}px;border:none;")
                 w.setLayout(row)
                 self._mem_layout.addWidget(w)
         self._mem_layout.addStretch()
@@ -385,7 +385,7 @@ class StatusPanel(QWidget):
 
     def _build(self):
         root=QWidget(self); root.setGeometry(0,0,self.PW,self.PH); root.setObjectName("R")
-        root.setStyleSheet(f"QWidget#R{{background:{BG};border-radius:20px;border:1.5px solid {BD};}}")
+        root.setStyleSheet(f"QWidget#R{{background:{BG};border-radius:{_s(20)}px;border:1.5px solid {BD};}}")
         ml=QVBoxLayout(root); ml.setContentsMargins(_s(16), _s(14), _s(16), _s(12)); ml.setSpacing(0)
 
         # 标题
@@ -393,7 +393,7 @@ class StatusPanel(QWidget):
         h.addStretch()
         self._coin=_lbl("💰 0",12,TB,True); h.addWidget(self._coin); h.addSpacing(_s(8))
         cb=QPushButton("✕"); cb.setFixedSize(_s(28), _s(28))
-        cb.setStyleSheet(f"QPushButton{{background:transparent;color:{T3};border:none;font-size:14px;border-radius:14px;}}"
+        cb.setStyleSheet(f"QPushButton{{background:transparent;color:{T3};border:none;font-size:{_s(14)}px;border-radius:{_s(14)}px;}}"
                          f"QPushButton:hover{{background:{CARD2};color:{T2};}}")
         cb.clicked.connect(self.hide); h.addWidget(cb)
         ml.addLayout(h); ml.addSpacing(_s(8))
@@ -421,9 +421,9 @@ class StatusPanel(QWidget):
     def _style_tabs(self):
         for tid,tb in self._tbs.items():
             if tid==self._tab:
-                tb.setStyleSheet(f"QPushButton{{background:#e8d0c0;color:{T1};border:none;border-radius:8px;font-weight:bold;padding:2px 6px;}}")
+                tb.setStyleSheet(f"QPushButton{{background:#e8d0c0;color:{T1};border:none;border-radius:{_s(8)}px;font-weight:bold;padding:{_s(2)}px {_s(6)}px;}}")
             else:
-                tb.setStyleSheet(f"QPushButton{{background:transparent;color:{T2};border:none;border-radius:8px;padding:2px 6px;}}"
+                tb.setStyleSheet(f"QPushButton{{background:transparent;color:{T2};border:none;border-radius:{_s(8)}px;padding:{_s(2)}px {_s(6)}px;}}"
                                  f"QPushButton:hover{{background:#f0e4d8;}}")
 
     def _go(self,t):
@@ -445,8 +445,8 @@ class StatusPanel(QWidget):
         scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         scroll_area.setStyleSheet(
             f"QScrollArea{{border:none;background:transparent;}}"
-            f"QScrollBar:vertical{{width:5px;background:{CARD2};}}"
-            f"QScrollBar::handle:vertical{{background:{BD};border-radius:2px;}}"
+            f"QScrollBar:vertical{{width:{_s(5)}px;background:{CARD2};}}"
+            f"QScrollBar::handle:vertical{{background:{BD};border-radius:{_s(2)}px;}}"
             f"QScrollBar::add-line:vertical,QScrollBar::sub-line:vertical{{height:0px;}}")
         scroll_content = QWidget()
         scroll_content.setStyleSheet("background:transparent;border:none;")
@@ -464,13 +464,13 @@ class StatusPanel(QWidget):
         self.name_label=_lbl("嗵",15,T1,True)
         self.name_label.setSizePolicy(QSizePolicy.Preferred,QSizePolicy.Preferred)
         rb=QPushButton("✏"); rb.setFixedSize(_s(20), _s(20))
-        rb.setStyleSheet(f"QPushButton{{background:transparent;color:{T3};border:none;font-size:11px;}}"
+        rb.setStyleSheet(f"QPushButton{{background:transparent;color:{T3};border:none;font-size:{_s(11)}px;}}"
                          f"QPushButton:hover{{color:{ACC};}}")
         rb.clicked.connect(self._rename); nr.addWidget(self.name_label); nr.addWidget(rb); nr.addStretch()
         ic.addLayout(nr)
         self.mood_label=_lbl("😊 开心",11,T2); ic.addWidget(self.mood_label)
         self._lv=_lbl("⭐ Lv.1",10,TB)
-        self._lv.setStyleSheet(f"color:{TB};background:{BGB};border:none;border-radius:8px;padding:2px 8px;")
+        self._lv.setStyleSheet(f"color:{TB};background:{BGB};border:none;border-radius:{_s(8)}px;padding:{_s(2)}px {_s(8)}px;")
         lc=QHBoxLayout(); lc.addWidget(self._lv); lc.addStretch(); ic.addLayout(lc)
         hr.addLayout(ic)
         S.addLayout(hr); S.addSpacing(_s(4))
@@ -505,14 +505,14 @@ class StatusPanel(QWidget):
         exp_tip.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
         exp_tip.setStyleSheet(
             f"color:{T3};background:{CARD};border:1px dashed {BD};"
-            f"border-radius:8px;padding:4px 8px;margin:0;")
+            f"border-radius:{_s(8)}px;padding:{_s(4)}px {_s(8)}px;margin:0;")
         S.addWidget(exp_tip); S.addSpacing(_s(10))
         S.addWidget(_div()); S.addSpacing(_s(8))
 
         # 签到
         sr=QHBoxLayout()
         self._sb=QPushButton("📅 签到"); self._sb.setFixedHeight(_s(34)); self._sb.setFont(QFont("Microsoft YaHei", _fs(11)))
-        self._sb.setStyleSheet(f"QPushButton{{background:#e8f5e9;color:#388e3c;border:1.5px solid #a5d6a7;border-radius:10px;padding:0 16px;}}"
+        self._sb.setStyleSheet(f"QPushButton{{background:#e8f5e9;color:#388e3c;border:1.5px solid #a5d6a7;border-radius:{_s(10)}px;padding:0 {_s(16)}px;}}"
                                f"QPushButton:hover{{background:#c8e6c9;}}"
                                f"QPushButton:disabled{{background:{CARD2};color:{T3};border-color:{BD};}}")
         self._sb.clicked.connect(self._sign)
@@ -525,7 +525,7 @@ class StatusPanel(QWidget):
         for label_text,colors,key in [("饱食度",CH,"hunger"),("心情值",CHP,"happy"),("体力值",CE,"energy"),("亲密度",CI,"intimacy")]:
             row=QHBoxLayout(); row.setSpacing(_s(8)); row.setContentsMargins(_s(0), _s(2), _s(0), _s(2))
             nl=_lbl(label_text,11,T2)
-            nl.setFixedWidth(ATTR_W)
+            nl.setFixedWidth(_s(ATTR_W))
             nl.setAlignment(Qt.AlignLeft|Qt.AlignVCenter)
             bar=GradBar(*colors)
             vl=_lbl("80",10,T2); vl.setMinimumWidth(_s(32)); vl.setAlignment(Qt.AlignRight|Qt.AlignVCenter)
@@ -563,8 +563,8 @@ class StatusPanel(QWidget):
         sa.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         sa.setStyleSheet(
             f"QScrollArea{{border:none;background:transparent;}}"
-            f"QScrollBar:vertical{{width:5px;background:{CARD2};}}"
-            f"QScrollBar::handle:vertical{{background:{BD};border-radius:2px;}}"
+            f"QScrollBar:vertical{{width:{_s(5)}px;background:{CARD2};}}"
+            f"QScrollBar::handle:vertical{{background:{BD};border-radius:{_s(2)}px;}}"
             f"QScrollBar::add-line:vertical,QScrollBar::sub-line:vertical{{height:0px;}}")
         w=QWidget(); w.setStyleSheet("background:transparent;border:none;")
         sl=QVBoxLayout(w); sl.setContentsMargins(_s(0), _s(2), _s(4), _s(0)); sl.setSpacing(_s(14))
@@ -585,9 +585,9 @@ class StatusPanel(QWidget):
                 done = t["done"]
                 c=QWidget()
                 if done:
-                    c.setStyleSheet(f"background:#f6f9f7;border-radius:14px;border:1.5px solid #dce8df;")
+                    c.setStyleSheet(f"background:#f6f9f7;border-radius:{_s(14)}px;border:1.5px solid #dce8df;")
                 else:
-                    c.setStyleSheet(f"background:{CARD};border-radius:14px;border:1.5px solid {BD};")
+                    c.setStyleSheet(f"background:{CARD};border-radius:{_s(14)}px;border:1.5px solid {BD};")
                 cl=QVBoxLayout(c); cl.setContentsMargins(_s(14), _s(12), _s(14), _s(12)); cl.setSpacing(_s(3))
                 ico = _TASK_ICON.get(t.get("stat", ""), "📌")
                 tr=QHBoxLayout(); tr.setSpacing(_s(6))
@@ -636,8 +636,8 @@ class StatusPanel(QWidget):
         sa.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         sa.setStyleSheet(
             f"QScrollArea{{border:none;background:transparent;}}"
-            f"QScrollBar:vertical{{width:5px;background:{CARD2};}}"
-            f"QScrollBar::handle:vertical{{background:{BD};border-radius:2px;}}"
+            f"QScrollBar:vertical{{width:{_s(5)}px;background:{CARD2};}}"
+            f"QScrollBar::handle:vertical{{background:{BD};border-radius:{_s(2)}px;}}"
             f"QScrollBar::add-line:vertical,QScrollBar::sub-line:vertical{{height:0px;}}")
         sw = QWidget(); sw.setStyleSheet("background:transparent;border:none;")
         sl = QVBoxLayout(sw); sl.setContentsMargins(_s(0), _s(2), _s(4), _s(0)); sl.setSpacing(_s(10))
@@ -649,7 +649,7 @@ class StatusPanel(QWidget):
             # ── 空背包状态 ──────────────────────────────────
             empty = QFrame()
             empty.setStyleSheet(
-                f"QFrame{{background:{CARD};border:2px dashed {BD};border-radius:18px;}}")
+                f"QFrame{{background:{CARD};border:2px dashed {BD};border-radius:{_s(18)}px;}}")
             el = QVBoxLayout(empty); el.setContentsMargins(_s(24), _s(40), _s(24), _s(40))
             el.setAlignment(Qt.AlignCenter); el.setSpacing(_s(8))
             ico_l = QLabel("🛍️"); ico_l.setFont(QFont("Segoe UI Emoji", _fs(30)))
@@ -674,7 +674,7 @@ class StatusPanel(QWidget):
                     f"QFrame{{background:{CARD};"
                     f"border-top:4px solid {accent};"
                     f"border-left:1.5px solid {BD};border-right:1.5px solid {BD};border-bottom:1.5px solid {BD};"
-                    f"border-radius:14px;}}"
+                    f"border-radius:{_s(14)}px;}}"
                     f"QFrame:hover{{background:{BGB};"
                     f"border-left-color:{BD2};border-right-color:{BD2};border-bottom-color:{BD2};}}")
                 rl = QHBoxLayout(row)
@@ -686,7 +686,7 @@ class StatusPanel(QWidget):
                 ico.setAlignment(Qt.AlignCenter)
                 ico.setFont(QFont("Segoe UI Emoji", _fs(18)))
                 ico.setStyleSheet(
-                    f"QLabel{{background:{abg};border-radius:22px;border:none;}}")
+                    f"QLabel{{background:{abg};border-radius:{_s(22)}px;border:none;}}")
                 rl.addWidget(ico); rl.addSpacing(_s(12))
 
                 # 信息列
@@ -702,8 +702,8 @@ class StatusPanel(QWidget):
                     real_accent, real_abg = _ITEM_ACCENT.get(iid, _ITEM_ACCENT_DEFAULT)
                     cb.setStyleSheet(
                         f"QPushButton{{background:{real_abg};color:{real_accent};"
-                        f"border:1.5px solid {real_accent};border-radius:10px;"
-                        f"font-size:12px;font-weight:bold;}}"
+                        f"border:1.5px solid {real_accent};border-radius:{_s(10)}px;"
+                        f"font-size:{_s(12)}px;font-weight:bold;}}"
                         f"QPushButton:hover{{background:{real_accent};color:#fff;"
                         f"border-color:{real_accent};}}"
                         f"QPushButton:pressed{{background:{real_accent};color:#fff;}}")
@@ -711,7 +711,7 @@ class StatusPanel(QWidget):
                 else:
                     cb.setStyleSheet(
                         f"QPushButton{{background:{CARD2};color:{T3};"
-                        f"border:1.5px solid {BD};border-radius:10px;font-size:12px;}}")
+                        f"border:1.5px solid {BD};border-radius:{_s(10)}px;font-size:{_s(12)}px;}}")
                     cb.setEnabled(False)
                 rl.addWidget(cb)
                 sl.addWidget(row)
@@ -736,8 +736,8 @@ class StatusPanel(QWidget):
         sa.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         sa.setStyleSheet(
             f"QScrollArea{{border:none;background:transparent;}}"
-            f"QScrollBar:vertical{{width:5px;background:{CARD2};}}"
-            f"QScrollBar::handle:vertical{{background:{BD};border-radius:2px;}}"
+            f"QScrollBar:vertical{{width:{_s(5)}px;background:{CARD2};}}"
+            f"QScrollBar::handle:vertical{{background:{BD};border-radius:{_s(2)}px;}}"
             f"QScrollBar::add-line:vertical,QScrollBar::sub-line:vertical{{height:0px;}}")
         sw = QWidget(); sw.setStyleSheet("background:transparent;border:none;")
         sl = QVBoxLayout(sw); sl.setContentsMargins(_s(0), _s(2), _s(4), _s(0)); sl.setSpacing(_s(10))
@@ -749,7 +749,7 @@ class StatusPanel(QWidget):
 
             row = QFrame()
             row.setStyleSheet(
-                f"QFrame{{background:{CARD};border:1.5px solid {BD};border-radius:14px;}}"
+                f"QFrame{{background:{CARD};border:1.5px solid {BD};border-radius:{_s(14)}px;}}"
                 f"QFrame:hover{{background:{BGB};border-color:{BD2};}}")
             rl = QHBoxLayout(row)
             rl.setContentsMargins(_s(0), _s(14), _s(16), _s(14)); rl.setSpacing(0)
@@ -769,7 +769,7 @@ class StatusPanel(QWidget):
             ico.setAlignment(Qt.AlignCenter)
             ico.setFont(QFont("Segoe UI Emoji", _fs(18)))
             ico.setStyleSheet(
-                f"QLabel{{background:{abg};border-radius:22px;border:none;}}")
+                f"QLabel{{background:{abg};border-radius:{_s(22)}px;border:none;}}")
             rl.addWidget(ico); rl.addSpacing(_s(12))
 
             # 信息列
@@ -784,15 +784,15 @@ class StatusPanel(QWidget):
             if can_buy:
                 bb.setStyleSheet(
                     f"QPushButton{{background:#fff8e1;color:#9a7000;"
-                    f"border:1.5px solid #ffe082;border-radius:10px;"
-                    f"font-size:11px;font-weight:bold;}}"
+                    f"border:1.5px solid #ffe082;border-radius:{_s(10)}px;"
+                    f"font-size:{_s(11)}px;font-weight:bold;}}"
                     f"QPushButton:hover{{background:#ffe082;border-color:#c8a800;}}"
                     f"QPushButton:pressed{{background:#ffd740;}}")
                 bb.clicked.connect(lambda _=None, i=iid: self._buy(i))
             else:
                 bb.setStyleSheet(
                     f"QPushButton{{background:{CARD2};color:{T3};"
-                    f"border:1.5px solid {BD};border-radius:10px;font-size:11px;}}")
+                    f"border:1.5px solid {BD};border-radius:{_s(10)}px;font-size:{_s(11)}px;}}")
                 bb.setEnabled(False)
             rl.addWidget(bb)
             sl.addWidget(row)
@@ -811,17 +811,17 @@ class StatusPanel(QWidget):
         sa.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         sa.setStyleSheet(
             f"QScrollArea{{border:none;background:transparent;}}"
-            f"QScrollBar:vertical{{width:5px;background:{CARD2};border-radius:2px;}}"
-            f"QScrollBar::handle:vertical{{background:{BD};border-radius:2px;}}"
+            f"QScrollBar:vertical{{width:{_s(5)}px;background:{CARD2};border-radius:{_s(2)}px;}}"
+            f"QScrollBar::handle:vertical{{background:{BD};border-radius:{_s(2)}px;}}"
             f"QScrollBar::add-line:vertical,QScrollBar::sub-line:vertical{{height:0px;}}")
         sw=QWidget(); sw.setStyleSheet("background:transparent;border:none;")
         sl=QVBoxLayout(sw); sl.setContentsMargins(_s(0), _s(2), _s(4), _s(0)); sl.setSpacing(_s(10))
         for a in self._gs.get_achievements_status(self._ps):
             c=QWidget()
             if a["unlocked"]:
-                c.setStyleSheet(f"background:#fffbf0;border-radius:14px;border:1.5px solid #f0d8a0;")
+                c.setStyleSheet(f"background:#fffbf0;border-radius:{_s(14)}px;border:1.5px solid #f0d8a0;")
             else:
-                c.setStyleSheet(f"background:{CARD};border-radius:14px;border:1.5px solid {BD};")
+                c.setStyleSheet(f"background:{CARD};border-radius:{_s(14)}px;border:1.5px solid {BD};")
             cl=QHBoxLayout(c); cl.setContentsMargins(_s(14), _s(10), _s(14), _s(10)); cl.setSpacing(_s(10))
             icon_lbl=QLabel("🏆" if a["unlocked"] else "🔒")
             icon_lbl.setFont(QFont("Microsoft YaHei", _fs(15) if a["unlocked"] else 12))
@@ -854,9 +854,9 @@ class StatusPanel(QWidget):
         self._chat_scroll.setWidgetResizable(True)
         self._chat_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self._chat_scroll.setStyleSheet(
-            f"QScrollArea{{border:1px solid {BD};border-radius:12px;background:{CARD};}}"
-            f"QScrollBar:vertical{{width:5px;background:{CARD2};}}"
-            f"QScrollBar::handle:vertical{{background:{BD};border-radius:2px;}}"
+            f"QScrollArea{{border:1px solid {BD};border-radius:{_s(12)}px;background:{CARD};}}"
+            f"QScrollBar:vertical{{width:{_s(5)}px;background:{CARD2};}}"
+            f"QScrollBar::handle:vertical{{background:{BD};border-radius:{_s(2)}px;}}"
             f"QScrollBar::add-line:vertical,QScrollBar::sub-line:vertical{{height:0px;}}")
         self._chat_content=QWidget()
         self._chat_content.setStyleSheet(f"background:{CARD};border:none;")
@@ -887,7 +887,7 @@ class StatusPanel(QWidget):
         send_btn=QPushButton("发送"); send_btn.setFixedSize(_s(56), _s(36))
         send_btn.setFont(QFont("Microsoft YaHei", _fs(11)))
         send_btn.setStyleSheet(
-            f"QPushButton{{background:#e8d0c0;color:{T1};border:none;border-radius:12px;font-weight:bold;}}"
+            f"QPushButton{{background:#e8d0c0;color:{T1};border:none;border-radius:{_s(12)}px;font-weight:bold;}}"
             f"QPushButton:hover{{background:#dcc0b0;}}"
             f"QPushButton:pressed{{background:{CARD2};}}")
         send_btn.clicked.connect(self._send_chat)
@@ -945,7 +945,7 @@ class StatusPanel(QWidget):
         msg_index: 该消息在 recent 中的下标，用于删除（-1 表示实时新增，由当前 recent 长度推算）
         scroll_to_bottom: 是否自动滚动到底部（删除场景中为 False）
         """
-        BUBBLE_W = 272
+        BUBBLE_W = _s(272)
         html_text = (
             f'<span style="font-family:Microsoft YaHei;font-size:10pt;">'
             f'{_text_to_html(text)}</span>'
@@ -990,9 +990,9 @@ class StatusPanel(QWidget):
         from PyQt5.QtWidgets import QMenu, QAction
         menu = QMenu(self)
         menu.setStyleSheet(
-            f"QMenu{{background:{CARD};border:1px solid {BD};border-radius:8px;padding:4px 0;"
-            f"font-family:'Microsoft YaHei';font-size:12px;}}"
-            f"QMenu::item{{padding:5px 18px;color:{T1};border-radius:5px;margin:1px 3px;}}"
+            f"QMenu{{background:{CARD};border:1px solid {BD};border-radius:{_s(8)}px;padding:4px 0;"
+            f"font-family:'Microsoft YaHei';font-size:{_s(12)}px;}}"
+            f"QMenu::item{{padding:{_s(5)}px {_s(18)}px;color:{T1};border-radius:{_s(5)}px;margin:{_s(1)}px {_s(3)}px;}}"
             f"QMenu::item:selected{{background:#f5ddd0;color:#a04030;}}")
         # 加入记忆
         mem_action = QAction("📌 加入记忆", self)
@@ -1073,7 +1073,7 @@ class StatusPanel(QWidget):
             return
 
         typing_lbl=_lbl("正在思考...",10,T3)
-        typing_lbl.setStyleSheet(f"color:{T3};background:transparent;border:none;padding:4px;")
+        typing_lbl.setStyleSheet(f"color:{T3};background:transparent;border:none;padding:{_s(4)}px;")
         idx=self._chat_layout.count()-1
         self._chat_layout.insertWidget(idx, typing_lbl)
         self._pending_typing_lbl=typing_lbl
@@ -1148,17 +1148,10 @@ class StatusPanel(QWidget):
     def _pg_settings(self):
         L=self._cl
 
-        # 包在可滚动区域中，避免小窗/高 DPI 下内容被挤压
-        # 设置页内容已精确排列，隐藏滚动条防止其占宽导致反馈循环，滚轮仍可滚动
-        scroll_area = QScrollArea()
-        scroll_area.setWidgetResizable(True)
-        scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        scroll_area.setStyleSheet(
-            f"QScrollArea{{border:none;background:transparent;}}")
-        scroll_content = QWidget()
-        scroll_content.setStyleSheet("background:transparent;border:none;")
-        S = QVBoxLayout(scroll_content)
+        # 不使用 QScrollArea — 所有组件等比缩放以适应面板，禁止出现滚动条
+        wrapper = QWidget()
+        wrapper.setStyleSheet("background:transparent;border:none;")
+        S = QVBoxLayout(wrapper)
         S.setContentsMargins(_s(0), _s(0), _s(0), _s(0))
         S.setSpacing(0)
 
@@ -1181,15 +1174,15 @@ class StatusPanel(QWidget):
             if is_password:
                 inp.setEchoMode(QLineEdit.Password)
             inp.setStyleSheet(
-                f"QLineEdit{{background:{CARD};border:1.5px solid {BD};border-radius:10px;"
-                f"padding:4px 12px;color:{T1};}}"
+                f"QLineEdit{{background:{CARD};border:1.5px solid {BD};border-radius:{_s(10)}px;"
+                f"padding:{_s(4)}px {_s(12)}px;color:{T1};}}"
                 f"QLineEdit:focus{{border-color:{ACC};}}")
             row.addWidget(inp)
             clr=QPushButton("✕"); clr.setFixedSize(_s(28), _s(36))
             clr.setToolTip("清空此项")
             clr.setStyleSheet(
                 f"QPushButton{{background:transparent;color:{T3};border:none;"
-                f"font-size:12px;border-radius:8px;}}"
+                f"font-size:{_s(12)}px;border-radius:{_s(8)}px;}}"
                 f"QPushButton:hover{{color:#c06060;background:#fde8e8;}}")
             clr.clicked.connect(inp.clear)
             row.addWidget(clr)
@@ -1207,7 +1200,7 @@ class StatusPanel(QWidget):
         save_btn=QPushButton("保存设置"); save_btn.setFixedHeight(_s(38))
         save_btn.setFont(QFont("Microsoft YaHei", _fs(11),QFont.Bold))
         save_btn.setStyleSheet(
-            f"QPushButton{{background:#e8d0c0;color:{T1};border:none;border-radius:12px;padding:0 20px;}}"
+            f"QPushButton{{background:#e8d0c0;color:{T1};border:none;border-radius:{_s(12)}px;padding:0 {_s(20)}px;}}"
             f"QPushButton:hover{{background:#dcc0b0;}}")
         save_btn.clicked.connect(self._save_settings)
         br.addWidget(save_btn)
@@ -1215,7 +1208,7 @@ class StatusPanel(QWidget):
         test_btn=QPushButton("测试连接"); test_btn.setFixedHeight(_s(38))
         test_btn.setFont(QFont("Microsoft YaHei", _fs(11)))
         test_btn.setStyleSheet(
-            f"QPushButton{{background:{CARD};color:{T2};border:1.5px solid {BD};border-radius:12px;padding:0 20px;}}"
+            f"QPushButton{{background:{CARD};color:{T2};border:1.5px solid {BD};border-radius:{_s(12)}px;padding:0 {_s(20)}px;}}"
             f"QPushButton:hover{{background:{BGB};}}")
         test_btn.clicked.connect(self._test_api)
         br.addWidget(test_btn)
@@ -1233,7 +1226,7 @@ class StatusPanel(QWidget):
         mem_btn=QPushButton("📝 记忆管理"); mem_btn.setFixedHeight(_s(42))
         mem_btn.setFont(QFont("Microsoft YaHei", _fs(12),QFont.Bold))
         mem_btn.setStyleSheet(
-            f"QPushButton{{background:{CARD};color:{T1};border:1.5px solid {BD};border-radius:12px;padding:0 20px;}}"
+            f"QPushButton{{background:{CARD};color:{T1};border:1.5px solid {BD};border-radius:{_s(12)}px;padding:0 {_s(20)}px;}}"
             f"QPushButton:hover{{background:{BGB};border-color:{BD2};}}"
             f"QPushButton:pressed{{background:{CARD2};}}")
         mem_btn.clicked.connect(self._open_memory_window)
@@ -1264,8 +1257,9 @@ class StatusPanel(QWidget):
                     if px.red() > 200 and px.green() > 200 and px.blue() > 200:
                         qr_img.setPixelColor(x, y, bg_c)
             qr_lbl = QLabel()
+            qr_sz = _s(120)
             qr_pix = QPixmap.fromImage(qr_img).scaled(
-                120, 120, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+                qr_sz, qr_sz, Qt.KeepAspectRatio, Qt.SmoothTransformation)
             qr_lbl.setPixmap(qr_pix)
             qr_lbl.setFixedSize(qr_pix.size())
             qr_lbl.setAlignment(Qt.AlignCenter)
@@ -1309,6 +1303,7 @@ class StatusPanel(QWidget):
         _p.setPen(Qt.NoPen); _p.setBrush(QBrush(QColor("#07c160")))
         _p.drawEllipse(10, 3, 2, 2); _p.drawEllipse(13, 3, 2, 2)
         _p.end()
+        wx_pix = wx_pix.scaled(_s(18), _s(16), Qt.KeepAspectRatio, Qt.SmoothTransformation)
         wx_icon.setPixmap(wx_pix); wx_icon.setFixedSize(_s(18), _s(16))
         wx_icon.setStyleSheet("background:transparent;border:none;")
         wx_row.addWidget(wx_icon)
@@ -1321,8 +1316,7 @@ class StatusPanel(QWidget):
         S.addLayout(footer)
         S.addStretch()
 
-        scroll_area.setWidget(scroll_content)
-        L.addWidget(scroll_area, 1)
+        L.addWidget(wrapper, 1)
 
     def _open_memory_window(self):
         if not self._cs:
@@ -1395,7 +1389,7 @@ class StatusPanel(QWidget):
 
     def _add_chat_bubble_html(self, html_text, is_user):
         """直接传入 HTML 内容的气泡（供内部使用）"""
-        BUBBLE_W = 272
+        BUBBLE_W = _s(272)
         bubble = QLabel()
         bubble.setTextFormat(Qt.RichText)
         bubble.setOpenExternalLinks(False)
