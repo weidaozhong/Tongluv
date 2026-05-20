@@ -534,7 +534,7 @@ class CrawlOverlay(QWidget):
 #  知识中心主窗口
 # ══════════════════════════════════════════════════════════════
 class KnowledgeHub(QWidget):
-    _BASE_KW, _BASE_KH = 720, 680
+    _BASE_KW, _BASE_KH = 900, 850
     _DESIGN_H = 1440
 
     def __init__(self, chat_service, parent=None, parent_panel=None):
@@ -548,8 +548,7 @@ class KnowledgeHub(QWidget):
         scr = QApplication.primaryScreen()
         avail_h = scr.availableGeometry().height() if scr else 1080
         logical_h = scr.geometry().height() if scr else 1440
-        dpr = scr.devicePixelRatio() if scr else 1.0
-        _scale = min(1.0, (logical_h * dpr) / self._DESIGN_H)
+        _scale = min(1.0, logical_h / self._DESIGN_H)
         global _ui_scale
         _ui_scale = _scale
         self.KW = max(480, int(self._BASE_KW * _scale))

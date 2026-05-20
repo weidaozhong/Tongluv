@@ -114,11 +114,8 @@ class AvatarWidget(QWidget):
         # 裁剪到圆形区域
         cl=QPainterPath(); cl.addEllipse(QRectF(o,o,s,s)); p.setClipPath(cl)
         if self._px:
-            # 精确居中：以圆心为基准，图片居中绘制
-            px_w, px_h = self._px.width(), self._px.height()
-            draw_x = o + (s - px_w) // 2
-            draw_y = o + (s - px_h) // 2
-            p.drawPixmap(draw_x, draw_y, self._px)
+            # DPR pixmap 逻辑尺寸 = s，drawPixmap 自动按逻辑大小绘制
+            p.drawPixmap(o, o, self._px)
         p.end()
     def mousePressEvent(self,e):
         if e.button()==Qt.LeftButton: self.clicked.emit()
@@ -169,7 +166,7 @@ def _clear_layout(layout):
 #  独立记忆管理窗口
 # ══════════════════════════════════════════════════════════════
 class MemoryWindow(QWidget):
-    _BASE_MW, _BASE_MH = 400, 560
+    _BASE_MW, _BASE_MH = 500, 700
     _DESIGN_H = 1440   # 设计基准：2560×1440 @ 100% DPI
 
     def __init__(self, chat_service, parent=None):
@@ -181,8 +178,7 @@ class MemoryWindow(QWidget):
         scr = QApplication.primaryScreen()
         logical_h = scr.geometry().height() if scr else 1440
         avail_h = scr.availableGeometry().height() if scr else 1080
-        dpr = scr.devicePixelRatio() if scr else 1.0
-        _scale = min(1.0, (logical_h * dpr) / self._DESIGN_H)
+        _scale = min(1.0, logical_h / self._DESIGN_H)
         global _ui_scale; _ui_scale = _scale
         self.MW = max(260, int(self._BASE_MW * _scale))
         self.MH = max(360, int(self._BASE_MH * _scale))
@@ -332,8 +328,8 @@ class StatusPanel(QWidget):
     _test_result_signal=pyqtSignal(str)    # status text
     _action_reply_signal=pyqtSignal(str, str)  # reply, error (动作触发的 AI 回复)
 
-    _BASE_PW = 390
-    _BASE_PH = 800
+    _BASE_PW = 430
+    _BASE_PH = 820
     _DESIGN_H = 1440   # 设计基准：2560×1440 @ 100% DPI
 
     # ── 聊天内容 → 期待动作 关键词映射 ──
@@ -359,16 +355,13 @@ class StatusPanel(QWidget):
         super().__init__(parent)
         self.setWindowFlags(Qt.WindowStaysOnTopHint|Qt.Tool|Qt.FramelessWindowHint)
         self.setAttribute(Qt.WA_TranslucentBackground)
-        # ── 根据物理屏幕高度等比缩放面板尺寸 ──
-        # 用物理高度（逻辑高 × DPR）做缩放基准，
-        # 这样同一块 1080p 屏幕无论 100% 还是 125% 得到相同 scale，
-        # 125% 时 Qt 的 HighDpiScaling 再统一放大渲染，整体尺寸自然增大
+        # ── 根据屏幕逻辑高度等比缩放面板尺寸 ──
+        # AA_EnableHighDpiScaling 已按 DPR 放大渲染，
+        # 此处只需用逻辑高度适配不同物理屏幕
         screen = QApplication.primaryScreen()
         logical_h = screen.geometry().height() if screen else 1440
         avail_h = screen.availableGeometry().height() if screen else 1080
-        dpr = screen.devicePixelRatio() if screen else 1.0
-        physical_h = logical_h * dpr
-        _scale = min(1.0, physical_h / self._DESIGN_H)
+        _scale = min(1.0, logical_h / self._DESIGN_H)
         global _ui_scale; _ui_scale = _scale
         self.PW = max(280, int(self._BASE_PW * _scale))
         self.PH = max(450, int(self._BASE_PH * _scale))
@@ -569,7 +562,7 @@ class StatusPanel(QWidget):
         sa.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         sa.setStyleSheet(f"QScrollArea{{border:none;background:transparent;}}")
         w=QWidget(); w.setStyleSheet("background:transparent;border:none;")
-        sl=QVBoxLayout(w); sl.setContentsMargins(_s(0), _s(2), _s(4), _s(0)); sl.setSpacing(_s(18))
+        sl=QVBoxLayout(w); sl.setContentsMargins(_s(0), _s(2), _s(4), _s(0)); sl.setSpacing(0)
         sl.addWidget(_lbl("📋 每日任务",13,T1,True))
         if not self._gs:
             sl.addWidget(_lbl("系统未初始化",11,T3)); sl.addStretch()
@@ -584,6 +577,7 @@ class StatusPanel(QWidget):
             tasks = [t for t in tasks if t["id"] != "login"]
             tasks.sort(key=lambda t: 1 if t["done"] else 0)
             for t in tasks:
+                sl.addStretch(1)
                 done = t["done"]
                 c=QWidget()
                 if done:
@@ -615,7 +609,7 @@ class StatusPanel(QWidget):
                     bar.set_value(int(t["progress"]/t["target"]*100) if t["target"]>0 else 0)
                     cl.addWidget(bar)
                 sl.addWidget(c)
-            sl.addStretch()
+            sl.addStretch(1)
         sa.setWidget(w)
         L.addWidget(sa,1)
 
@@ -638,7 +632,7 @@ class StatusPanel(QWidget):
         sa.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         sa.setStyleSheet(f"QScrollArea{{border:none;background:transparent;}}")
         sw = QWidget(); sw.setStyleSheet("background:transparent;border:none;")
-        sl = QVBoxLayout(sw); sl.setContentsMargins(_s(0), _s(2), _s(4), _s(0)); sl.setSpacing(_s(10))
+        sl = QVBoxLayout(sw); sl.setContentsMargins(_s(0), _s(2), _s(4), _s(0)); sl.setSpacing(0)
 
         from src.game_systems import SHOP_MAP
         bp = self._gs.get_backpack()
@@ -660,6 +654,7 @@ class StatusPanel(QWidget):
             sl.addStretch(); sl.addWidget(empty); sl.addStretch()
         else:
             for iid, cnt in bp.items():
+                sl.addStretch(1)
                 s = SHOP_MAP.get(iid)
                 if not s: continue
                 usable = self._gs.can_use_item(iid, self._ps)[0] if self._ps else True
@@ -713,7 +708,7 @@ class StatusPanel(QWidget):
                     cb.setEnabled(False)
                 rl.addWidget(cb)
                 sl.addWidget(row)
-            sl.addStretch()
+            sl.addStretch(1)
 
         sa.setWidget(sw)
         L.addWidget(sa, 1)
@@ -734,9 +729,10 @@ class StatusPanel(QWidget):
         sa.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         sa.setStyleSheet(f"QScrollArea{{border:none;background:transparent;}}")
         sw = QWidget(); sw.setStyleSheet("background:transparent;border:none;")
-        sl = QVBoxLayout(sw); sl.setContentsMargins(_s(0), _s(2), _s(4), _s(0)); sl.setSpacing(_s(10))
+        sl = QVBoxLayout(sw); sl.setContentsMargins(_s(0), _s(2), _s(4), _s(0)); sl.setSpacing(0)
 
         for s in self._gs.get_shop_items():
+            sl.addStretch(1)
             iid = s["id"]
             accent, abg = _ITEM_ACCENT.get(iid, _ITEM_ACCENT_DEFAULT)
             can_buy = self._gs.coins >= s["price"]
@@ -790,7 +786,7 @@ class StatusPanel(QWidget):
                 bb.setEnabled(False)
             rl.addWidget(bb)
             sl.addWidget(row)
-        sl.addStretch()
+        sl.addStretch(1)
 
         sa.setWidget(sw)
         L.addWidget(sa, 1)
@@ -1214,7 +1210,7 @@ class StatusPanel(QWidget):
         self._cfg_status.setWordWrap(True)
         S.addWidget(self._cfg_status)
 
-        S.addSpacing(_s(26)); S.addWidget(_div()); S.addSpacing(_s(22))
+        S.addStretch(1); S.addWidget(_div()); S.addSpacing(_s(8))
 
         # 记忆管理入口按钮
         mem_btn=QPushButton("📝 记忆管理"); mem_btn.setFixedHeight(_s(42))
@@ -1231,7 +1227,7 @@ class StatusPanel(QWidget):
             S.addWidget(_lbl(f"{mi['facts_count']} 条记忆  ·  {mi['recent_count']//2} 轮对话",9,T3))
 
         # ── 赞赏 + 关于（左右两栏）──
-        S.addSpacing(_s(26)); S.addWidget(_div()); S.addSpacing(_s(18))
+        S.addStretch(1); S.addWidget(_div()); S.addSpacing(_s(8))
         footer = QHBoxLayout(); footer.setContentsMargins(_s(10), _s(0), _s(10), _s(0))
 
         # 左栏：赞赏
@@ -1314,7 +1310,7 @@ class StatusPanel(QWidget):
         footer.addLayout(right_col)
 
         S.addLayout(footer)
-        S.addStretch()
+        S.addStretch(1)
 
         L.addWidget(wrapper, 1)
 

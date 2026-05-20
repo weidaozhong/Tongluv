@@ -1713,13 +1713,12 @@ def main():
     global PET_SIZE
     app = QApplication(sys.argv)
     app.setQuitOnLastWindowClosed(False)
-    # ── 根据物理屏幕高度动态调整桌宠尺寸 ──
-    # 用物理高度（逻辑高 × DPR）做基准，
-    # 同一块屏幕无论 DPI 设多少都得到相同 scale
+    # ── 根据屏幕逻辑高度动态调整桌宠尺寸 ──
+    # AA_EnableHighDpiScaling 已按 DPR 缩放逻辑坐标，
+    # 此处只需用逻辑高度适配不同物理屏幕，Qt 自动处理 DPR 放大
     _scr = QApplication.primaryScreen()
     if _scr:
-        _physical_h = _scr.geometry().height() * _scr.devicePixelRatio()
-        _scale = min(1.0, _physical_h / _DESIGN_H)
+        _scale = min(1.0, _scr.geometry().height() / _DESIGN_H)
         PET_SIZE = max(120, int(210 * _scale))
     window = PetWindow()
     sys.exit(app.exec_())
