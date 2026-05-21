@@ -4,6 +4,11 @@ on:
   push:
     tags:
       - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version tag (e.g. v1.0.0)'
+        required: true
 
 permissions:
   contents: write
@@ -11,6 +16,8 @@ permissions:
 jobs:
   build:
     runs-on: windows-latest
+    env:
+      VERSION: ${{ github.event.inputs.version || github.ref_name }}
 
     steps:
       - name: Checkout code
@@ -26,7 +33,7 @@ jobs:
 
       - name: Inject version from tag
         run: |
-          $ver = "${{ github.ref_name }}"
+          $ver = "${{ env.VERSION }}"
           $file = "src/status_panel.py"
           (Get-Content $file -Raw) -replace '版本号：v[\d.]+', "版本号：$ver" | Set-Content $file -NoNewline
 
@@ -47,6 +54,7 @@ jobs:
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
-          name: 蓝色小嗵 ${{ github.ref_name }}
+          tag_name: ${{ env.VERSION }}
+          name: 蓝色小嗵 ${{ env.VERSION }}
           files: dist/xiaotong.exe
           generate_release_notes: true
