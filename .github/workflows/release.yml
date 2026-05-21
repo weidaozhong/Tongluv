@@ -24,6 +24,12 @@ jobs:
       - name: Install dependencies
         run: pip install PyQt5 pynput pyinstaller
 
+      - name: Inject version from tag
+        run: |
+          $ver = "${{ github.ref_name }}"
+          $file = "src/status_panel.py"
+          (Get-Content $file -Raw) -replace '版本号：v[\d.]+', "版本号：$ver" | Set-Content $file -NoNewline
+
       - name: Restore donate QR image
         run: |
           $b64 = Get-Content "data/donate_qr.b64" -Raw

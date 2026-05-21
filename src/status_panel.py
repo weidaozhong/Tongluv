@@ -1274,7 +1274,7 @@ class StatusPanel(QWidget):
         right_col = QVBoxLayout(); right_col.setSpacing(_s(16))
         right_col.setAlignment(Qt.AlignTop)
         right_col.setContentsMargins(_s(0), _s(48), _s(0), _s(0))
-        about_ver = _lbl("版本号：v1.0.0", 9, T3)
+        about_ver = _lbl("版本号：v1.0.1", 9, T3)
         about_ver.setAlignment(Qt.AlignLeft)
         right_col.addWidget(about_ver)
         about_author = _lbl("by  WWW.没有COM", 9, T2)
