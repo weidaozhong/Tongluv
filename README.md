@@ -12,7 +12,7 @@
       <br><br>
       <img src="https://img.shields.io/badge/platform-Windows%2010%20%7C%2011-blue" />
       <img src="https://img.shields.io/badge/python-3.10%2B-blue" />
-      <img src="https://img.shields.io/badge/license-MIT-green" />
+      <img src="https://img.shields.io/badge/license-MIT%20No--Sale-green" />
       <a href="https://github.com/gildingmazzonimo621-design/XIAOTONG-Desktop-pet/releases/latest">
         <img src="https://img.shields.io/github/v/release/gildingmazzonimo621-design/XIAOTONG-Desktop-pet?label=%E2%AC%87%20download&color=brightgreen" />
       </a>
