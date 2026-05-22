@@ -325,20 +325,6 @@ geren/
 
 ---
 
-## 🛠️ 技术栈
-<sub>Tech Stack</sub>
-
-| 技术 | 用途 | Purpose |
-|------|------|---------|
-| **Python 3.10+** | 主语言 | Primary language |
-| **PyQt5** | 界面渲染，高 DPI 自适应 | UI rendering, high-DPI adaptive |
-| **pynput** | 全局键盘 / 鼠标监听 | Global keyboard/mouse listener |
-| **Win32 API (ctypes)** | 窗口枚举、DPI 感知、单实例互斥锁 | Window enumeration, DPI awareness, single-instance mutex |
-| **urllib / ssl** | HTTP 请求，零第三方网络依赖 | HTTP requests, zero third-party network deps |
-| **PyInstaller** | 打包为 EXE，内嵌 DPI 清单 | Bundle as EXE with embedded DPI manifest |
-
----
-
 ## 📬 联系我 · Contact
 
 如果你有任何想法、建议，或希望进行商业合作，欢迎通过微信联系我：
@@ -363,3 +349,17 @@ geren/
   <br><sub>Commercial collaboration is welcome — please contact the author via WeChat above</sub>
 - 📄 分发时必须同时附带 `LICENSE` 和 `ADDITIONAL_TERMS.md`
   <br><sub>Distribution must include both `LICENSE` and `ADDITIONAL_TERMS.md`</sub>
+
+---
+
+## 🛠️ 技术栈
+<sub>Tech Stack</sub>
+
+| 技术 | 用途 | Purpose |
+|------|------|---------|
+| **Python 3.10+** | 主语言 | Primary language |
+| **PyQt5** | 界面渲染，高 DPI 自适应 | UI rendering, high-DPI adaptive |
+| **pynput** | 全局键盘 / 鼠标监听 | Global keyboard/mouse listener |
+| **Win32 API (ctypes)** | 窗口枚举、DPI 感知、单实例互斥锁 | Window enumeration, DPI awareness, single-instance mutex |
+| **urllib / ssl** | HTTP 请求，零第三方网络依赖 | HTTP requests, zero third-party network deps |
+| **PyInstaller** | 打包为 EXE，内嵌 DPI 清单 | Bundle as EXE with embedded DPI manifest |
