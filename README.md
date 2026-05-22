@@ -12,7 +12,7 @@
       <br><br>
       <img src="https://img.shields.io/badge/platform-Windows%2010%20%7C%2011-blue" />
       <img src="https://img.shields.io/badge/python-3.10%2B-blue" />
-      <img src="https://img.shields.io/badge/license-XIAOTONG--License--v1.0-green" />
+      <img src="https://img.shields.io/badge/license-Apache--2.0%20%2B%20Additional%20Terms-green" />
       <a href="https://github.com/gildingmazzonimo621-design/XIAOTONG-Desktop-pet/releases/latest">
         <img src="https://img.shields.io/github/v/release/gildingmazzonimo621-design/XIAOTONG-Desktop-pet?label=%E2%AC%87%20download&color=brightgreen" />
       </a>
@@ -350,8 +350,8 @@ geren/
 
 ## 📜 开源协议 · License
 
-本项目采用 [XIAOTONG Desktop Pet License v1.0](LICENSE)，基于以下核心规则：
-<br><sub>This project is licensed under the [XIAOTONG Desktop Pet License v1.0](LICENSE), with the following core rules:</sub>
+本项目基于 [Apache License 2.0](LICENSE) 开源，并附加 [额外条款](ADDITIONAL_TERMS.md)。使用本项目即表示你同意同时遵守两份文件。
+<br><sub>This project is released under [Apache License 2.0](LICENSE) with [Additional Terms](ADDITIONAL_TERMS.md). By using this project you agree to comply with both.</sub>
 
 - ✅ 自由使用、修改和分发，但需**署名并链接回原仓库**
   <br><sub>Free to use, modify, and distribute — with attribution and link-back required</sub>
@@ -361,3 +361,5 @@ geren/
   <br><sub>The "About" section must not be modified or removed</sub>
 - 🤝 **欢迎商业合作洽谈**，请先通过上方微信联系作者
   <br><sub>Commercial collaboration is welcome — please contact the author via WeChat above</sub>
+- 📄 分发时必须同时附带 `LICENSE` 和 `ADDITIONAL_TERMS.md`
+  <br><sub>Distribution must include both `LICENSE` and `ADDITIONAL_TERMS.md`</sub>
