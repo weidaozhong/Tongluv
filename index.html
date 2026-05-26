@@ -49,7 +49,7 @@
 }
 
 html{scroll-behavior:smooth}
-body{font-family:var(--sans);color:var(--text);background:var(--bg);overflow-x:hidden;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;cursor:none}
+body{font-family:var(--sans);color:var(--text);background:var(--bg);overflow-x:hidden;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;cursor:none;user-select:none;-webkit-user-select:none}
 
 /* restore cursor for interactive elements */
 a,button,input,select,textarea,[role="button"],.feat-card,.gallery-item,.panel-img-w,.hub-card{cursor:none}
@@ -247,13 +247,26 @@ body:not(.loaded){position:fixed!important;inset:0!important;overflow:hidden!imp
   border-radius:50%;
   animation:sparkleAnim .85s ease-out forwards;
 }
-/* ── Click Ripple ────────────────────────── */
+/* ── Click Ripple ———————————————————————── */
 .click-ripple{
   position:fixed;pointer-events:none;z-index:9997;
+  width:8px;height:8px;
   border-radius:50%;
-  border:1.5px solid rgba(251,191,36,.35);
-  background:radial-gradient(circle,rgba(251,191,36,.12),transparent 70%);
-  animation:rippleExpand .7s cubic-bezier(.23,1,.32,1) forwards;
+  /* 居中定位到点击点 */
+  transform:translate(-50%,-50%) scale(0);
+  background:transparent;
+  border:1.5px solid rgba(184,146,63,0.75);
+  animation:rippleExpand .65s cubic-bezier(.23,1,.32,1) forwards;
+}
+.click-ripple.rr2{
+  border-color:rgba(82,183,136,0.50);
+  animation-duration:.85s;
+  animation-delay:.07s;
+}
+.click-ripple.rr3{
+  border-color:rgba(167,201,87,0.30);
+  animation-duration:1.05s;
+  animation-delay:.14s;
 }
 @keyframes fairyPulse{0%,100%{transform:scale(1);opacity:.7}50%{transform:scale(1.4);opacity:1}}
 @keyframes sparkleAnim{
@@ -261,8 +274,8 @@ body:not(.loaded){position:fixed!important;inset:0!important;overflow:hidden!imp
   100%{opacity:0;transform:translate(-50%,-50%) scale(0) translateY(-32px)}
 }
 @keyframes rippleExpand{
-  0%{width:0;height:0;opacity:.6;transform:translate(-50%,-50%) scale(1)}
-  100%{width:120px;height:120px;opacity:0;transform:translate(-50%,-50%) scale(1)}
+  0%  {transform:translate(-50%,-50%) scale(1);opacity:.85}
+  100%{transform:translate(-50%,-50%) scale(18);opacity:0}
 }
 
 /* ── Ambient Orbs (forest-green + haze-blue) ── */
@@ -1231,14 +1244,22 @@ body.loaded .hc>*:nth-child(6){animation-delay:.42s}
       }
     });
 
-    /* ── Click Ripple ──────────────────────── */
+    /* ── Click Ripple — 三圈水波纹扩散 ──────────────── */
     document.addEventListener('click', function(e){
-      var r = document.createElement('div');
-      r.className = 'click-ripple';
-      r.style.left = e.clientX + 'px';
-      r.style.top = e.clientY + 'px';
-      document.body.appendChild(r);
-      r.addEventListener('animationend', function(){r.remove()});
+      /* NOTE: e.button===0 确保只响应左键点击 */
+      if(e.button !== 0) return;
+      var cx = e.clientX, cy = e.clientY;
+      /* 三圈依次延迟初始，内金 → 中绿 → 外黄绿 */
+      ['','rr2','rr3'].forEach(function(cls, i){
+        setTimeout(function(){
+          var r = document.createElement('div');
+          r.className = 'click-ripple' + (cls ? ' '+cls : '');
+          r.style.left = cx + 'px';
+          r.style.top  = cy + 'px';
+          document.body.appendChild(r);
+          r.addEventListener('animationend', function(){ r.remove(); });
+        }, i * 70);
+      });
     });
 
     (function animateFairy(){
