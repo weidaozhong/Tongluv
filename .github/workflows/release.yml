@@ -51,6 +51,12 @@ jobs:
           $size = (Get-Item "dist/xiaotong.exe").Length / 1MB
           Write-Host "Build successful: xiaotong.exe ($([math]::Round($size, 1)) MB)"
 
+      - name: Rename build output to include version
+        run: |
+          $ver = "${{ env.VERSION }}"
+          Rename-Item -Path "dist/xiaotong.exe" -NewName "xiaotong-$ver.exe"
+          Write-Host "Renamed build to xiaotong-$ver.exe"
+
       - name: Delete old asset if exists
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -61,9 +67,9 @@ jobs:
           try {
             $release = Invoke-RestMethod "https://api.github.com/repos/$repo/releases/tags/$tag" -Headers $headers
             foreach ($asset in $release.assets) {
-              if ($asset.name -eq "xiaotong.exe") {
+              if ($asset.name -eq "xiaotong-$tag.exe") {
                 Invoke-RestMethod "https://api.github.com/repos/$repo/releases/assets/$($asset.id)" -Method Delete -Headers $headers
-                Write-Host "Deleted old asset: xiaotong.exe (id=$($asset.id))"
+                Write-Host "Deleted old asset: xiaotong-$tag.exe (id=$($asset.id))"
               }
             }
           } catch {
@@ -75,5 +81,41 @@ jobs:
         with:
           tag_name: ${{ env.VERSION }}
           name: 蓝色小嗵 ${{ env.VERSION }}
-          files: dist/xiaotong.exe
+          files: dist/xiaotong-${{ env.VERSION }}.exe
           generate_release_notes: true
+
+      - name: Checkout gh-pages branch
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          path: gh-pages-dir
+
+      - name: Update landing page links
+        run: |
+          $version = "${{ env.VERSION }}"
+          $htmlFile = "gh-pages-dir/index.html"
+          if (Test-Path $htmlFile) {
+            $content = Get-Content $htmlFile -Raw
+            # 替换最新版重定向链接或旧的带版本号的链接
+            $pattern = 'https://github.com/weidaozhong/Tongluv/releases/(latest/download/xiaotong\.exe|download/v[\d.]+/xiaotong-v[\d.]+\.exe)'
+            $newUrl = "https://github.com/weidaozhong/Tongluv/releases/download/$version/xiaotong-$version.exe"
+            $content = $content -replace $pattern, $newUrl
+            Set-Content $htmlFile $content -NoNewline
+            Write-Host "Updated landing page links to $newUrl"
+          } else {
+            Write-Error "index.html not found in gh-pages branch"
+          }
+
+      - name: Commit and push landing page updates
+        run: |
+          cd gh-pages-dir
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          $status = git status --porcelain
+          if ($status) {
+            git commit -m "chore: auto-update landing page download links for ${{ env.VERSION }}"
+            git push origin gh-pages
+          } else {
+            Write-Host "No changes in landing page links"
+          }
