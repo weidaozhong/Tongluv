@@ -1,6 +1,5 @@
 export async function onRequest(context) {
   const gitHubDownloadUrl = "https://github.com/weidaozhong/Tongluv/releases/download/v1.0.1/xiaotong.exe";
-  const fileName = "xiaotong-v1.0.1.exe";
   
   // 获取请求用户的国家/地区代码 (Cloudflare 自动提供)
   const country = context.request.headers.get("CF-IPCountry");
@@ -10,22 +9,8 @@ export async function onRequest(context) {
     return Response.redirect(gitHubDownloadUrl, 302);
   }
   
-  // 如果是中国大陆 (CN) 用户，走 Cloudflare 专属的高速流式代理
-  try {
-    const response = await fetch(gitHubDownloadUrl);
-    if (!response.ok) {
-      return new Response("无法从源站获取文件", { status: response.status });
-    }
-    const newHeaders = new Headers(response.headers);
-    newHeaders.set("Content-Disposition", `attachment; filename="${fileName}"`);
-    newHeaders.set("Access-Control-Allow-Origin", "*");
-    
-    return new Response(response.body, {
-      status: response.status,
-      statusText: response.statusText,
-      headers: newHeaders
-    });
-  } catch (err) {
-    return new Response("下载代理服务暂时不可用: " + err.message, { status: 500 });
-  }
+  // 如果是中国大陆 (CN) 用户，302 重定向到信誉极高、不报警告的公益高速加速节点 (moeyy 代理)
+  // 这能彻底打破 Cloudflare 免费版对国内用户的越洋限速瓶颈
+  const cnSpeedUrl = `https://github.moeyy.xyz/${gitHubDownloadUrl}`;
+  return Response.redirect(cnSpeedUrl, 302);
 }
