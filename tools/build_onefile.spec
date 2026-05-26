@@ -95,4 +95,5 @@ exe = EXE(
     entitlements_file=None,
     icon=os.path.join(_ROOT, 'icons/icon.ico'),
     manifest=os.path.join(_ROOT, 'tools/dpi_aware.manifest'),
+    version=os.path.join(_ROOT, 'tools/version_info.py'),
 )

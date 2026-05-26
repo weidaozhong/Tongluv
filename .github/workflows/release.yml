@@ -37,6 +37,19 @@ jobs:
           $file = "src/status_panel.py"
           (Get-Content $file -Raw) -replace '版本号：v[\d.]+', "版本号：$ver" | Set-Content $file -NoNewline
 
+          # Update version_info.py for EXE metadata
+          $nums = $ver.TrimStart('v').Split('.')
+          $major = $nums[0]; $minor = $nums[1]; $patch = $nums[2]
+          $tuple = "($major, $minor, $patch, 0)"
+          $verStr = "$major.$minor.$patch.0"
+          $viFile = "tools/version_info.py"
+          $vi = Get-Content $viFile -Raw
+          $vi = $vi -replace 'filevers=\(\d+, \d+, \d+, \d+\)', "filevers=$tuple"
+          $vi = $vi -replace 'prodvers=\(\d+, \d+, \d+, \d+\)', "prodvers=$tuple"
+          $vi = $vi -replace "FileVersion', u'[\d.]+'", "FileVersion', u'$verStr'"
+          $vi = $vi -replace "ProductVersion', u'[\d.]+'", "ProductVersion', u'$verStr'"
+          Set-Content $viFile $vi -NoNewline
+
       - name: Restore donate QR image
         run: |
           $b64 = Get-Content "data/donate_qr.b64" -Raw
