@@ -1,16 +1,19 @@
 export async function onRequest(context) {
+  // 每次发布新版本时，GitHub Actions 会自动替换此处的最新版直链 (供国内用户高速下载)
   const gitHubDownloadUrl = "https://github.com/weidaozhong/Tongluv/releases/download/v1.0.1/xiaotong.exe";
+  
+  // GitHub 官方 Releases 列表页面 (供海外用户自由挑选版本)
+  const gitHubReleasesPage = "https://github.com/weidaozhong/Tongluv/releases";
   
   // 获取请求用户的国家/地区代码 (Cloudflare 自动提供)
   const country = context.request.headers.get("CF-IPCountry");
   
-  // 如果不是中国大陆 (CN) 用户，直接 302 重定向到 GitHub 官方原始下载链接
+  // 如果不是中国大陆 (CN) 用户，直接 302 重定向到 GitHub 官方 Releases 列表页面，让其自由选择版本
   if (country && country !== "CN") {
-    return Response.redirect(gitHubDownloadUrl, 302);
+    return Response.redirect(gitHubReleasesPage, 302);
   }
   
-  // 如果是中国大陆 (CN) 用户，302 重定向到信誉极高、不报警告的公益高速加速节点 (moeyy 代理)
-  // 这能彻底打破 Cloudflare 免费版对国内用户的越洋限速瓶颈
+  // 如果是中国大陆 (CN) 用户，302 重定向到国内公益高速加速节点 (moeyy 代理) 直接下载最新版
   const cnSpeedUrl = `https://github.moeyy.xyz/${gitHubDownloadUrl}`;
   return Response.redirect(cnSpeedUrl, 302);
 }
