@@ -622,91 +622,51 @@ body.loaded .hc>*:nth-child(6){animation-delay:.42s}
 .reveal{opacity:0;transform:translateY(28px);transition:opacity .7s ease,transform .7s cubic-bezier(.23,1,.32,1)}
 .reveal.vis{opacity:1;transform:translateY(0)}
 
-/* ── Story — 竖排书卷风 ──────────────────── */
-.story-sec{
-  padding:60px 0 80px;background:var(--bg);
-  position:relative;overflow:hidden;
+/* ── Story — 打字机效果 ──────────────────── */
+.story-sec{padding:60px 0 80px;background:var(--bg)}
+.typewriter-box{
+  max-width:680px;margin:0 auto;position:relative;padding:0 24px;
 }
-/* 宣纸纹理背景 */
-.story-sec::before{
-  content:'';position:absolute;inset:0;
-  background:
-    repeating-linear-gradient(
-      0deg,
-      transparent,transparent 28px,
-      rgba(160,140,110,.03) 28px,rgba(160,140,110,.03) 29px
-    );
-  pointer-events:none;
-}
-.story-scroll{
-  max-width:900px;margin:0 auto;padding:0 24px;
-  position:relative;
-}
-/* 三列竖排容器 */
-.story-cols{
-  display:flex;
-  /* NOTE: 中文竖排阅读顺序从右到左，但三段故事是叙事顺序，用从左到右更符合现代阅读习惯 */
-  justify-content:center;
-  gap:0;
-  margin-bottom:32px;
-}
-.story-col{
-  flex:1;
-  writing-mode:vertical-rl;
-  text-orientation:mixed;
-  padding:28px 20px;
-  position:relative;
-  display:flex;
-  align-items:center;
-  justify-content:flex-start;
-}
-/* 列间装饰分隔线 */
-.story-col + .story-col::before{
-  content:'';
-  position:absolute;left:0;top:12%;height:76%;
-  width:1px;
-  background:linear-gradient(180deg,transparent,rgba(160,140,110,.25) 20%,rgba(160,140,110,.25) 80%,transparent);
+.story-mark{
+  font-family:var(--serif);font-size:6rem;line-height:.8;
+  color:var(--green);opacity:.12;
+  position:absolute;top:-16px;left:4px;user-select:none;
 }
 .story-cn{
-  font-family:'Noto Serif SC',var(--serif-cn),serif;
-  font-size:1.05rem;
-  line-height:2.2;
-  letter-spacing:.15em;
-  color:var(--text);
+  font-family:var(--serif-cn);font-size:1.1rem;
+  line-height:2.1;color:var(--text);margin-bottom:16px;
 }
-/* 底部英文注释 — 横排 */
-.story-en-row{
-  text-align:center;
-  padding:0 24px;
-  max-width:760px;
-  margin:0 auto;
+.story-cn:last-of-type{margin-bottom:0}
+
+/* 打字机光标 */
+.tw-cursor{
+  display:inline-block;
+  width:8px;height:1.1rem;
+  background:var(--green);
+  vertical-align:middle;
+  animation:twBlink .8s steps(2, start) infinite;
+  margin-left:4px;
+  position:relative;
+  top:-2px;
 }
-.story-en-row p{
+@keyframes twBlink{
+  0%, 100%{opacity:1}
+  50%{opacity:0}
+}
+/* 英文注释 — 淡入 */
+.tw-en{
+  margin-top:28px;
+  opacity:0;
+  transition:opacity 1.5s ease;
+}
+.tw-en.vis{opacity:1;}
+.tw-en p{
   font-family:var(--serif);font-style:italic;
-  font-size:.8rem;line-height:1.8;color:var(--text-3);
-  margin-bottom:6px;
+  font-size:.85rem;line-height:1.7;color:var(--text-3);
+  margin-bottom:12px;
 }
-.story-en-row p:last-child{margin-bottom:0}
-/* 装饰引号 */
-.story-quote{
-  text-align:center;margin-bottom:20px;
-  font-family:var(--serif);font-size:4.5rem;line-height:1;
-  color:var(--green);opacity:.15;user-select:none;
-}
-/* 响应式：小屏改回横排 */
-@media(max-width:680px){
-  .story-cols{flex-direction:column;gap:0}
-  .story-col{
-    writing-mode:horizontal-tb;
-    text-orientation:initial;
-    padding:16px 0;
-  }
-  .story-col + .story-col::before{
-    left:10%;top:0;width:80%;height:1px;
-    background:linear-gradient(90deg,transparent,rgba(160,140,110,.25) 20%,rgba(160,140,110,.25) 80%,transparent);
-  }
-  .story-cn{letter-spacing:.08em;font-size:1rem;line-height:2}
-}
+.tw-en p:last-child{margin-bottom:0}
+
 
 /* ── Features ────────────────────────────── */
 .feat-sec{padding:60px 0 100px;background:var(--bg)}
@@ -1218,23 +1178,13 @@ body.loaded .hc>*:nth-child(6){animation-delay:.42s}
       <h2 class="sec-t" data-text="为什么做这只桌宠">为什么做这只桌宠</h2>
       <p class="sec-t-en">Why This Project</p>
     </div>
-    <div class="story-scroll reveal">
-      <div class="story-quote" aria-hidden="true">"</div>
-      <div class="story-cols">
-        <div class="story-col">
-          <p class="story-cn">蓝色小嗵的形象来源于唱作组合DOUDOU杜冰儿杜飞儿的歌曲嗵嗵</p>
-        </div>
-        <div class="story-col">
-          <p class="story-cn">嗵是森林里果实落地的声响也是生命轮转生生不息的回响这首歌讲的不是告别而是每一次落下都意味着重新开始</p>
-        </div>
-        <div class="story-col">
-          <p class="story-cn">我很喜欢这个意象所以把TA变成了一只住在桌面上的小精灵TA从森林里来带着那声嗵留在你身边</p>
-        </div>
+    <div class="typewriter-box reveal">
+      <div class="story-mark" aria-hidden="true">"</div>
+      <div id="tw-content">
+        <!-- JS 逐字注入内容 -->
       </div>
-      <div class="story-en-row">
-        <p>XIAOTONG is inspired by the song "Tong Tong" from singer-songwriter duo DOUDOU (Du Bing'er &amp; Du Fei'er).</p>
-        <p>"Tong" is the sound of fruit falling in the forest — an echo of life's endless cycle. Every fall marks a new beginning.</p>
-        <p>I turned it into a little spirit living on your desktop — TA came from the forest, carrying that sound, and stayed by your side.</p>
+      <div id="tw-en" class="tw-en">
+        <!-- JS 注入英文翻译 -->
       </div>
     </div>
   </div>
@@ -1756,6 +1706,83 @@ body.loaded .hc>*:nth-child(6){animation-delay:.42s}
   } else {
     document.body.classList.add('loaded');
     document.documentElement.style.overflow = '';
+  }
+
+  /* ── Typewriter Effect ─────────────────── */
+  var twBox = document.querySelector('.typewriter-box');
+  if(twBox){
+    var twObs = new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        if(e.isIntersecting){
+          startTypewriter();
+          twObs.unobserve(e.target);
+        }
+      });
+    },{threshold:.25, rootMargin:'0px 0px -50px 0px'});
+    twObs.observe(twBox);
+  }
+
+  function startTypewriter(){
+    var lines = [
+      "蓝色小嗵的形象来源于唱作组合 DOUDOU（杜冰儿、杜飞儿）的歌曲《嗵嗵》。",
+      "「嗵」是森林里果实落地的声响，也是生命轮转、生生不息的回响。这首歌讲的不是告别，而是每一次落下都意味着重新开始。",
+      "我很喜欢这个意象，所以把 TA 变成了一只住在桌面上的小精灵——TA 从森林里来，带着那声「嗵」，留在你身边。"
+    ];
+    var enLines = [
+      "XIAOTONG is inspired by the song \"Tong Tong\" from singer-songwriter duo DOUDOU (Du Bing'er & Du Fei'er).",
+      "\"Tong\" is the sound of fruit falling in the forest — an echo of life's endless cycle. The song isn't about farewell; every fall marks a new beginning.",
+      "I loved this imagery, so I turned it into a little spirit living on your desktop — TA came from the forest, carrying that sound of \"tong\", and stayed by your side."
+    ];
+    var contentEl = document.getElementById('tw-content');
+    var enEl = document.getElementById('tw-en');
+    
+    var cursorEl = document.createElement('span');
+    cursorEl.className = 'tw-cursor';
+    
+    var lineIdx = 0;
+    var charIdx = 0;
+    var currentP = null;
+    
+    function typeChar(){
+      if(lineIdx >= lines.length){
+        /* 打字结束，显示英文翻译 */
+        var enHtml = "";
+        enLines.forEach(function(l){ enHtml += "<p>" + l + "</p>"; });
+        enEl.innerHTML = enHtml;
+        enEl.classList.add('vis');
+        return;
+      }
+      
+      var currentLine = lines[lineIdx];
+      
+      if(charIdx === 0){
+        currentP = document.createElement('p');
+        currentP.className = 'story-cn';
+        contentEl.appendChild(currentP);
+        currentP.appendChild(cursorEl); /* 光标跟随到新段落 */
+      }
+      
+      /* 将字符插入到光标前面 */
+      var textNode = document.createTextNode(currentLine.charAt(charIdx));
+      currentP.insertBefore(textNode, cursorEl);
+      charIdx++;
+      
+      if(charIdx >= currentLine.length){
+        lineIdx++;
+        charIdx = 0;
+        setTimeout(typeChar, 600); /* 段落之间的停顿 */
+      } else {
+        /* 随机打字延迟（模拟真人敲击） */
+        var delay = 35 + Math.random() * 60;
+        /* 标点符号停顿稍微长一点 */
+        if(/[,.，。、]/.test(currentLine.charAt(charIdx-1))){
+          delay += 120;
+        }
+        setTimeout(typeChar, delay);
+      }
+    }
+    
+    setTimeout(typeChar, 400); /* 初始等待 */
   }
 
 })();
