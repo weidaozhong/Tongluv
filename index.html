@@ -11,6 +11,7 @@
   <meta property="og:image" content="icons/icon.png">
   <meta property="og:url" content="https://weidaozhong.github.io/Tongluv/">
   <link rel="icon" href="icons/icon.png">
+  <link rel="preload" href="icons/icon.png" as="image">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Noto+Serif+SC:wght@400;700&display=swap" rel="stylesheet">
@@ -69,7 +70,8 @@ body:not(.loaded){position:fixed!important;inset:0!important;overflow:hidden!imp
   background:radial-gradient(circle,rgba(184,146,63,.06),rgba(94,123,168,.04) 50%,transparent 70%);
   filter:blur(30px);
   scale:0;opacity:0;
-  animation:kBloom .6s .5s cubic-bezier(.23,1,.32,1) forwards;
+  animation:kLife 7s .5s ease-in-out forwards;
+  --pulse-amp: 0.08;
 }
 
 /* bloom wrapper — centering + scale */
@@ -78,11 +80,12 @@ body:not(.loaded){position:fixed!important;inset:0!important;overflow:hidden!imp
   translate:-50% -50%;
   scale:0;opacity:0;
 }
-.LS-w1{animation:kBloom .45s 0s cubic-bezier(.23,1,.32,1) forwards}
-.LS-w2{animation:kBloom .5s .15s cubic-bezier(.23,1,.32,1) forwards}
-.LS-w3{animation:kBloom .5s .3s cubic-bezier(.23,1,.32,1) forwards}
-.LS-w4{animation:kBloom .5s .5s cubic-bezier(.23,1,.32,1) forwards}
-.LS-w5{animation:kBloom .55s .75s cubic-bezier(.23,1,.32,1) forwards}
+/* staggered start → heartbeat ripples outward from center with increasing intensity */
+.LS-w1{animation:kLife 7s 0s    ease-in-out forwards; --pulse-amp: 0.04;}
+.LS-w2{animation:kLife 7s .15s  ease-in-out forwards; --pulse-amp: 0.08;}
+.LS-w3{animation:kLife 7s .3s   ease-in-out forwards; --pulse-amp: 0.12;}
+.LS-w4{animation:kLife 7s .5s   ease-in-out forwards; --pulse-amp: 0.16;}
+.LS-w5{animation:kLife 7s .75s  ease-in-out forwards; --pulse-amp: 0.22;}
 
 /* L1: gold center dot */
 .LS-l1{
@@ -137,6 +140,30 @@ body:not(.loaded){position:fixed!important;inset:0!important;overflow:hidden!imp
 @keyframes kBloom{
   0%{scale:0;opacity:0}
   60%{scale:1.12;opacity:1}
+  100%{scale:1;opacity:1}
+}
+@keyframes kLife{
+  /* 绽放阶段 (0% ~ 20%) */
+  0%{scale:0;opacity:0}
+  15%{scale:1.12;opacity:1}
+  20%{scale:1;opacity:1}
+  
+  /* 第一次脉冲 (26% ~ 38%) */
+  26%{scale:calc(1 - var(--pulse-amp, 0.05) * 0.15)}
+  32%{scale:calc(1 + var(--pulse-amp, 0.05) * 0.45)}
+  38%{scale:1}
+  
+  /* 第二次脉冲：强度递增 (44% ~ 56%) */
+  44%{scale:calc(1 - var(--pulse-amp, 0.05) * 0.25)}
+  50%{scale:calc(1 + var(--pulse-amp, 0.05) * 0.70)}
+  56%{scale:1}
+  
+  /* 第三次脉冲：最强波动 (62% ~ 74%) */
+  62%{scale:calc(1 - var(--pulse-amp, 0.05) * 0.35)}
+  68%{scale:calc(1 + var(--pulse-amp, 0.05) * 1.00)}
+  74%{scale:1;opacity:1}
+  
+  /* 稳定状态 */
   100%{scale:1;opacity:1}
 }
 @keyframes kCW{to{rotate:360deg}}
@@ -1442,10 +1469,10 @@ body.loaded .hc>*:nth-child(6){animation-delay:.42s}
     }
 
     /* min animation time */
-    setTimeout(function(){ animDone = true; tryExit(); }, 2200);
+    setTimeout(function(){ animDone = true; tryExit(); }, 6500);
     /* max wait — images are ~1.4MB after WebP conversion,
-       8s is enough even on slower CN connections */
-    setTimeout(function(){ preloadDone = true; tryExit(); }, 8000);
+       10s is enough even on slower CN connections */
+    setTimeout(function(){ preloadDone = true; tryExit(); }, 10000);
 
   } else {
     document.body.classList.add('loaded');
