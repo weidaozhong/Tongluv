@@ -12,9 +12,9 @@
   <meta property="og:url" content="https://weidaozhong.github.io/Tongluv/">
   <link rel="icon" href="icons/icon.png">
   <link rel="preload" href="icons/icon.png" as="image">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Noto+Serif+SC:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.loli.net">
+  <link rel="preconnect" href="https://gstatic.loli.net" crossorigin>
+  <link href="https://fonts.loli.net/css2?family=Instrument+Serif:ital@0;1&family=Noto+Serif+SC:wght@400;700&display=swap" rel="stylesheet">
 
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
@@ -1441,6 +1441,8 @@ body.loaded .hc>*:nth-child(6){animation-delay:.42s}
   var ls = document.getElementById('loadingScreen');
   if(ls){
     var preloadDone = false, animDone = false, exited = false;
+    var useCDN = false;
+    var cdnPrefix = 'https://jsd.cdn.zzko.cn/gh/weidaozhong/Tongluv@gh-pages/';
 
     /* preload all lazy images during animation */
     var lazySrcs = [];
@@ -1448,14 +1450,22 @@ body.loaded .hc>*:nth-child(6){animation-delay:.42s}
       lazySrcs.push(img.getAttribute('src'));
     });
     var remaining = lazySrcs.length;
-    if(remaining === 0){ preloadDone = true; }
-    else {
+    var activeImages = [];
+
+    function startPreload() {
+      if(remaining === 0){ 
+        preloadDone = true; 
+        tryExit(); 
+        return; 
+      }
       lazySrcs.forEach(function(src){
         var i = new Image();
+        activeImages.push(i);
         i.onload = i.onerror = function(){
           if(--remaining <= 0){ preloadDone = true; tryExit(); }
         };
-        i.src = src;
+        var finalSrc = (useCDN && src && !src.startsWith('http')) ? (cdnPrefix + src) : src;
+        i.src = finalSrc;
       });
     }
 
@@ -1468,10 +1478,46 @@ body.loaded .hc>*:nth-child(6){animation-delay:.42s}
       setTimeout(function(){ ls.remove(); }, 1000);
     }
 
+    /* Detect domestic network through a quick GitHub connectivity race (800ms) */
+    var isLocal = /localhost|127\.0\.0\.1/.test(window.location.hostname);
+    if(!isLocal){
+      var t0 = Date.now();
+      var testImg = new Image();
+      var timer = setTimeout(function(){
+        useCDN = true;
+        applyCDNForPage();
+      }, 800);
+
+      testImg.onload = function(){
+        clearTimeout(timer);
+        startPreload();
+      };
+      testImg.onerror = function(){
+        clearTimeout(timer);
+        useCDN = true;
+        applyCDNForPage();
+      };
+      testImg.src = 'https://github.com/favicon.ico?t=' + t0;
+    } else {
+      startPreload();
+    }
+
+    function applyCDNForPage() {
+      document.querySelectorAll('img').forEach(function(img){
+        var src = img.getAttribute('src');
+        if(src && !src.startsWith('http') && src.indexOf('icons/icon.png') === -1){
+          img.src = cdnPrefix + src;
+        }
+      });
+      activeImages.forEach(function(i){ i.onload = i.onerror = null; i.src = ''; });
+      activeImages = [];
+      remaining = lazySrcs.length;
+      startPreload();
+    }
+
     /* min animation time */
     setTimeout(function(){ animDone = true; tryExit(); }, 6500);
-    /* max wait — images are ~1.4MB after WebP conversion,
-       10s is enough even on slower CN connections */
+    /* max wait */
     setTimeout(function(){ preloadDone = true; tryExit(); }, 10000);
 
   } else {
