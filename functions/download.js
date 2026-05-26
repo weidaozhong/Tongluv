@@ -13,7 +13,7 @@ export async function onRequest(context) {
     return Response.redirect(gitHubReleasesPage, 302);
   }
   
-  // 如果是中国大陆 (CN) 用户，302 重定向到国内公益高速加速节点 (moeyy 代理) 直接下载最新版
-  const cnSpeedUrl = `https://github.moeyy.xyz/${gitHubDownloadUrl}`;
+  // 如果是中国大陆 (CN) 用户，302 重定向到国内高速加速节点直接下载最新版
+  const cnSpeedUrl = `https://ghfast.top/${gitHubDownloadUrl}`;
   return Response.redirect(cnSpeedUrl, 302);
 }
