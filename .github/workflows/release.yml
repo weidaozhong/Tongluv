@@ -142,7 +142,7 @@ jobs:
       - name: Commit and push landing page updates
         run: |
           cd gh-pages-dir
-          git config --global user.name "Tong"
+          git config --global user.name "weidaozhong"
           git config --global user.email "gildingmazzonimo621@gmail.com"
           git add functions/download.js
           $status = git status --porcelain
