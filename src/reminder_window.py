@@ -4,7 +4,7 @@
 from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel,
                              QPushButton, QLineEdit, QGridLayout, QApplication)
 from PyQt5.QtCore import Qt, QPoint, pyqtSignal
-from PyQt5.QtGui import QFont
+from PyQt5.QtGui import QFont, QIntValidator
 from src.status_panel import BG, CARD, CARD2, BD, T1, T2, T3, TB
 
 _DESIGN_H = 1440
@@ -29,8 +29,10 @@ def _lbl(text, pt, color, bold=False):
 
 class ReminderWindow(QWidget):
     start_countdown = pyqtSignal(float, str)   # 秒, 标签
+    toggle_pause    = pyqtSignal()
+    reset_timer     = pyqtSignal()
 
-    _BASE_W, _BASE_H = 400, 470
+    _BASE_W, _BASE_H = 400, 540
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -41,12 +43,13 @@ class ReminderWindow(QWidget):
         global _scale
         _scale = min(1.0, logical_h / _DESIGN_H)
         self.W = max(300, int(self._BASE_W * _scale))
-        self.H = max(340, int(self._BASE_H * _scale))
+        self.H = max(380, int(self._BASE_H * _scale))
         self.setFixedSize(self.W, self.H)
         self._dp = QPoint(); self._dg = False
         g = scr.geometry()
         self.move((g.width() - self.W) // 2, (g.height() - self.H) // 2)
         self._build()
+        self.set_timer_state(False, False)
 
     # 拖拽移动
     def mousePressEvent(self, e):
@@ -88,29 +91,35 @@ class ReminderWindow(QWidget):
         cl.setContentsMargins(_s(14), _s(12), _s(14), _s(14)); cl.setSpacing(_s(10))
         cl.addWidget(_lbl("⏱ 快捷倒计时", 11, T1, True))
 
+        # 预设
         grid = QGridLayout(); grid.setSpacing(_s(8))
         for i, (label, secs) in enumerate(
                 [("5 分", 300), ("10 分", 600), ("15 分", 900), ("25 分", 1500)]):
             b = QPushButton(label); b.setFixedHeight(_s(42))
             b.setCursor(Qt.PointingHandCursor)
             b.setFont(QFont("Microsoft YaHei", _fs(11), QFont.Bold))
-            b.setStyleSheet(
-                f"QPushButton{{background:{BG};color:{T1};border:1px solid {BD};"
-                f"border-radius:{_s(10)}px;}}"
-                f"QPushButton:hover{{background:{CARD2};border:1px solid {TB};}}")
+            b.setStyleSheet(self._preset_css())
             b.clicked.connect(lambda _, sec=secs: self.start_countdown.emit(float(sec), ""))
             grid.addWidget(b, i // 2, i % 2)
         cl.addLayout(grid)
 
+        # 自定义:时 / 分 / 秒(直接填,无需换算)
         cl.addWidget(_lbl("自定义", 10, T2))
-        row = QHBoxLayout(); row.setSpacing(_s(6))
-        self._min_inp = QLineEdit(); self._min_inp.setPlaceholderText("分钟")
-        self._min_inp.setFixedWidth(_s(70)); self._min_inp.setStyleSheet(self._input_css())
+        hms = QHBoxLayout(); hms.setSpacing(_s(4))
+        self._h_inp = self._num_input("时")
+        self._m_inp = self._num_input("分")
+        self._s_inp = self._num_input("秒")
+        for inp, unit in ((self._h_inp, "时"), (self._m_inp, "分"), (self._s_inp, "秒")):
+            hms.addWidget(inp); hms.addWidget(_lbl(unit, 10, T2))
+        hms.addStretch()
+        cl.addLayout(hms)
+
+        # 标签
         self._lbl_inp = QLineEdit(); self._lbl_inp.setPlaceholderText("标签(可选,如 泡茶)")
         self._lbl_inp.setStyleSheet(self._input_css())
-        row.addWidget(self._min_inp); row.addWidget(self._lbl_inp, 1)
-        cl.addLayout(row)
+        cl.addWidget(self._lbl_inp)
 
+        # 开始(启动一个新倒计时)
         sb = QPushButton("开始"); sb.setFixedHeight(_s(42))
         sb.setCursor(Qt.PointingHandCursor)
         sb.setFont(QFont("Microsoft YaHei", _fs(11), QFont.Bold))
@@ -120,8 +129,35 @@ class ReminderWindow(QWidget):
         sb.clicked.connect(self._start_custom)
         cl.addWidget(sb)
 
+        # 暂停/重置(控制进行中的倒计时)
+        ctrl = QHBoxLayout(); ctrl.setSpacing(_s(8))
+        self._pause_btn = QPushButton("暂停"); self._pause_btn.setFixedHeight(_s(38))
+        self._pause_btn.setCursor(Qt.PointingHandCursor)
+        self._pause_btn.setFont(QFont("Microsoft YaHei", _fs(10), QFont.Bold))
+        self._pause_btn.setStyleSheet(self._ctrl_css())
+        self._pause_btn.clicked.connect(lambda _: self.toggle_pause.emit())
+        self._reset_btn = QPushButton("重置"); self._reset_btn.setFixedHeight(_s(38))
+        self._reset_btn.setCursor(Qt.PointingHandCursor)
+        self._reset_btn.setFont(QFont("Microsoft YaHei", _fs(10), QFont.Bold))
+        self._reset_btn.setStyleSheet(self._ctrl_css())
+        self._reset_btn.clicked.connect(lambda _: self.reset_timer.emit())
+        ctrl.addWidget(self._pause_btn); ctrl.addWidget(self._reset_btn)
+        cl.addLayout(ctrl)
+
         ml.addWidget(card)
         ml.addStretch()
+
+    # ── 样式 ──
+    def _preset_css(self):
+        return (f"QPushButton{{background:{BG};color:{T1};border:1px solid {BD};"
+                f"border-radius:{_s(10)}px;}}"
+                f"QPushButton:hover{{background:{CARD2};border:1px solid {TB};}}")
+
+    def _ctrl_css(self):
+        return (f"QPushButton{{background:{BG};color:{T1};border:1px solid {BD};"
+                f"border-radius:{_s(10)}px;}}"
+                f"QPushButton:hover{{background:{CARD2};border:1px solid {TB};}}"
+                f"QPushButton:disabled{{background:{CARD2};color:{T3};border:1px solid {BD};}}")
 
     def _input_css(self):
         return (f"QLineEdit{{background:white;color:{T1};border:1px solid {BD};"
@@ -129,13 +165,27 @@ class ReminderWindow(QWidget):
                 f"font-family:'Microsoft YaHei';font-size:{_s(11)}px;}}"
                 f"QLineEdit:focus{{border:1px solid {TB};}}")
 
+    def _num_input(self, ph):
+        e = QLineEdit(); e.setPlaceholderText(ph)
+        e.setFixedWidth(_s(50)); e.setAlignment(Qt.AlignCenter)
+        e.setStyleSheet(self._input_css())
+        e.setValidator(QIntValidator(0, 999, self))
+        return e
+
+    # ── 状态:供 main 同步暂停/重置按钮 ──
+    def set_timer_state(self, active: bool, paused: bool):
+        self._pause_btn.setEnabled(active)
+        self._reset_btn.setEnabled(active)
+        self._pause_btn.setText("继续" if paused else "暂停")
+
     def _start_custom(self):
-        try:
-            mins = float(self._min_inp.text().strip())
-        except ValueError:
-            return
-        if mins <= 0:
+        def _v(e):
+            t = e.text().strip()
+            return int(t) if t else 0
+        total = _v(self._h_inp) * 3600 + _v(self._m_inp) * 60 + _v(self._s_inp)
+        if total <= 0:
             return
         label = self._lbl_inp.text().strip()
-        self._min_inp.clear(); self._lbl_inp.clear()
-        self.start_countdown.emit(mins * 60.0, label)
+        self._h_inp.clear(); self._m_inp.clear(); self._s_inp.clear()
+        self._lbl_inp.clear()
+        self.start_countdown.emit(float(total), label)

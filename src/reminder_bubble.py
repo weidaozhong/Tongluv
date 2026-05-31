@@ -88,13 +88,6 @@ class ReminderBubbleManager:
         if b in self._bubbles:
             self._bubbles.remove(b)
 
-    def reposition(self, pet_x, pet_y, pet_w):
-        # 最新的在最上面;从桌宠正上方往上叠
-        y = pet_y
-        for b in self._bubbles:
-            bx = int(pet_x + pet_w / 2 - b.width() / 2)
-            y = y - b.height() - round(6 * b._scale)
-            b.move(bx, int(y))
-
-    def has_active(self) -> bool:
-        return bool(self._bubbles)
+    def active_bubbles(self):
+        """返回当前所有未关闭的到点气泡(位置由 main 统一堆叠)。"""
+        return list(self._bubbles)

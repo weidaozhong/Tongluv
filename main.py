@@ -423,10 +423,13 @@ class PetWindow(QWidget):
         # ── 提醒·番茄钟模块(P1:快捷倒计时)──
         self.countdown        = Countdown()
         self._countdown_active = False
+        self._countdown_paused = False
         self.countdown_float  = CountdownFloat()
         self.reminder_bubbles = ReminderBubbleManager()
         self.reminder_window  = ReminderWindow()
         self.reminder_window.start_countdown.connect(self._on_start_countdown)
+        self.reminder_window.toggle_pause.connect(self._on_toggle_pause)
+        self.reminder_window.reset_timer.connect(self._on_reset_countdown)
 
         self.input_state = InputState()
 
@@ -678,10 +681,8 @@ class PetWindow(QWidget):
         self._tick_auto_walk(dt)
         self._apply_walk_movement()
         self._sync_window_pos()
-        self.bubble.update_position(self._pet_x, self._pet_y, PET_SIZE)
         self._tick_countdown()
-        self.countdown_float.update_position(self._pet_x, self._pet_y, PET_SIZE)
-        self.reminder_bubbles.reposition(self._pet_x, self._pet_y, PET_SIZE)
+        self._restack_above_pet()
 
         if hasattr(self.renderer, 'update'):
             action_str = (
@@ -1567,23 +1568,74 @@ class PetWindow(QWidget):
         """独立窗口请求开始一个快捷倒计时(前台计时器,替换式)。"""
         self.countdown.start(seconds, label)
         self._countdown_active = True
+        self._countdown_paused = False
+        self.reminder_window.set_timer_state(True, False)
+
+    def _on_toggle_pause(self):
+        if not self._countdown_active:
+            return
+        if self._countdown_paused:
+            self.countdown.resume()
+            self._countdown_paused = False
+        else:
+            self.countdown.pause()
+            self._countdown_paused = True
+        self.reminder_window.set_timer_state(True, self._countdown_paused)
+
+    def _on_reset_countdown(self):
+        self.countdown.stop()
+        self._countdown_active = False
+        self._countdown_paused = False
+        self.countdown_float.set_text("")
+        self.reminder_window.set_timer_state(False, False)
 
     def _tick_countdown(self):
-        """每帧:更新浮窗;到点弹持久气泡并停。"""
+        """每帧:更新浮窗;暂停时冻结显示;到点弹持久气泡并停。"""
         if not self._countdown_active:
             self.countdown_float.set_text("")
             return
+        label = self.countdown.label
+        if self._countdown_paused:
+            rem = format_remaining(self.countdown.remaining)
+            self.countdown_float.set_text(f"⏸ {label} {rem}" if label else f"⏸ {rem}")
+            return
         if self.countdown.is_done:
             self._countdown_active = False
-            label = self.countdown.label
             self.countdown.stop()
             self.countdown_float.set_text("")
             text = f"{label} 时间到" if label else "时间到!"
             self.reminder_bubbles.show_bubble(text)
+            self.reminder_window.set_timer_state(False, False)
             return
-        label = self.countdown.label
         rem = format_remaining(self.countdown.remaining)
         self.countdown_float.set_text(f"⏰ {label} {rem}" if label else f"⏰ {rem}")
+
+    def _restack_above_pet(self):
+        """桌宠头顶浮动元素竖直堆叠,避免重叠。
+        顺序(贴近头顶→往上):倒计时浮窗 → 聊天气泡 → 到点气泡。
+        头顶放不下则改到桌宠下方。"""
+        widgets = []
+        if self.countdown_float.isVisible():
+            widgets.append(self.countdown_float)
+        if self.bubble.isVisible():
+            widgets.append(self.bubble)
+        widgets.extend(self.reminder_bubbles.active_bubbles())
+        if not widgets:
+            return
+        cx = int(self._pet_x + PET_SIZE / 2)
+        gap = 6
+        total_h = sum(w.height() for w in widgets) + gap * (len(widgets) - 1)
+        pet_top = int(self._pet_y)
+        if pet_top + 8 - total_h >= 0:
+            y = pet_top + 8                       # 最低元素底边,略压头顶
+            for w in widgets:
+                w.move(int(cx - w.width() / 2), int(y - w.height()))
+                y = y - w.height() - gap
+        else:
+            y = pet_top + PET_SIZE - 8            # 头顶放不下:挪到桌宠下方
+            for w in widgets:
+                w.move(int(cx - w.width() / 2), int(y))
+                y = y + w.height() + gap
 
     def _show_reminder_window(self):
         self.reminder_window.show()
