@@ -89,13 +89,33 @@ jobs:
             Write-Host "No existing release found, skipping asset cleanup"
           }
 
+      - name: Extract tag annotation
+        id: tag_msg
+        run: |
+          $tag = "${{ env.VERSION }}"
+          # 尝试读取注释标签的消息（跳过第一行标题，取正文部分）
+          $msg = git tag -l --format='%(contents:body)' $tag 2>$null
+          if (-not $msg -or $msg.Trim() -eq '') {
+            # 回退：读取完整消息
+            $msg = git tag -l --format='%(contents)' $tag 2>$null
+          }
+          if (-not $msg -or $msg.Trim() -eq '') {
+            $msg = "Release $tag"
+          }
+          # 写入多行输出到 GITHUB_OUTPUT
+          $msg = $msg.Trim()
+          "BODY<<EOF" | Out-File -Append $env:GITHUB_OUTPUT
+          $msg | Out-File -Append $env:GITHUB_OUTPUT
+          "EOF" | Out-File -Append $env:GITHUB_OUTPUT
+          Write-Host "Release body extracted ($($msg.Length) chars)"
+
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ env.VERSION }}
           name: 蓝色小嗵 ${{ env.VERSION }}
+          body: ${{ steps.tag_msg.outputs.BODY }}
           files: dist/xiaotong-${{ env.VERSION }}.exe
-          generate_release_notes: true
 
       - name: Checkout gh-pages branch
         uses: actions/checkout@v4
