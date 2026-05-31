@@ -94,7 +94,7 @@ class ReminderWindow(QWidget):
         # 预设
         grid = QGridLayout(); grid.setSpacing(_s(8))
         for i, (label, secs) in enumerate(
-                [("5 分", 300), ("10 分", 600), ("15 分", 900), ("25 分", 1500)]):
+                [("5 分", 300), ("10 分", 600), ("15 分", 900), ("30 分", 1800)]):
             b = QPushButton(label); b.setFixedHeight(_s(42))
             b.setCursor(Qt.PointingHandCursor)
             b.setFont(QFont("Microsoft YaHei", _fs(11), QFont.Bold))
@@ -106,18 +106,21 @@ class ReminderWindow(QWidget):
         # 自定义:时 / 分 / 秒(直接填,无需换算)
         cl.addWidget(_lbl("自定义", 10, T2))
         hms = QHBoxLayout(); hms.setSpacing(_s(4))
-        self._h_inp = self._num_input("时")
-        self._m_inp = self._num_input("分")
-        self._s_inp = self._num_input("秒")
+        self._h_inp = self._num_input()
+        self._m_inp = self._num_input()
+        self._s_inp = self._num_input()
         for inp, unit in ((self._h_inp, "时"), (self._m_inp, "分"), (self._s_inp, "秒")):
             hms.addWidget(inp); hms.addWidget(_lbl(unit, 10, T2))
         hms.addStretch()
         cl.addLayout(hms)
 
         # 标签
-        self._lbl_inp = QLineEdit(); self._lbl_inp.setPlaceholderText("标签(可选,如 泡茶)")
+        lab_row = QHBoxLayout(); lab_row.setSpacing(_s(6))
+        lab_row.addWidget(_lbl("标签", 10, T2))
+        self._lbl_inp = QLineEdit()
         self._lbl_inp.setStyleSheet(self._input_css())
-        cl.addWidget(self._lbl_inp)
+        lab_row.addWidget(self._lbl_inp, 1)
+        cl.addLayout(lab_row)
 
         # 开始(启动一个新倒计时)
         sb = QPushButton("开始"); sb.setFixedHeight(_s(42))
@@ -165,8 +168,8 @@ class ReminderWindow(QWidget):
                 f"font-family:'Microsoft YaHei';font-size:{_s(11)}px;}}"
                 f"QLineEdit:focus{{border:1px solid {TB};}}")
 
-    def _num_input(self, ph):
-        e = QLineEdit(); e.setPlaceholderText(ph)
+    def _num_input(self):
+        e = QLineEdit()
         e.setFixedWidth(_s(50)); e.setAlignment(Qt.AlignCenter)
         e.setStyleSheet(self._input_css())
         e.setValidator(QIntValidator(0, 999, self))
