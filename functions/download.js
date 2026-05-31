@@ -1,6 +1,6 @@
 export async function onRequest(context) {
   // 每次发布新版本时，GitHub Actions 会自动替换此处的最新版直链 (供国内用户高速下载)
-  const gitHubDownloadUrl = "https://github.com/weidaozhong/Tongluv/releases/download/v1.0.1/xiaotong.exe";
+  const gitHubDownloadUrl = "https://github.com/weidaozhong/Tongluv/releases/download/v1.0.2/xiaotong-v1.0.2.exe";
   
   // GitHub 官方 Releases 列表页面 (供海外用户自由挑选版本)
   const gitHubReleasesPage = "https://github.com/weidaozhong/Tongluv/releases";
