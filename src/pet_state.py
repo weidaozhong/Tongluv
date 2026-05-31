@@ -68,12 +68,14 @@ class PetState:
 
     def update(self, dt_seconds):
         if self.is_sleeping:
-            self.energy = min(100, self.energy + 0.02 * dt_seconds)
-            self.hunger = max(0, self.hunger - 0.005 * dt_seconds)
+            # NOTE: 睡眠恢复较快，从 20→80 约 17 分钟，避免桌宠长时间处于睡眠状态
+            self.energy = min(100, self.energy + 0.06 * dt_seconds)
+            self.hunger = max(0, self.hunger - 0.003 * dt_seconds)
             # NOTE: 自动唤醒由 main.py _tick 统一管理，避免 state 层与 UI 层不同步
         else:
             self.hunger = max(0, self.hunger - 0.01 * dt_seconds)
-            self.energy = max(0, self.energy - 0.008 * dt_seconds)
+            # NOTE: 清醒时体力缓慢消耗，从 100→20 约 7.4 小时，一个工作日内基本不会自动入睡
+            self.energy = max(0, self.energy - 0.003 * dt_seconds)
             self.happiness = max(0, self.happiness - 0.005 * dt_seconds)
         self._update_mood()
         self.intimacy = min(100, self.intimacy + 0.001 * dt_seconds)
