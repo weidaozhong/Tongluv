@@ -115,6 +115,10 @@ from src.input_monitor import InputMonitor, InputState
 from src.game_systems import GameSystems
 from src.chat_service import ChatService
 from src.snap_system import SnapSystem, TASKBAR_MARGIN
+from src.timer_core import Countdown, format_remaining
+from src.countdown_float import CountdownFloat
+from src.reminder_bubble import ReminderBubbleManager
+from src.reminder_window import ReminderWindow
 
 PET_SIZE = 210   # 基准值，main() 中根据屏幕逻辑高度重新计算
 PET_WINDOW_MARGIN = 20   # 窗口四周透明 padding，_sync_window_pos 中用到
@@ -415,6 +419,15 @@ class PetWindow(QWidget):
         self.game     = GameSystems()
         self.chat_svc = ChatService()
         self.panel    = StatusPanel(game_systems=self.game, chat_service=self.chat_svc)
+
+        # ── 提醒·番茄钟模块(P1:快捷倒计时)──
+        self.countdown        = Countdown()
+        self._countdown_active = False
+        self.countdown_float  = CountdownFloat()
+        self.reminder_bubbles = ReminderBubbleManager()
+        self.reminder_window  = ReminderWindow()
+        self.reminder_window.start_countdown.connect(self._on_start_countdown)
+
         self.input_state = InputState()
 
         self.monitor = InputMonitor(idle_timeout=10.0)
@@ -666,6 +679,9 @@ class PetWindow(QWidget):
         self._apply_walk_movement()
         self._sync_window_pos()
         self.bubble.update_position(self._pet_x, self._pet_y, PET_SIZE)
+        self._tick_countdown()
+        self.countdown_float.update_position(self._pet_x, self._pet_y, PET_SIZE)
+        self.reminder_bubbles.reposition(self._pet_x, self._pet_y, PET_SIZE)
 
         if hasattr(self.renderer, 'update'):
             action_str = (
@@ -1546,6 +1562,34 @@ class PetWindow(QWidget):
             category = _time_slot()
         self._say(_pick(category), mood=_mood_to_str(self.state.current_mood))
 
+    # ── 提醒·番茄钟(P1)────────────────────────────────────────────────
+    def _on_start_countdown(self, seconds: float, label: str):
+        """独立窗口请求开始一个快捷倒计时(前台计时器,替换式)。"""
+        self.countdown.start(seconds, label)
+        self._countdown_active = True
+
+    def _tick_countdown(self):
+        """每帧:更新浮窗;到点弹持久气泡并停。"""
+        if not self._countdown_active:
+            self.countdown_float.set_text("")
+            return
+        if self.countdown.is_done:
+            self._countdown_active = False
+            label = self.countdown.label
+            self.countdown.stop()
+            self.countdown_float.set_text("")
+            text = f"{label} 时间到" if label else "时间到!"
+            self.reminder_bubbles.show_bubble(text)
+            return
+        label = self.countdown.label
+        rem = format_remaining(self.countdown.remaining)
+        self.countdown_float.set_text(f"⏰ {label} {rem}" if label else f"⏰ {rem}")
+
+    def _show_reminder_window(self):
+        self.reminder_window.show()
+        self.reminder_window.raise_()
+        self.reminder_window.activateWindow()
+
     def _say(self, text: str, mood: str = "normal", trigger_anim: bool = True):
         # NOTE: 睡觉状态下不弹出任何文字气泡，保持安静沉浸感
         if self.state.is_sleeping:
@@ -1680,6 +1724,9 @@ class PetWindow(QWidget):
         a_mem = QAction("📝 记忆管理", self)
         a_mem.triggered.connect(self._open_memory_from_tray)
         menu.addAction(a_mem)
+        a_rem = QAction("⏰ 提醒·番茄钟", self)
+        a_rem.triggered.connect(self._show_reminder_window)
+        menu.addAction(a_rem)
         menu.addSeparator()
         a_quit = QAction("❌ 退出", self); a_quit.triggered.connect(self._quit)
         menu.addAction(a_quit)
