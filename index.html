@@ -101,11 +101,11 @@ body:not(.loaded){position:fixed!important;inset:0!important;overflow:hidden!imp
 }
 @keyframes kAmbientGlow {
   0%   { background-color: transparent; }
-  10%  { background-color: rgba(243,156,18,0.06); } /* 春：暖金 */
+  10%  { background-color: rgba(167,201,87,0.06); } /* 春：浅绿 #a7c957 */
   25%  { background-color: transparent; }
   35%  { background-color: rgba(52,152,219,0.06); } /* 夏：清透蓝 */
   50%  { background-color: transparent; }
-  65%  { background-color: rgba(231,76,60,0.06); }  /* 秋：柔红 */
+  65%  { background-color: rgba(160,82,45,0.06); }  /* 秋：大地棕 #a0522d */
   75%  { background-color: transparent; }
   85%  { background-color: rgba(255,255,255,0.4); } /* 冬：极致冰白 */
   100% { background-color: transparent; }
@@ -320,8 +320,8 @@ body:not(.loaded){position:fixed!important;inset:0!important;overflow:hidden!imp
 /* 伴生小元素统一样式 */
 .lyric-ele { position: absolute; z-index: 1; pointer-events: none; }
 
-/* 春：金色星芒闪烁 */
-.lyric-ele-spring { right: -30px; top: -10px; color: #f39c12; font-family: sans-serif; text-shadow:0 0 10px rgba(243,156,18,0.8); }
+/* 春：浅绿小花闪烁 */
+.lyric-ele-spring { right: -30px; top: -10px; color: #a7c957; font-family: sans-serif; text-shadow:0 0 10px rgba(167,201,87,0.8); }
 .lyric-ele-spring .star { display: inline-block; animation: kStarTwinkle 1.2s 0.5s ease-in-out forwards; opacity:0; }
 .lyric-ele-spring .star-sm { font-size: 0.6em; position: absolute; left: 15px; top: 15px; animation: kStarTwinkle 1s 0.7s ease-in-out forwards; opacity:0; }
 @keyframes kStarTwinkle { 0%{opacity:0; transform:scale(0) rotate(0deg)} 50%{opacity:1; transform:scale(1.2) rotate(45deg)} 100%{opacity:0; transform:scale(0) rotate(90deg)} }
@@ -333,7 +333,7 @@ body:not(.loaded){position:fixed!important;inset:0!important;overflow:hidden!imp
 /* 秋：落叶画圈 */
 .lyric-ele-autumn { right: -20px; top: -10px; width: 35px; height: 35px; }
 .lyric-ele-autumn svg { width:100%; height:100%; overflow:visible; }
-.lyric-ele-autumn circle { fill:none; stroke:#e74c3c; stroke-width:1.5; stroke-dasharray:302; stroke-dashoffset:302; animation: kDrawCircle 1.2s 4.1s cubic-bezier(0.4, 0, 0.2, 1) forwards; opacity:0.8;}
+.lyric-ele-autumn circle { fill:none; stroke:#a0522d; stroke-width:1.5; stroke-dasharray:302; stroke-dashoffset:302; animation: kDrawCircle 1.2s 4.1s cubic-bezier(0.4, 0, 0.2, 1) forwards; opacity:0.8;}
 @keyframes kDrawCircle { to { stroke-dashoffset: 0; } }
 
 /* 冬：冰封横向瞬闪 */
@@ -1230,7 +1230,7 @@ body.loaded .hc>*:nth-child(6){animation-delay:.42s}
   <!-- 歌词：四季依次淡入展开，带有专属伴生小元素 -->
   <div class="LS-lyric LS-lyric--1">
     <div class="lyric-text">春天　就让这繁花都开遍</div>
-    <div class="lyric-ele lyric-ele-spring"><span class="star">✦</span><span class="star star-sm">✦</span></div>
+    <div class="lyric-ele lyric-ele-spring"><span class="star">❀</span><span class="star star-sm">❀</span></div>
   </div>
   <div class="LS-lyric LS-lyric--2">
     <div class="lyric-text">夏天　我想你想了千万遍</div>
