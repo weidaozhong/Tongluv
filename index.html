@@ -201,11 +201,11 @@ body:not(.loaded){position:fixed!important;inset:0!important;overflow:hidden!imp
   pointer-events: none;
   z-index: 10002;
   will-change: transform, opacity;
-  animation: kTrailFade 0.8s cubic-bezier(0.1, 1, 0.3, 1) forwards;
+  animation: kTrailFade 1.2s ease-out forwards;
 }
 @keyframes kTrailFade {
-  0% { transform: translate(-50%, -50%) rotate(var(--r0)) scale(var(--s)); opacity: 1; filter: blur(0px); }
-  100% { transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) rotate(var(--r1)) scale(0); opacity: 0; filter: blur(2px); }
+  0% { transform: translate(-50%, -50%) scale(1); opacity: 1; filter: blur(0px); }
+  100% { transform: translate(-50%, -50%) scale(0.2); opacity: 0; filter: blur(2px); }
 }
 
 /* expand outward — inner first, outer last */
@@ -1673,41 +1673,22 @@ body.loaded .hc>*:nth-child(6){animation-delay:.42s}
         }, 150);
         
         var now = Date.now();
-        if(now - lastTrailTime > 16 && lsScreen) {
+        if(now - lastTrailTime > 12 && lsScreen) {
           lastTrailTime = now;
-          for(var i=0; i<3; i++) {
-            var dot = document.createElement('div');
-            dot.className = 'LS-trail-dot';
-            dot.style.left = e.clientX + 'px';
-            dot.style.top = e.clientY + 'px';
-            dot.style.background = '#fff';
-            
-            if(Math.random() > 0.7) {
-              dot.style.width = (Math.random() * 30 + 10) + 'px';
-              dot.style.height = '2px';
-              dot.style.borderRadius = '2px';
-              dot.style.boxShadow = '0 0 10px 2px ' + trailColors[trailIdx];
-            } else {
-              var size = Math.random() * 8 + 4;
-              dot.style.width = size + 'px';
-              dot.style.height = size + 'px';
-              dot.style.borderRadius = '50%';
-              dot.style.boxShadow = '0 0 12px 4px ' + trailColors[trailIdx];
-            }
-            
-            var dx = (Math.random() - 0.5) * 80;
-            var dy = (Math.random() - 0.5) * 80;
-            if(dy > 0) dy = -dy; 
-            
-            dot.style.setProperty('--dx', dx + 'px');
-            dot.style.setProperty('--dy', dy + 'px');
-            dot.style.setProperty('--r0', (Math.random() * 360) + 'deg'); 
-            dot.style.setProperty('--r1', (Math.random() * 360 + 180) + 'deg');
-            dot.style.setProperty('--s', (Math.random() * 0.8 + 0.5));
-            
-            lsScreen.appendChild(dot);
-            setTimeout((function(d){ return function(){ d.remove(); } })(dot), 800);
-          }
+          var dot = document.createElement('div');
+          dot.className = 'LS-trail-dot';
+          dot.style.left = e.clientX + 'px';
+          dot.style.top = e.clientY + 'px';
+          dot.style.background = '#fff';
+          
+          var size = Math.random() * 4 + 6;
+          dot.style.width = size + 'px';
+          dot.style.height = size + 'px';
+          dot.style.borderRadius = '50%';
+          dot.style.boxShadow = '0 0 12px 4px ' + trailColors[trailIdx];
+          
+          lsScreen.appendChild(dot);
+          setTimeout((function(d){ return function(){ d.remove(); } })(dot), 1200);
         }
       }
     });
