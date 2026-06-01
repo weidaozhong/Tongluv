@@ -14,7 +14,7 @@
   <link rel="preload" href="icons/icon.png" as="image">
   <link rel="preconnect" href="https://fonts.loli.net">
   <link rel="preconnect" href="https://gstatic.loli.net" crossorigin>
-  <link href="https://fonts.loli.net/css2?family=Zhi+Mang+Xing&family=Instrument+Serif:ital@0;1&family=Noto+Serif+SC:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.loli.net/css2?family=Instrument+Serif:ital@0;1&family=Noto+Serif+SC:wght@400;700&display=swap" rel="stylesheet">
 
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;cursor:none;user-select:none;-webkit-user-select:none}
@@ -265,55 +265,36 @@ body:not(.loaded){position:fixed!important;inset:0!important;overflow:hidden!imp
   to{opacity:0;transform:translateY(-20px) scale(.4)}
 }
 
-/* ── 加载屏歌词进度条 (书法长亮呼吸) ───────────────────────────── */
+/* ── 加载屏歌词 (顺序出现并消失) ───────────────────────────── */
 .LS-lyric{
   position:absolute;
-  font-family: 'Zhi Mang Xing', 'STXingkai', 'STKaiti', 'KaiTi', cursive, serif;
-  font-size:clamp(1.5rem, 3.5vw, 1.8rem);
+  font-family: 'Kaiti SC', 'STKaiti', 'KaiTi', '楷体', serif;
+  font-size:clamp(1.2rem, 3vw, 1.5rem);
   font-weight:400;
   letter-spacing:.15em;
   opacity:0;
   pointer-events:none;
   white-space:nowrap;
 }
-/* 四个位置，并且分别绑定不同的颜色和出场、呼吸动画 */
-.LS-lyric--1{ top:25%; left:15%; animation: kLSLyric1 10s 0.5s ease-out forwards; }
-.LS-lyric--2{ bottom:25%; right:15%; animation: kLSLyric2 10s 2.0s ease-out forwards; }
-.LS-lyric--3{ top:20%; right:15%; animation: kLSLyric3 10s 3.5s ease-out forwards; }
-.LS-lyric--4{ bottom:20%; left:25%; animation: kLSLyric4 10s 5.0s ease-out forwards; }
+/* 顺序淡入淡出，不重叠 */
+.LS-lyric--1{ top:25%; left:15%; color:#f39c12; animation: kLSLyricSeq 1.5s 0.2s forwards; text-shadow:0 0 12px rgba(243,156,18,0.5); }
+.LS-lyric--2{ bottom:25%; right:15%; color:#3498db; animation: kLSLyricSeq 1.5s 1.8s forwards; text-shadow:0 0 12px rgba(52,152,219,0.5); }
+.LS-lyric--3{ top:20%; right:15%; color:#e74c3c; animation: kLSLyricSeq 1.5s 3.4s forwards; text-shadow:0 0 12px rgba(231,76,60,0.5); }
+.LS-lyric--4{ bottom:20%; left:25%; color:#fff; animation: kLSLyricSeq 1.5s 5.0s forwards; text-shadow:0 0 15px rgba(255,255,255,0.8), 0 0 25px rgba(243,156,18,0.6); }
 
-/* 1: 金色 */
-@keyframes kLSLyric1 {
-  0% { opacity:0; transform: translateY(15px); filter: blur(6px); color:rgba(168,159,145,0.4); text-shadow:none; }
-  10% { opacity:1; transform: translateY(0); filter: blur(0); color:#f39c12; text-shadow:0 0 15px rgba(243,156,18,0.6); }
-  100% { opacity:0.8; transform: translateY(-15px) translateX(10px); filter: blur(1px); color:#f1c40f; text-shadow:0 0 20px rgba(241,196,15,0.4); }
-}
-/* 2: 清透蓝 */
-@keyframes kLSLyric2 {
-  0% { opacity:0; transform: translateY(15px); filter: blur(6px); color:rgba(168,159,145,0.4); text-shadow:none; }
-  10% { opacity:1; transform: translateY(0); filter: blur(0); color:#85c1e9; text-shadow:0 0 15px rgba(52,152,219,0.8); }
-  100% { opacity:0.8; transform: translateY(-15px) translateX(-10px); filter: blur(1px); color:#85c1e9; text-shadow:0 0 20px rgba(52,152,219,0.5); }
-}
-/* 3: 柔粉 */
-@keyframes kLSLyric3 {
-  0% { opacity:0; transform: translateY(15px); filter: blur(6px); color:rgba(168,159,145,0.4); text-shadow:none; }
-  10% { opacity:1; transform: translateY(0); filter: blur(0); color:#f5b7b1; text-shadow:0 0 15px rgba(231,76,60,0.6); }
-  100% { opacity:0.8; transform: translateY(-15px) translateX(10px); filter: blur(1px); color:#fadbd8; text-shadow:0 0 20px rgba(231,76,60,0.4); }
-}
-/* 4: 纯白混合金 (高光收尾) */
-@keyframes kLSLyric4 {
-  0% { opacity:0; transform: translateY(15px) scale(0.9); filter: blur(6px); color:rgba(168,159,145,0.4); text-shadow:none; }
-  10% { opacity:1; transform: translateY(0) scale(1.1); filter: blur(0); color:#fff; text-shadow:0 0 20px rgba(255,255,255,0.8), 0 0 40px rgba(243,156,18,0.6); }
-  100% { opacity:0.9; transform: translateY(-15px) scale(1); filter: blur(1px); color:#fff; text-shadow:0 0 15px rgba(255,255,255,0.5), 0 0 25px rgba(243,156,18,0.4); }
+@keyframes kLSLyricSeq {
+  0%   { opacity:0; transform: translateY(12px); filter: blur(4px); }
+  25%  { opacity:1; transform: translateY(0); filter: blur(0); }
+  75%  { opacity:1; transform: translateY(0); filter: blur(0); }
+  100% { opacity:0; transform: translateY(-12px); filter: blur(4px); }
 }
 
-/* 焦外呼吸转场时歌词跟随模糊淡出 */
+/* 焦外呼吸转场时歌词如果还没消失则跟随模糊淡出 */
 .LS.exit .LS-lyric{
-  animation:kLSLyricExit 1s ease-in forwards;
+  animation:kLSLyricExit .6s ease-in forwards;
 }
 @keyframes kLSLyricExit{
-  0%{opacity:1;filter:blur(0)}
-  100%{opacity:0;filter:blur(15px)}
+  to { opacity:0; filter:blur(15px); }
 }
 
 
