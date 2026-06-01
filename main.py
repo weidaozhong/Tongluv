@@ -151,6 +151,13 @@ _DIALOGUES: dict[str, list[str]] = {
     "study":    ["认真学习中...📖", "知识就是力量！", "好多要学的呀...", "嘘...我在看书呢", "学习使我快乐！...吧？"],
 }
 
+_FOCUS_ENCOURAGE = [
+    "专注的你超酷的!✨", "保持住,我陪着你~", "这一刻好认真,加油!💪",
+    "心无旁骛,真棒!", "再坚持一下,你超棒~", "安静地陪你冲~📖",
+    "专注力拉满!继续!", "嘘——别分心,你做得很好🌟",
+]
+
+
 def _time_slot() -> str:
     h = datetime.now().hour
     if 6  <= h < 11: return "morning"
@@ -440,6 +447,8 @@ class PetWindow(QWidget):
         if _saved_pomo:
             self.pomodoro.cfg.update(_saved_pomo)
             self.reminder_window.set_pomodoro_config(self.pomodoro.cfg)
+        self._focus_encourage_left  = 0
+        self._focus_encourage_timer = 0.0
 
         self.input_state = InputState()
 
@@ -693,7 +702,7 @@ class PetWindow(QWidget):
         self._tick_auto_walk(dt)
         self._apply_walk_movement()
         self._sync_window_pos()
-        self._tick_foreground()
+        self._tick_foreground(dt)
         self._restack_above_pet()
 
         if hasattr(self.renderer, 'update'):
@@ -1627,10 +1636,10 @@ class PetWindow(QWidget):
         rem = format_remaining(self.countdown.remaining)
         self.countdown_float.set_text(f"⏰ {label} {rem}" if label else f"⏰ {rem}")
 
-    def _tick_foreground(self):
+    def _tick_foreground(self, dt: float):
         """前台计时器(番茄钟 或 快捷倒计时,二选一)驱动头顶浮窗。"""
         if self.pomodoro.active:
-            self._tick_pomodoro()
+            self._tick_pomodoro(dt)
         else:
             self._tick_countdown()
 
@@ -1644,6 +1653,7 @@ class PetWindow(QWidget):
         self.pomodoro.cfg.update(cfg)
         reminder_store.save_pomodoro_config(self.pomodoro.cfg)
         self.pomodoro.start()
+        self._setup_focus_encourage()
         self.reminder_window.set_pomodoro_state(True, False)
         self._say("开始专注!我陪你~📖", mood="happy", trigger_anim=False)
         self.renderer.trigger("study")
@@ -1669,7 +1679,13 @@ class PetWindow(QWidget):
         return (self.pomodoro.active and not self.pomodoro.paused
                 and self.pomodoro.phase == FOCUS)
 
-    def _tick_pomodoro(self):
+    def _setup_focus_encourage(self):
+        """每段专注随机安排 1~2 次鼓励气泡,并定下首次出现的时机。"""
+        self._focus_encourage_left = random.randint(1, 2)
+        focus_sec = max(30, self.pomodoro.cfg.get("focus_min", 25) * 60)
+        self._focus_encourage_timer = random.uniform(focus_sec * 0.2, focus_sec * 0.5)
+
+    def _tick_pomodoro(self, dt: float):
         if self.pomodoro.paused:
             rem = format_remaining(self.pomodoro.remaining)
             self.countdown_float.set_text(f"⏸ {self.pomodoro.label} {rem}")
@@ -1678,12 +1694,21 @@ class PetWindow(QWidget):
         new_phase = self.pomodoro.update()
         if new_phase is not None:
             self._on_pomodoro_phase(new_phase)
-        # 专注期间保持学习姿势:被打断回到 idle 时重新埋头
-        if (self.pomodoro.phase == FOCUS
-                and getattr(self.renderer, "_action", "idle") == "idle"
-                and not getattr(self.renderer, "_pending", [])):
-            self.renderer.trigger("study")
-            self.state.current_action = PetAction.STUDY
+        if self.pomodoro.phase == FOCUS:
+            # 保持学习姿势:被打断回到 idle 时重新埋头
+            if (getattr(self.renderer, "_action", "idle") == "idle"
+                    and not getattr(self.renderer, "_pending", [])):
+                self.renderer.trigger("study")
+                self.state.current_action = PetAction.STUDY
+            # 偶尔冒一句鼓励(不触发动画,埋头姿势不变)
+            if self._focus_encourage_left > 0:
+                self._focus_encourage_timer -= dt
+                if self._focus_encourage_timer <= 0:
+                    self._focus_encourage_left -= 1
+                    self._say(random.choice(_FOCUS_ENCOURAGE), mood="happy", trigger_anim=False)
+                    if self._focus_encourage_left > 0:
+                        focus_sec = max(30, self.pomodoro.cfg.get("focus_min", 25) * 60)
+                        self._focus_encourage_timer = random.uniform(focus_sec * 0.15, focus_sec * 0.35)
         rem = format_remaining(self.pomodoro.remaining)
         self.countdown_float.set_text(f"🍅 {self.pomodoro.label} {rem}")
         self.reminder_window.set_pomodoro_status(
@@ -1695,6 +1720,7 @@ class PetWindow(QWidget):
             self._say("休息结束,继续加油!💪", mood="happy", trigger_anim=False)
             self.renderer.trigger("study")
             self.state.current_action = PetAction.STUDY
+            self._setup_focus_encourage()
         else:
             tip = "专注结束,起来活动下~☕" if phase == SHORT_BREAK else "完成一组!好好长休一下~🌟"
             self._say(tip, mood="happy", trigger_anim=False)
