@@ -45,8 +45,8 @@ def pet_save_path() -> str:
 def game_data_path() -> str:
     return get_user_file("game_data.json")
 
-def reminder_data_path() -> str:
-    return get_user_file("reminder_data.json")
+def pomodoro_config_path() -> str:
+    return get_user_file("pomodoro_config.json")
 
 def avatar_path() -> str:
     return get_user_file("avatar_custom.png")

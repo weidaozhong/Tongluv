@@ -120,7 +120,7 @@ from src.countdown_float import CountdownFloat
 from src.reminder_bubble import ReminderBubbleManager
 from src.reminder_window import ReminderWindow
 from src.pomodoro import PomodoroTimer, FOCUS, SHORT_BREAK
-from src import reminder_store
+from src import pomodoro_store
 
 PET_SIZE = 210   # 基准值，main() 中根据屏幕逻辑高度重新计算
 PET_WINDOW_MARGIN = 20   # 窗口四周透明 padding，_sync_window_pos 中用到
@@ -443,7 +443,7 @@ class PetWindow(QWidget):
         self.reminder_window.start_pomodoro.connect(self._on_start_pomodoro)
         self.reminder_window.toggle_pomodoro_pause.connect(self._on_toggle_pomodoro_pause)
         self.reminder_window.reset_pomodoro.connect(self._on_reset_pomodoro)
-        _saved_pomo = reminder_store.load_pomodoro_config()
+        _saved_pomo = pomodoro_store.load_pomodoro_config()
         if _saved_pomo:
             self.pomodoro.cfg.update(_saved_pomo)
             self.reminder_window.set_pomodoro_config(self.pomodoro.cfg)
@@ -1651,7 +1651,7 @@ class PetWindow(QWidget):
             self.countdown.stop()
             self.reminder_window.set_timer_state(False, False)
         self.pomodoro.cfg.update(cfg)
-        reminder_store.save_pomodoro_config(self.pomodoro.cfg)
+        pomodoro_store.save_pomodoro_config(self.pomodoro.cfg)
         self.pomodoro.start()
         self._setup_focus_encourage()
         self.reminder_window.set_pomodoro_state(True, False)
