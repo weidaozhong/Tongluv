@@ -125,6 +125,7 @@ jobs:
         with:
           ref: gh-pages
           path: gh-pages-dir
+          token: ${{ secrets.PAT }}
 
       - name: Update download proxy function link
         run: |
