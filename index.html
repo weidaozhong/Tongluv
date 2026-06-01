@@ -265,29 +265,58 @@ body:not(.loaded){position:fixed!important;inset:0!important;overflow:hidden!imp
   to{opacity:0;transform:translateY(-20px) scale(.4)}
 }
 
-/* ── 加载屏歌词 (顺序出现并消失) ───────────────────────────── */
+/* ── 加载屏歌词与伴生小元素 ───────────────────────────── */
 .LS-lyric{
   position:absolute;
   font-family: 'Kaiti SC', 'STKaiti', 'KaiTi', '楷体', serif;
   font-size:clamp(1.2rem, 3vw, 1.5rem);
   font-weight:400;
   letter-spacing:.15em;
+  color:#4a4036; /* 极深茶色，绝对清晰 */
   opacity:0;
   pointer-events:none;
   white-space:nowrap;
+  display: flex;
+  align-items: center;
 }
-/* 顺序淡入淡出，不重叠 */
-.LS-lyric--1{ top:25%; left:15%; color:#f39c12; animation: kLSLyricSeq 1.5s 0.2s forwards; text-shadow:0 0 12px rgba(243,156,18,0.5); }
-.LS-lyric--2{ bottom:25%; right:15%; color:#3498db; animation: kLSLyricSeq 1.5s 1.8s forwards; text-shadow:0 0 12px rgba(52,152,219,0.5); }
-.LS-lyric--3{ top:20%; right:15%; color:#e74c3c; animation: kLSLyricSeq 1.5s 3.4s forwards; text-shadow:0 0 12px rgba(231,76,60,0.5); }
-.LS-lyric--4{ bottom:20%; left:25%; color:#fff; animation: kLSLyricSeq 1.5s 5.0s forwards; text-shadow:0 0 15px rgba(255,255,255,0.8), 0 0 25px rgba(243,156,18,0.6); }
+.lyric-text { position: relative; z-index: 2; }
 
-@keyframes kLSLyricSeq {
-  0%   { opacity:0; transform: translateY(12px); filter: blur(4px); }
-  25%  { opacity:1; transform: translateY(0); filter: blur(0); }
-  75%  { opacity:1; transform: translateY(0); filter: blur(0); }
-  100% { opacity:0; transform: translateY(-12px); filter: blur(4px); }
+/* 顺序遮罩展开淡出，不重叠 */
+.LS-lyric--1{ top:25%; left:15%; animation: kLSLyricMask 1.8s 0.2s forwards; }
+.LS-lyric--2{ bottom:25%; right:15%; animation: kLSLyricMask 1.8s 2.0s forwards; }
+.LS-lyric--3{ top:20%; right:15%; animation: kLSLyricMask 1.8s 3.8s forwards; }
+.LS-lyric--4{ bottom:20%; left:25%; animation: kLSLyricMask 1.8s 5.6s forwards; }
+
+@keyframes kLSLyricMask {
+  0%   { clip-path: polygon(0 -50%, 0 -50%, 0 150%, 0 150%); opacity:0; transform:translateX(-10px); }
+  10%  { opacity:1; }
+  35%  { clip-path: polygon(0 -50%, 120% -50%, 120% 150%, 0 150%); transform:translateX(0); }
+  75%  { opacity:1; clip-path: polygon(0 -50%, 120% -50%, 120% 150%, 0 150%); transform:translateX(0); }
+  100% { opacity:0; clip-path: polygon(0 -50%, 120% -50%, 120% 150%, 0 150%); transform:translateX(0); }
 }
+
+/* 伴生小元素统一样式 */
+.lyric-ele { position: absolute; z-index: 1; pointer-events: none; }
+
+/* 春：金色星芒闪烁 */
+.lyric-ele-spring { right: -30px; top: -10px; color: #f39c12; font-family: sans-serif; text-shadow:0 0 10px rgba(243,156,18,0.8); }
+.lyric-ele-spring .star { display: inline-block; animation: kStarTwinkle 1.2s 0.5s ease-in-out forwards; opacity:0; }
+.lyric-ele-spring .star-sm { font-size: 0.6em; position: absolute; left: 15px; top: 15px; animation: kStarTwinkle 1s 0.7s ease-in-out forwards; opacity:0; }
+@keyframes kStarTwinkle { 0%{opacity:0; transform:scale(0) rotate(0deg)} 50%{opacity:1; transform:scale(1.2) rotate(45deg)} 100%{opacity:0; transform:scale(0) rotate(90deg)} }
+
+/* 夏：细微风轨掠过 */
+.lyric-ele-summer { bottom: -5px; left: 0; height: 1px; background: #3498db; box-shadow:0 0 8px rgba(52,152,219,0.8); animation: kWindSweep 1.2s 2.3s forwards; opacity:0; }
+@keyframes kWindSweep { 0%{opacity:0; width:0; left:0} 30%{opacity:0.6; width:80%} 100%{opacity:0; width:20px; left:120%} }
+
+/* 秋：落叶画圈 */
+.lyric-ele-autumn { right: -20px; top: -10px; width: 35px; height: 35px; }
+.lyric-ele-autumn svg { width:100%; height:100%; overflow:visible; }
+.lyric-ele-autumn circle { fill:none; stroke:#e74c3c; stroke-width:1.5; stroke-dasharray:302; stroke-dashoffset:302; animation: kDrawCircle 1.2s 4.1s cubic-bezier(0.4, 0, 0.2, 1) forwards; opacity:0.8;}
+@keyframes kDrawCircle { to { stroke-dashoffset: 0; } }
+
+/* 冬：冰封横向瞬闪 */
+.lyric-ele-winter { left: -10%; top: 50%; width: 120%; height: 1px; background: linear-gradient(90deg, transparent, #8e7a5d, transparent); box-shadow:0 0 10px rgba(184,146,63,0.8); animation: kIceFlash 1s 5.9s forwards; opacity:0; }
+@keyframes kIceFlash { 0%{opacity:0; transform:scaleX(0)} 50%{opacity:1; transform:scaleX(1)} 100%{opacity:0; transform:scaleX(0)} }
 
 /* 焦外呼吸转场时歌词如果还没消失则跟随模糊淡出 */
 .LS.exit .LS-lyric{
@@ -1175,11 +1204,23 @@ body.loaded .hc>*:nth-child(6){animation-delay:.42s}
   <div class="LS-leaf" style="left:78%;width:12px;height:12px;background:#f1c40f;animation:kLSLeafC 10s -7s ease-in-out infinite"></div>
   <div class="LS-leaf" style="left:88%;width:5px;height:5px;background:#1abc9c;animation:kLSLeafA 7.5s -3s ease-in-out infinite"></div>
   <div class="LS-leaf" style="left:96%;width:15px;height:15px;background:#e74c3c;animation:kLSLeafB 9s -5s ease-in-out infinite"></div>
-  <!-- 歌词：四季依次淡入淡出，填充加载等待时间 -->
-  <div class="LS-lyric LS-lyric--1">春天　就让这繁花都开遍</div>
-  <div class="LS-lyric LS-lyric--2">夏天　我想你想了千万遍</div>
-  <div class="LS-lyric LS-lyric--3">秋天　当落叶画成一个圈</div>
-  <div class="LS-lyric LS-lyric--4">冬天　就在这冰封一瞬间</div>
+  <!-- 歌词：四季依次淡入展开，带有专属伴生小元素 -->
+  <div class="LS-lyric LS-lyric--1">
+    <div class="lyric-text">春天　就让这繁花都开遍</div>
+    <div class="lyric-ele lyric-ele-spring"><span class="star">✦</span><span class="star star-sm">✦</span></div>
+  </div>
+  <div class="LS-lyric LS-lyric--2">
+    <div class="lyric-text">夏天　我想你想了千万遍</div>
+    <div class="lyric-ele lyric-ele-summer"></div>
+  </div>
+  <div class="LS-lyric LS-lyric--3">
+    <div class="lyric-text">秋天　当落叶画成一个圈</div>
+    <div class="lyric-ele lyric-ele-autumn"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="48" /></svg></div>
+  </div>
+  <div class="LS-lyric LS-lyric--4">
+    <div class="lyric-text">冬天　就在这冰封一瞬间</div>
+    <div class="lyric-ele lyric-ele-winter"></div>
+  </div>
 </div>
 
 <!-- Background layers -->
