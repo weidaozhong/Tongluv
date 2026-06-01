@@ -1,8 +1,10 @@
-"""提醒·番茄钟 独立窗口 —— P1 只放快捷倒计时。
+"""提醒·番茄钟 独立窗口。
 窗体/配色/缩放沿用 StatusPanel、MemoryWindow:暖色卡片、圆角、Microsoft YaHei。
+多分区放在滚动区里(快捷倒计时 / 番茄钟 / 后续提醒、备忘录),按需纵向增长。
 """
 from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel,
-                             QPushButton, QLineEdit, QGridLayout, QApplication)
+                             QPushButton, QLineEdit, QGridLayout, QScrollArea,
+                             QApplication)
 from PyQt5.QtCore import Qt, QPoint, pyqtSignal
 from PyQt5.QtGui import QFont, QIntValidator
 from src.status_panel import BG, CARD, CARD2, BD, T1, T2, T3, TB
@@ -28,11 +30,16 @@ def _lbl(text, pt, color, bold=False):
 
 
 class ReminderWindow(QWidget):
+    # 快捷倒计时
     start_countdown = pyqtSignal(float, str)   # 秒, 标签
     toggle_pause    = pyqtSignal()
     reset_timer     = pyqtSignal()
+    # 番茄钟
+    start_pomodoro        = pyqtSignal(dict)   # 时长配置
+    toggle_pomodoro_pause = pyqtSignal()
+    reset_pomodoro        = pyqtSignal()
 
-    _BASE_W, _BASE_H = 400, 540
+    _BASE_W, _BASE_H = 400, 600
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -50,8 +57,9 @@ class ReminderWindow(QWidget):
         self.move((g.width() - self.W) // 2, (g.height() - self.H) // 2)
         self._build()
         self.set_timer_state(False, False)
+        self.set_pomodoro_state(False, False)
 
-    # 拖拽移动
+    # ── 拖拽移动 ──
     def mousePressEvent(self, e):
         if e.button() == Qt.LeftButton:
             self._dg = True; self._dp = e.globalPos() - self.frameGeometry().topLeft()
@@ -63,13 +71,14 @@ class ReminderWindow(QWidget):
     def paintEvent(self, _):
         pass
 
+    # ── 整体布局 ──
     def _build(self):
         root = QWidget(self); root.setGeometry(0, 0, self.W, self.H)
         root.setObjectName("RR")
         root.setStyleSheet(
             f"QWidget#RR{{background:{BG};border-radius:{_s(20)}px;border:1.5px solid {BD};}}")
         ml = QVBoxLayout(root)
-        ml.setContentsMargins(_s(16), _s(14), _s(16), _s(14)); ml.setSpacing(_s(12))
+        ml.setContentsMargins(_s(16), _s(14), _s(16), _s(14)); ml.setSpacing(_s(10))
 
         # 标题栏
         h = QHBoxLayout()
@@ -83,27 +92,42 @@ class ReminderWindow(QWidget):
         cb.clicked.connect(self.close); h.addWidget(cb)
         ml.addLayout(h)
 
-        # 快捷倒计时卡片
+        # 滚动区(承载各分区卡片)
+        body = QWidget(); body.setStyleSheet("background:transparent;border:none;")
+        bl = QVBoxLayout(body)
+        bl.setContentsMargins(0, _s(2), _s(4), 0); bl.setSpacing(_s(12))
+        bl.addWidget(self._build_quick_card())
+        bl.addWidget(self._build_pomodoro_card())
+        bl.addStretch()
+
+        sa = QScrollArea(); sa.setWidgetResizable(True)
+        sa.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        sa.setStyleSheet(
+            "QScrollArea{border:none;background:transparent;}"
+            f"QScrollBar:vertical{{width:{_s(5)}px;background:transparent;}}"
+            f"QScrollBar::handle:vertical{{background:{BD};border-radius:{_s(2)}px;}}"
+            "QScrollBar::add-line:vertical,QScrollBar::sub-line:vertical{height:0;}")
+        sa.setWidget(body)
+        ml.addWidget(sa, 1)
+
+    # ── 快捷倒计时分区 ──
+    def _build_quick_card(self):
         card = QWidget(); card.setObjectName("QC")
-        card.setStyleSheet(
-            f"QWidget#QC{{background:{CARD};border-radius:{_s(14)}px;border:1px solid {BD};}}")
+        card.setStyleSheet(f"QWidget#QC{{background:{CARD};border-radius:{_s(14)}px;border:1px solid {BD};}}")
         cl = QVBoxLayout(card)
         cl.setContentsMargins(_s(14), _s(12), _s(14), _s(14)); cl.setSpacing(_s(10))
         cl.addWidget(_lbl("⏱ 快捷倒计时", 11, T1, True))
 
-        # 预设
         grid = QGridLayout(); grid.setSpacing(_s(8))
         for i, (label, secs) in enumerate(
                 [("5 分", 300), ("10 分", 600), ("15 分", 900), ("30 分", 1800)]):
-            b = QPushButton(label); b.setFixedHeight(_s(42))
-            b.setCursor(Qt.PointingHandCursor)
+            b = QPushButton(label); b.setFixedHeight(_s(42)); b.setCursor(Qt.PointingHandCursor)
             b.setFont(QFont("Microsoft YaHei", _fs(11), QFont.Bold))
-            b.setStyleSheet(self._preset_css())
+            b.setStyleSheet(self._soft_css())
             b.clicked.connect(lambda _, sec=secs: self.start_countdown.emit(float(sec), ""))
             grid.addWidget(b, i // 2, i % 2)
         cl.addLayout(grid)
 
-        # 自定义:时 / 分 / 秒(直接填,无需换算)
         cl.addWidget(_lbl("自定义", 10, T2))
         hms = QHBoxLayout(); hms.setSpacing(_s(4))
         self._h_inp = self._num_input()
@@ -114,51 +138,80 @@ class ReminderWindow(QWidget):
         hms.addStretch()
         cl.addLayout(hms)
 
-        # 标签
         lab_row = QHBoxLayout(); lab_row.setSpacing(_s(6))
         lab_row.addWidget(_lbl("标签", 10, T2))
-        self._lbl_inp = QLineEdit()
-        self._lbl_inp.setStyleSheet(self._input_css())
+        self._lbl_inp = QLineEdit(); self._lbl_inp.setStyleSheet(self._input_css())
         lab_row.addWidget(self._lbl_inp, 1)
         cl.addLayout(lab_row)
 
-        # 开始(启动一个新倒计时)
-        sb = QPushButton("开始"); sb.setFixedHeight(_s(42))
-        sb.setCursor(Qt.PointingHandCursor)
+        sb = QPushButton("开始"); sb.setFixedHeight(_s(42)); sb.setCursor(Qt.PointingHandCursor)
         sb.setFont(QFont("Microsoft YaHei", _fs(11), QFont.Bold))
-        sb.setStyleSheet(
-            f"QPushButton{{background:{TB};color:white;border:none;border-radius:{_s(12)}px;}}"
-            f"QPushButton:hover{{background:#b06838;}}")
+        sb.setStyleSheet(self._primary_css())
         sb.clicked.connect(self._start_custom)
         cl.addWidget(sb)
 
-        # 暂停/重置(控制进行中的倒计时)
         ctrl = QHBoxLayout(); ctrl.setSpacing(_s(8))
-        self._pause_btn = QPushButton("暂停"); self._pause_btn.setFixedHeight(_s(38))
-        self._pause_btn.setCursor(Qt.PointingHandCursor)
-        self._pause_btn.setFont(QFont("Microsoft YaHei", _fs(10), QFont.Bold))
-        self._pause_btn.setStyleSheet(self._ctrl_css())
-        self._pause_btn.clicked.connect(lambda _: self.toggle_pause.emit())
-        self._reset_btn = QPushButton("重置"); self._reset_btn.setFixedHeight(_s(38))
-        self._reset_btn.setCursor(Qt.PointingHandCursor)
-        self._reset_btn.setFont(QFont("Microsoft YaHei", _fs(10), QFont.Bold))
-        self._reset_btn.setStyleSheet(self._ctrl_css())
-        self._reset_btn.clicked.connect(lambda _: self.reset_timer.emit())
+        self._pause_btn = self._mk_ctrl_btn("暂停", lambda _: self.toggle_pause.emit())
+        self._reset_btn = self._mk_ctrl_btn("重置", lambda _: self.reset_timer.emit())
         ctrl.addWidget(self._pause_btn); ctrl.addWidget(self._reset_btn)
         cl.addLayout(ctrl)
+        return card
 
-        ml.addWidget(card)
-        ml.addStretch()
+    # ── 番茄钟分区 ──
+    def _build_pomodoro_card(self):
+        card = QWidget(); card.setObjectName("PC")
+        card.setStyleSheet(f"QWidget#PC{{background:{CARD};border-radius:{_s(14)}px;border:1px solid {BD};}}")
+        cl = QVBoxLayout(card)
+        cl.setContentsMargins(_s(14), _s(12), _s(14), _s(14)); cl.setSpacing(_s(10))
+        cl.addWidget(_lbl("🍅 番茄钟", 11, T1, True))
 
-    # ── 样式 ──
-    def _preset_css(self):
-        return (f"QPushButton{{background:{BG};color:{T1};border:1px solid {BD};"
-                f"border-radius:{_s(10)}px;}}"
+        self._foc_inp = self._num_input("25")
+        self._sht_inp = self._num_input("5")
+        self._lng_inp = self._num_input("15")
+        self._cyc_inp = self._num_input("4")
+
+        row1 = QHBoxLayout(); row1.setSpacing(_s(4))
+        row1.addWidget(_lbl("专注", 10, T2)); row1.addWidget(self._foc_inp); row1.addWidget(_lbl("分", 10, T3))
+        row1.addSpacing(_s(10))
+        row1.addWidget(_lbl("短休", 10, T2)); row1.addWidget(self._sht_inp); row1.addWidget(_lbl("分", 10, T3))
+        row1.addStretch()
+        cl.addLayout(row1)
+
+        row2 = QHBoxLayout(); row2.setSpacing(_s(4))
+        row2.addWidget(_lbl("长休", 10, T2)); row2.addWidget(self._lng_inp); row2.addWidget(_lbl("分", 10, T3))
+        row2.addSpacing(_s(10))
+        row2.addWidget(_lbl("每", 10, T2)); row2.addWidget(self._cyc_inp); row2.addWidget(_lbl("轮后长休", 10, T3))
+        row2.addStretch()
+        cl.addLayout(row2)
+
+        sb = QPushButton("开始专注"); sb.setFixedHeight(_s(42)); sb.setCursor(Qt.PointingHandCursor)
+        sb.setFont(QFont("Microsoft YaHei", _fs(11), QFont.Bold))
+        sb.setStyleSheet(self._primary_css())
+        sb.clicked.connect(self._start_pomodoro)
+        cl.addWidget(sb)
+
+        ctrl = QHBoxLayout(); ctrl.setSpacing(_s(8))
+        self._pomo_pause_btn = self._mk_ctrl_btn("暂停", lambda _: self.toggle_pomodoro_pause.emit())
+        self._pomo_reset_btn = self._mk_ctrl_btn("重置", lambda _: self.reset_pomodoro.emit())
+        ctrl.addWidget(self._pomo_pause_btn); ctrl.addWidget(self._pomo_reset_btn)
+        cl.addLayout(ctrl)
+
+        self._pomo_status = _lbl("未开始", 10, T3)
+        self._pomo_status.setAlignment(Qt.AlignCenter)
+        cl.addWidget(self._pomo_status)
+        return card
+
+    # ── 样式 / 小工具 ──
+    def _soft_css(self):
+        return (f"QPushButton{{background:{BG};color:{T1};border:1px solid {BD};border-radius:{_s(10)}px;}}"
                 f"QPushButton:hover{{background:{CARD2};border:1px solid {TB};}}")
 
+    def _primary_css(self):
+        return (f"QPushButton{{background:{TB};color:white;border:none;border-radius:{_s(12)}px;}}"
+                f"QPushButton:hover{{background:#b06838;}}")
+
     def _ctrl_css(self):
-        return (f"QPushButton{{background:{BG};color:{T1};border:1px solid {BD};"
-                f"border-radius:{_s(10)}px;}}"
+        return (f"QPushButton{{background:{BG};color:{T1};border:1px solid {BD};border-radius:{_s(10)}px;}}"
                 f"QPushButton:hover{{background:{CARD2};border:1px solid {TB};}}"
                 f"QPushButton:disabled{{background:{CARD2};color:{T3};border:1px solid {BD};}}")
 
@@ -168,19 +221,37 @@ class ReminderWindow(QWidget):
                 f"font-family:'Microsoft YaHei';font-size:{_s(11)}px;}}"
                 f"QLineEdit:focus{{border:1px solid {TB};}}")
 
-    def _num_input(self):
+    def _mk_ctrl_btn(self, text, slot):
+        b = QPushButton(text); b.setFixedHeight(_s(38)); b.setCursor(Qt.PointingHandCursor)
+        b.setFont(QFont("Microsoft YaHei", _fs(10), QFont.Bold))
+        b.setStyleSheet(self._ctrl_css())
+        b.clicked.connect(slot)
+        return b
+
+    def _num_input(self, prefill=""):
         e = QLineEdit()
-        e.setFixedWidth(_s(50)); e.setAlignment(Qt.AlignCenter)
+        if prefill:
+            e.setText(prefill)
+        e.setFixedWidth(_s(46)); e.setAlignment(Qt.AlignCenter)
         e.setStyleSheet(self._input_css())
         e.setValidator(QIntValidator(0, 999, self))
         return e
 
-    # ── 状态:供 main 同步暂停/重置按钮 ──
+    # ── 状态同步(供 main 调)──
     def set_timer_state(self, active: bool, paused: bool):
         self._pause_btn.setEnabled(active)
         self._reset_btn.setEnabled(active)
         self._pause_btn.setText("继续" if paused else "暂停")
 
+    def set_pomodoro_state(self, active: bool, paused: bool):
+        self._pomo_pause_btn.setEnabled(active)
+        self._pomo_reset_btn.setEnabled(active)
+        self._pomo_pause_btn.setText("继续" if paused else "暂停")
+
+    def set_pomodoro_status(self, text: str):
+        self._pomo_status.setText(text)
+
+    # ── 触发 ──
     def _start_custom(self):
         def _v(e):
             t = e.text().strip()
@@ -192,3 +263,18 @@ class ReminderWindow(QWidget):
         self._h_inp.clear(); self._m_inp.clear(); self._s_inp.clear()
         self._lbl_inp.clear()
         self.start_countdown.emit(float(total), label)
+
+    def _start_pomodoro(self):
+        def _v(e, d):
+            try:
+                v = int(e.text().strip())
+                return v if v > 0 else d
+            except ValueError:
+                return d
+        cfg = {
+            "focus_min":          _v(self._foc_inp, 25),
+            "short_break_min":    _v(self._sht_inp, 5),
+            "long_break_min":     _v(self._lng_inp, 15),
+            "cycles_before_long": _v(self._cyc_inp, 4),
+        }
+        self.start_pomodoro.emit(cfg)
