@@ -79,66 +79,120 @@ body:not(.loaded){position:fixed!important;inset:0!important;overflow:hidden!imp
   position:absolute;top:50%;left:50%;
   translate:-50% -50%;
   scale:0;opacity:0;
+  perspective: 1200px;
+  transform-style: preserve-3d;
 }
 /* staggered start for compass assembly with gentle pulse */
-.LS-w1{animation:kLife 7s 0s    ease-in-out forwards; --pulse-amp: 0.02;}
-.LS-w2{animation:kLife 7s .1s   ease-in-out forwards; --pulse-amp: 0.02;}
-.LS-w3{animation:kLife 7s .2s   ease-in-out forwards; --pulse-amp: 0.02;}
-.LS-w4{animation:kLife 7s .3s   ease-in-out forwards; --pulse-amp: 0.02;}
-.LS-w5{animation:kLife 7s .4s   ease-in-out forwards; --pulse-amp: 0.02;}
+.LS-w1{animation:kLife 7s 0s    ease-in-out forwards; --pulse-amp: 0.02; transform-style: preserve-3d;}
+.LS-w2{animation:kLife 7s .1s   ease-in-out forwards; --pulse-amp: 0.02; transform-style: preserve-3d;}
+.LS-w3{animation:kLife 7s .2s   ease-in-out forwards; --pulse-amp: 0.02; transform-style: preserve-3d;}
+.LS-w4{animation:kLife 7s .3s   ease-in-out forwards; --pulse-amp: 0.02; transform-style: preserve-3d;}
+.LS-w5{animation:kLife 7s .4s   ease-in-out forwards; --pulse-amp: 0.02; transform-style: preserve-3d;}
 
-/* L1: Outer compass tick marks */
+/* L1: Outer Gold Ring (3D Axis 1) */
 .LS-l1{
-  width:180px;height:180px;border-radius:50%;
-  background:repeating-conic-gradient(from 0deg, var(--gold) 0deg 2deg, transparent 2deg 6deg);
-  -webkit-mask:radial-gradient(circle, transparent 86px, #000 88px);
-  mask:radial-gradient(circle, transparent 86px, #000 88px);
-  animation:kCW 30s linear infinite;
-  opacity: 0.6;
+  width:220px;height:220px;border-radius:50%;
+  border: 3px solid transparent;
+  border-top-color: rgba(184,146,63,0.8);
+  border-bottom-color: rgba(184,146,63,0.8);
+  box-shadow: 0 0 25px rgba(184,146,63,0.3), inset 0 0 25px rgba(184,146,63,0.3);
+  animation:kAstro1 10s linear infinite;
+}
+.LS-l1::before{
+  content:''; position:absolute; inset: 8px; border-radius:50%;
+  border: 1.5px dashed var(--gold); opacity: 0.5;
 }
 
-/* L2: Inner Color Wheel (Thematic colors) */
+/* L2: Middle Ocean Ring (3D Axis 2) */
 .LS-l2{
-  width:150px;height:150px;border-radius:50%;
-  background:conic-gradient(from 0deg, var(--ocean), var(--mint), var(--green-light), var(--gold), var(--ocean));
-  -webkit-mask:radial-gradient(circle, transparent 40px, #000 60px);
-  mask:radial-gradient(circle, transparent 40px, #000 60px);
-  opacity: 0.35;
-  animation:kCCW 20s linear infinite;
+  width:160px;height:160px;border-radius:50%;
+  border: 2px solid transparent;
+  border-left-color: var(--ocean);
+  border-right-color: var(--ocean);
+  box-shadow: 0 0 20px rgba(94,123,168,.4), inset 0 0 20px rgba(94,123,168,.4);
+  animation:kAstro2 14s linear infinite;
+}
+.LS-l2::before{
+  content:''; position:absolute; inset: 5px; border-radius:50%;
+  border: 2px dotted var(--mint); opacity: 0.6;
 }
 
-/* L3: Compass inner track / details */
+/* L3: Inner Mint Ring (3D Axis 3) */
 .LS-l3{
-  width:100px;height:100px;border-radius:50%;
-  border:1px dashed rgba(94,123,168,.5); /* ocean */
-  animation:kCW 15s linear infinite;
+  width:110px;height:110px;border-radius:50%;
+  border: 1.5px solid var(--green-light);
+  box-shadow: 0 0 15px rgba(122,173,126,.6);
+  animation:kAstro3 8s linear infinite;
+}
+.LS-l3::after{
+  content:''; position:absolute; top:-4px; left:50%; width:8px; height:8px;
+  background: var(--gold); border-radius:50%; translate:-50% 0;
+  box-shadow: 0 0 10px var(--gold);
 }
 
-/* L4: Compass Needle (Diamond pointer) */
+/* L4: The Glowing Core & Needle */
 .LS-l4{
-  width:14px;height:120px;
-  background:linear-gradient(to bottom, var(--ocean) 50%, var(--gold) 50%);
-  clip-path:polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
-  /* A smooth, slightly bouncy spin for the compass needle */
-  animation:kNeedleSpin 6s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  width:36px;height:36px;border-radius:50%;
+  background: radial-gradient(circle at 30% 30%, #fff, var(--mint) 30%, var(--ocean) 70%);
+  box-shadow: 0 0 40px var(--mint), 0 0 80px var(--ocean);
+  animation:kCoreFloat 4s ease-in-out infinite;
+  transform-style: preserve-3d;
+}
+.LS-l4::before{
+  content:''; position:absolute; top:50%; left:50%;
+  width:4px; height:120px;
+  background: linear-gradient(to bottom, var(--gold) 50%, var(--ocean) 50%);
+  clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+  animation: kAstroNeedle 6s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
 }
 
-/* L5: Center Pivot */
+/* L5: Giant Magic Array (Ground Plane) */
 .LS-l5{
-  width:12px;height:12px;border-radius:50%;
-  background:var(--bg);
-  border:2.5px solid var(--gold);
-  box-shadow:0 0 15px rgba(184,146,63,.4);
+  width:360px;height:360px;border-radius:50%;
+  background: repeating-conic-gradient(from 0deg, var(--gold) 0deg 2deg, transparent 2deg 12deg);
+  -webkit-mask: radial-gradient(circle, transparent 176px, #000 178px);
+  mask: radial-gradient(circle, transparent 176px, #000 178px);
+  transform: rotateX(75deg);
+  animation:kAstroFlat 25s linear infinite;
+  opacity: 0.25;
+}
+.LS-l5::before{
+  content:''; position:absolute; inset: 24px; border-radius:50%;
+  background: repeating-conic-gradient(from 0deg, var(--ocean) 0deg 1deg, transparent 1deg 6deg);
+  -webkit-mask: radial-gradient(circle, transparent 152px, #000 154px);
+  mask: radial-gradient(circle, transparent 152px, #000 154px);
+  animation: kAstroFlatRev 18s linear infinite;
 }
 
-@keyframes kNeedleSpin {
-  0% { transform: rotate(0deg); }
-  15% { transform: rotate(190deg); }
-  25% { transform: rotate(180deg); }
-  50% { transform: rotate(180deg); }
-  65% { transform: rotate(370deg); }
-  75% { transform: rotate(360deg); }
-  100% { transform: rotate(360deg); }
+@keyframes kAstro1 {
+  0% { transform: rotateX(65deg) rotateY(0deg) rotateZ(0deg); }
+  100% { transform: rotateX(65deg) rotateY(360deg) rotateZ(360deg); }
+}
+@keyframes kAstro2 {
+  0% { transform: rotateX(0deg) rotateY(65deg) rotateZ(0deg); }
+  100% { transform: rotateX(360deg) rotateY(65deg) rotateZ(360deg); }
+}
+@keyframes kAstro3 {
+  0% { transform: rotateX(45deg) rotateY(45deg) rotateZ(0deg); }
+  100% { transform: rotateX(45deg) rotateY(45deg) rotateZ(360deg); }
+}
+@keyframes kAstroFlat {
+  0% { transform: rotateX(75deg) rotateZ(0deg); }
+  100% { transform: rotateX(75deg) rotateZ(360deg); }
+}
+@keyframes kAstroFlatRev {
+  0% { transform: rotateZ(360deg); }
+  100% { transform: rotateZ(0deg); }
+}
+@keyframes kCoreFloat {
+  0%, 100% { transform: translateY(-15px) scale(1); filter: brightness(1); }
+  50% { transform: translateY(15px) scale(1.1); filter: brightness(1.3); }
+}
+@keyframes kAstroNeedle {
+  0%, 100% { transform: translate(-50%, -50%) rotateZ(0deg) rotateY(0deg); }
+  25% { transform: translate(-50%, -50%) rotateZ(90deg) rotateY(180deg); }
+  50% { transform: translate(-50%, -50%) rotateZ(180deg) rotateY(360deg); }
+  75% { transform: translate(-50%, -50%) rotateZ(270deg) rotateY(540deg); }
 }
 
 /* expand outward — inner first, outer last */
