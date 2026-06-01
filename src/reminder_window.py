@@ -8,6 +8,7 @@ from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel,
 from PyQt5.QtCore import Qt, QPoint, pyqtSignal
 from PyQt5.QtGui import QFont, QIntValidator
 from src.status_panel import BG, CARD, CARD2, BD, T1, T2, T3, TB
+from src.pomodoro import DEFAULT_CONFIG
 
 _DESIGN_H = 1440
 _scale = 1.0
@@ -156,7 +157,18 @@ class ReminderWindow(QWidget):
         card.setStyleSheet(f"QWidget#PC{{background:{CARD};border-radius:{_s(14)}px;border:1px solid {BD};}}")
         cl = QVBoxLayout(card)
         cl.setContentsMargins(_s(14), _s(12), _s(14), _s(14)); cl.setSpacing(_s(10))
-        cl.addWidget(_lbl("🍅 番茄钟", 11, T1, True))
+        title_row = QHBoxLayout()
+        title_row.addWidget(_lbl("🍅 番茄钟", 11, T1, True))
+        title_row.addStretch()
+        rb = QPushButton("↺"); rb.setFixedSize(_s(24), _s(24))
+        rb.setCursor(Qt.PointingHandCursor); rb.setToolTip("重置为默认时长")
+        rb.setStyleSheet(
+            f"QPushButton{{background:transparent;color:{T3};border:none;"
+            f"font-size:{_s(16)}px;border-radius:{_s(12)}px;}}"
+            f"QPushButton:hover{{background:{CARD2};color:{TB};}}")
+        rb.clicked.connect(lambda _: self.set_pomodoro_config(DEFAULT_CONFIG))
+        title_row.addWidget(rb)
+        cl.addLayout(title_row)
 
         self._foc_inp = self._num_input("25")
         self._sht_inp = self._num_input("5")
