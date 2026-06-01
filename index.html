@@ -80,52 +80,65 @@ body:not(.loaded){position:fixed!important;inset:0!important;overflow:hidden!imp
   translate:-50% -50%;
   scale:0;opacity:0;
 }
-/* staggered start → heartbeat ripples outward from center with increasing intensity */
-.LS-w1{animation:kLife 7s 0s    ease-in-out forwards; --pulse-amp: 0.04;}
-.LS-w2{animation:kLife 7s .15s  ease-in-out forwards; --pulse-amp: 0.08;}
-.LS-w3{animation:kLife 7s .3s   ease-in-out forwards; --pulse-amp: 0.12;}
-.LS-w4{animation:kLife 7s .5s   ease-in-out forwards; --pulse-amp: 0.16;}
-.LS-w5{animation:kLife 7s .75s  ease-in-out forwards; --pulse-amp: 0.22;}
+/* staggered start for compass assembly with gentle pulse */
+.LS-w1{animation:kLife 7s 0s    ease-in-out forwards; --pulse-amp: 0.02;}
+.LS-w2{animation:kLife 7s .1s   ease-in-out forwards; --pulse-amp: 0.02;}
+.LS-w3{animation:kLife 7s .2s   ease-in-out forwards; --pulse-amp: 0.02;}
+.LS-w4{animation:kLife 7s .3s   ease-in-out forwards; --pulse-amp: 0.02;}
+.LS-w5{animation:kLife 7s .4s   ease-in-out forwards; --pulse-amp: 0.02;}
 
-/* L1: gold center dot */
+/* L1: Outer compass tick marks */
 .LS-l1{
-  width:14px;height:14px;border-radius:50%;
-  background:var(--gold);
-  box-shadow:0 0 20px rgba(184,146,63,.35),0 0 40px rgba(184,146,63,.12);
+  width:180px;height:180px;border-radius:50%;
+  background:repeating-conic-gradient(from 0deg, var(--gold) 0deg 2deg, transparent 2deg 6deg);
+  -webkit-mask:radial-gradient(circle, transparent 86px, #000 88px);
+  mask:radial-gradient(circle, transparent 86px, #000 88px);
+  animation:kCW 30s linear infinite;
+  opacity: 0.6;
 }
 
-/* L2: 6 mint rays — conic gradient masked to ring */
+/* L2: Inner Color Wheel (Thematic colors) */
 .LS-l2{
-  width:72px;height:72px;border-radius:50%;
-  background:repeating-conic-gradient(from 0deg,var(--mint) 0deg 2.5deg,transparent 2.5deg 60deg);
-  -webkit-mask:radial-gradient(circle,transparent 12px,#000 14px,#000 32px,transparent 34px);
-  mask:radial-gradient(circle,transparent 12px,#000 14px,#000 32px,transparent 34px);
-  animation:kCW 8s linear infinite;
+  width:150px;height:150px;border-radius:50%;
+  background:conic-gradient(from 0deg, var(--ocean), var(--mint), var(--green-light), var(--gold), var(--ocean));
+  -webkit-mask:radial-gradient(circle, transparent 40px, #000 60px);
+  mask:radial-gradient(circle, transparent 40px, #000 60px);
+  opacity: 0.35;
+  animation:kCCW 20s linear infinite;
 }
 
-/* L3: ocean dashed ring */
+/* L3: Compass inner track / details */
 .LS-l3{
-  width:96px;height:96px;border-radius:50%;
-  border:1.5px dashed var(--ocean);
-  animation:kCCW 6s linear infinite;
+  width:100px;height:100px;border-radius:50%;
+  border:1px dashed rgba(94,123,168,.5); /* ocean */
+  animation:kCW 15s linear infinite;
 }
 
-/* L4: 6 green wedge segments */
+/* L4: Compass Needle (Diamond pointer) */
 .LS-l4{
-  width:140px;height:140px;border-radius:50%;
-  background:repeating-conic-gradient(from 15deg,var(--green-light) 0deg 6deg,transparent 6deg 60deg);
-  -webkit-mask:radial-gradient(circle,transparent 54px,#000 56px,#000 66px,transparent 68px);
-  mask:radial-gradient(circle,transparent 54px,#000 56px,#000 66px,transparent 68px);
-  animation:kCW 4s linear infinite;
+  width:14px;height:120px;
+  background:linear-gradient(to bottom, var(--ocean) 50%, var(--gold) 50%);
+  clip-path:polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+  /* A smooth, slightly bouncy spin for the compass needle */
+  animation:kNeedleSpin 6s cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }
 
-/* L5: flowing gradient ring */
+/* L5: Center Pivot */
 .LS-l5{
-  width:186px;height:186px;border-radius:50%;
-  background:conic-gradient(from 0deg,var(--mint),var(--gold),var(--ocean),var(--green-light),var(--mint));
-  -webkit-mask:radial-gradient(circle,transparent 84px,#000 86px,#000 91px,transparent 93px);
-  mask:radial-gradient(circle,transparent 84px,#000 86px,#000 91px,transparent 93px);
-  animation:kCCW 10s linear infinite;
+  width:12px;height:12px;border-radius:50%;
+  background:var(--bg);
+  border:2.5px solid var(--gold);
+  box-shadow:0 0 15px rgba(184,146,63,.4);
+}
+
+@keyframes kNeedleSpin {
+  0% { transform: rotate(0deg); }
+  15% { transform: rotate(190deg); }
+  25% { transform: rotate(180deg); }
+  50% { transform: rotate(180deg); }
+  65% { transform: rotate(370deg); }
+  75% { transform: rotate(360deg); }
+  100% { transform: rotate(360deg); }
 }
 
 /* expand outward — inner first, outer last */
@@ -712,6 +725,8 @@ body.loaded .hc>*:nth-child(6){animation-delay:.42s}
 .feat-grid .reveal:nth-child(2){transition-delay:.08s}
 .feat-grid .reveal:nth-child(3){transition-delay:.16s}
 .feat-grid .reveal:nth-child(4){transition-delay:.24s}
+.feat-grid .reveal:nth-child(5){transition-delay:.32s}
+.feat-grid .reveal:nth-child(6){transition-delay:.40s}
 
 /* ── Panel Strip ─────────────────────────── */
 .panels-strip{
@@ -1234,6 +1249,24 @@ body.loaded .hc>*:nth-child(6){animation-delay:.42s}
           <p class="feat-name-en">Window Snap</p>
           <p class="feat-desc">TA 会自动吸附到你正在用的窗口上方，切换为趴趴姿态。窗口移到哪，TA 就跟到哪。想让 TA 下来？直接拖拽甩出去。</p>
           <p class="feat-desc-en">TA snaps to your active window's title bar and follows wherever it goes. Drag and fling with physics!</p>
+        </div>
+      </div>
+      <div class="reveal">
+        <div class="feat-card tilt-card">
+          <span class="feat-ico">🍅</span>
+          <h3 class="feat-name">沉浸式番茄钟</h3>
+          <p class="feat-name-en">Pomodoro Timer</p>
+          <p class="feat-desc">内置沉浸式番茄钟，工作时 TA 会安静陪伴，休息时主动提醒你放松。让你的学习和工作更有节奏。</p>
+          <p class="feat-desc-en">Built-in Pomodoro timer. TA stays quiet while you focus and reminds you to take a break. Enhance your productivity.</p>
+        </div>
+      </div>
+      <div class="reveal">
+        <div class="feat-card tilt-card">
+          <span class="feat-ico">⏱️</span>
+          <h3 class="feat-name">贴心快捷倒计时</h3>
+          <p class="feat-name-en">Quick Countdown</p>
+          <p class="feat-desc">泡面、敷面膜还是小憩？只需轻轻一点，快捷设置倒计时。时间一到，TA 会第一时间在屏幕上呼唤你。</p>
+          <p class="feat-desc-en">Quickly set a countdown for daily tasks. TA will pop up to notify you exactly when time is up.</p>
         </div>
       </div>
     </div>
