@@ -204,7 +204,12 @@ class ReminderWindow(QWidget):
         row2.addStretch()
         cl.addLayout(row2)
 
-        sb = QPushButton("开始专注"); sb.setFixedHeight(_s(42)); sb.setCursor(Qt.PointingHandCursor)
+        # 状态小字放在按钮上方:补齐右卡上半部高度,使"专注"按钮上边与左侧"开始"对齐
+        self._pomo_status = _lbl("未开始", 10, T3)
+        self._pomo_status.setAlignment(Qt.AlignCenter)
+        cl.addWidget(self._pomo_status)
+
+        sb = QPushButton("专注"); sb.setFixedHeight(_s(42)); sb.setCursor(Qt.PointingHandCursor)
         sb.setFont(QFont("Microsoft YaHei", _fs(11), QFont.Bold))
         sb.setStyleSheet(self._primary_css())
         sb.clicked.connect(self._start_pomodoro)
@@ -215,10 +220,6 @@ class ReminderWindow(QWidget):
         self._pomo_reset_btn = self._mk_ctrl_btn("重置", lambda _: self.reset_pomodoro.emit())
         ctrl.addWidget(self._pomo_pause_btn); ctrl.addWidget(self._pomo_reset_btn)
         cl.addLayout(ctrl)
-
-        self._pomo_status = _lbl("未开始", 10, T3)
-        self._pomo_status.setAlignment(Qt.AlignCenter)
-        cl.addWidget(self._pomo_status)
         cl.addStretch()
         return card
 
