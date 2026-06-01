@@ -1649,7 +1649,7 @@ body.loaded .hc>*:nth-child(6){animation-delay:.42s}
     var lsWrappers = document.querySelectorAll('.LS-w');
     var lsScreen = document.getElementById('loadingScreen');
     
-    var trailColors = ['rgba(255,215,0,0.6)', 'rgba(100,180,255,0.6)', 'rgba(255,180,200,0.6)'];
+    var trailColors = ['rgba(255,215,0,0.9)', 'rgba(80,170,255,0.9)', 'rgba(255,160,190,0.9)'];
     var trailIdx = 0;
     var trailTimer = null;
     var lastTrailTime = 0;
@@ -1683,7 +1683,7 @@ body.loaded .hc>*:nth-child(6){animation-delay:.42s}
           dot.style.left = e.clientX + 'px';
           dot.style.top = e.clientY + 'px';
           dot.style.color = '#fff';
-          dot.style.textShadow = '0 0 6px ' + trailColors[trailIdx];
+          dot.style.textShadow = '0 0 4px ' + trailColors[trailIdx] + ', 0 0 8px ' + trailColors[trailIdx];
           
           var dx = (Math.random() - 0.5) * 40;
           var dy = (Math.random() - 0.5) * 40;
