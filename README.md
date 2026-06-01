@@ -207,6 +207,22 @@
 
 ---
 
+## ⏱️ 实用效率工具 · 陪伴你的专注与小憩
+<sub>Practical Tools · For Focus and Rest</sub>
+
+> TA 不仅仅是个有趣的玩具，更是你桌面上的效率小助手。
+> 
+> <sub>TA is not just a fun toy, but also a productivity assistant on your desktop.</sub>
+
+<p align="center">
+  <img src="docs/pomodoro.png" width="650" alt="番茄钟与快捷倒计时" />
+</p>
+
+- **🍅 沉浸式番茄钟**：内置经典的番茄工作法（支持 25/5、50/10 等预设模式及自定义）。专注时 TA 会安静陪伴，不打扰你的思路；休息时间一到，TA 会准时提醒你放松。
+  <br><sub>Pomodoro Timer: Built-in Pomodoro method with presets and custom durations. TA stays quiet while you focus, and reminds you to take a break.</sub>
+- **⏱️ 贴心快捷倒计时**：泡面、敷面膜还是午间小憩？只需轻轻一点，快捷设置倒计时。时间一到，TA 会第一时间在屏幕上呼唤你。
+  <br><sub>Quick Countdown: Cooking instant noodles, using a face mask, or taking a quick nap? Set a countdown with one click. TA will pop up to notify you exactly when time is up.</sub>
+
 ## 🎯 养成系统 · 越陪伴越亲密
 <sub>Growth System · The More You Care, the Closer You Get</sub>
 
