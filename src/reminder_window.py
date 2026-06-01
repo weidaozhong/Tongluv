@@ -1,9 +1,9 @@
 """提醒·番茄钟 独立窗口。
 窗体/配色/缩放沿用 StatusPanel、MemoryWindow:暖色卡片、圆角、Microsoft YaHei。
-多分区放在滚动区里(快捷倒计时 / 番茄钟 / 后续提醒、备忘录),按需纵向增长。
+左右两栏:快捷倒计时(左半) | 番茄钟(右半),不用滚动条。
 """
 from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel,
-                             QPushButton, QLineEdit, QGridLayout, QScrollArea,
+                             QPushButton, QLineEdit, QGridLayout, QSizePolicy,
                              QApplication)
 from PyQt5.QtCore import Qt, QPoint, pyqtSignal
 from PyQt5.QtGui import QFont, QIntValidator
@@ -31,7 +31,7 @@ def _lbl(text, pt, color, bold=False):
 
 class ReminderWindow(QWidget):
     # 快捷倒计时
-    start_countdown = pyqtSignal(float, str)   # 秒, 标签
+    start_countdown = pyqtSignal(float, str)   # 秒, 待完成事件
     toggle_pause    = pyqtSignal()
     reset_timer     = pyqtSignal()
     # 番茄钟
@@ -39,7 +39,7 @@ class ReminderWindow(QWidget):
     toggle_pomodoro_pause = pyqtSignal()
     reset_pomodoro        = pyqtSignal()
 
-    _BASE_W, _BASE_H = 400, 600
+    _BASE_W, _BASE_H = 730, 470
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -49,8 +49,8 @@ class ReminderWindow(QWidget):
         logical_h = scr.geometry().height() if scr else 1440
         global _scale
         _scale = min(1.0, logical_h / _DESIGN_H)
-        self.W = max(300, int(self._BASE_W * _scale))
-        self.H = max(380, int(self._BASE_H * _scale))
+        self.W = max(480, int(self._BASE_W * _scale))
+        self.H = max(360, int(self._BASE_H * _scale))
         self.setFixedSize(self.W, self.H)
         self._dp = QPoint(); self._dg = False
         g = scr.geometry()
@@ -92,25 +92,17 @@ class ReminderWindow(QWidget):
         cb.clicked.connect(self.close); h.addWidget(cb)
         ml.addLayout(h)
 
-        # 滚动区(承载各分区卡片)
-        body = QWidget(); body.setStyleSheet("background:transparent;border:none;")
-        bl = QVBoxLayout(body)
-        bl.setContentsMargins(0, _s(2), _s(4), 0); bl.setSpacing(_s(12))
-        bl.addWidget(self._build_quick_card())
-        bl.addWidget(self._build_pomodoro_card())
-        bl.addStretch()
+        # 左右两栏:快捷倒计时 | 番茄钟
+        cards = QHBoxLayout(); cards.setSpacing(_s(12))
+        qc = self._build_quick_card()
+        pc = self._build_pomodoro_card()
+        for c in (qc, pc):
+            c.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
+        cards.addWidget(qc, 1)
+        cards.addWidget(pc, 1)
+        ml.addLayout(cards, 1)
 
-        sa = QScrollArea(); sa.setWidgetResizable(True)
-        sa.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        sa.setStyleSheet(
-            "QScrollArea{border:none;background:transparent;}"
-            f"QScrollBar:vertical{{width:{_s(5)}px;background:transparent;}}"
-            f"QScrollBar::handle:vertical{{background:{BD};border-radius:{_s(2)}px;}}"
-            "QScrollBar::add-line:vertical,QScrollBar::sub-line:vertical{height:0;}")
-        sa.setWidget(body)
-        ml.addWidget(sa, 1)
-
-    # ── 快捷倒计时分区 ──
+    # ── 快捷倒计时分区(左)──
     def _build_quick_card(self):
         card = QWidget(); card.setObjectName("QC")
         card.setStyleSheet(f"QWidget#QC{{background:{CARD};border-radius:{_s(14)}px;border:1px solid {BD};}}")
@@ -138,11 +130,11 @@ class ReminderWindow(QWidget):
         hms.addStretch()
         cl.addLayout(hms)
 
-        lab_row = QHBoxLayout(); lab_row.setSpacing(_s(6))
-        lab_row.addWidget(_lbl("标签", 10, T2))
+        ev_row = QHBoxLayout(); ev_row.setSpacing(_s(6))
+        ev_row.addWidget(_lbl("待完成事件", 10, T2))
         self._lbl_inp = QLineEdit(); self._lbl_inp.setStyleSheet(self._input_css())
-        lab_row.addWidget(self._lbl_inp, 1)
-        cl.addLayout(lab_row)
+        ev_row.addWidget(self._lbl_inp, 1)
+        cl.addLayout(ev_row)
 
         sb = QPushButton("开始"); sb.setFixedHeight(_s(42)); sb.setCursor(Qt.PointingHandCursor)
         sb.setFont(QFont("Microsoft YaHei", _fs(11), QFont.Bold))
@@ -155,9 +147,10 @@ class ReminderWindow(QWidget):
         self._reset_btn = self._mk_ctrl_btn("重置", lambda _: self.reset_timer.emit())
         ctrl.addWidget(self._pause_btn); ctrl.addWidget(self._reset_btn)
         cl.addLayout(ctrl)
+        cl.addStretch()
         return card
 
-    # ── 番茄钟分区 ──
+    # ── 番茄钟分区(右)──
     def _build_pomodoro_card(self):
         card = QWidget(); card.setObjectName("PC")
         card.setStyleSheet(f"QWidget#PC{{background:{CARD};border-radius:{_s(14)}px;border:1px solid {BD};}}")
@@ -172,14 +165,14 @@ class ReminderWindow(QWidget):
 
         row1 = QHBoxLayout(); row1.setSpacing(_s(4))
         row1.addWidget(_lbl("专注", 10, T2)); row1.addWidget(self._foc_inp); row1.addWidget(_lbl("分", 10, T3))
-        row1.addSpacing(_s(10))
+        row1.addSpacing(_s(12))
         row1.addWidget(_lbl("短休", 10, T2)); row1.addWidget(self._sht_inp); row1.addWidget(_lbl("分", 10, T3))
         row1.addStretch()
         cl.addLayout(row1)
 
         row2 = QHBoxLayout(); row2.setSpacing(_s(4))
         row2.addWidget(_lbl("长休", 10, T2)); row2.addWidget(self._lng_inp); row2.addWidget(_lbl("分", 10, T3))
-        row2.addSpacing(_s(10))
+        row2.addSpacing(_s(12))
         row2.addWidget(_lbl("每", 10, T2)); row2.addWidget(self._cyc_inp); row2.addWidget(_lbl("轮后长休", 10, T3))
         row2.addStretch()
         cl.addLayout(row2)
@@ -199,6 +192,7 @@ class ReminderWindow(QWidget):
         self._pomo_status = _lbl("未开始", 10, T3)
         self._pomo_status.setAlignment(Qt.AlignCenter)
         cl.addWidget(self._pomo_status)
+        cl.addStretch()
         return card
 
     # ── 样式 / 小工具 ──
