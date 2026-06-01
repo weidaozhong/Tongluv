@@ -198,8 +198,12 @@ body:not(.loaded){position:fixed!important;inset:0!important;overflow:hidden!imp
 /* Magic Cursor Light on Loading Screen */
 .LS-cursor-light {
   position: absolute;
-  width: 40px; height: 40px;
-  background: radial-gradient(circle, rgba(184,146,63,0.6) 0%, rgba(94,123,168,0.45) 35%, rgba(245,180,195,0.3) 70%, transparent 100%);
+  width: 8px; height: 8px;
+  background: #fff;
+  box-shadow: 
+    0 0 6px 3px rgba(255,215,0,0.5), 
+    0 0 12px 6px rgba(100,180,255,0.4), 
+    0 0 20px 10px rgba(255,180,200,0.3);
   border-radius: 50%;
   pointer-events: none;
   translate: -50% -50%;
