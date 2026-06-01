@@ -320,10 +320,10 @@ body:not(.loaded){position:fixed!important;inset:0!important;overflow:hidden!imp
 /* 伴生小元素统一样式 */
 .lyric-ele { position: absolute; z-index: 1; pointer-events: none; }
 
-/* 春：浅绿小花闪烁 */
-.lyric-ele-spring { right: -30px; top: -10px; color: #a7c957; font-family: sans-serif; text-shadow:0 0 10px rgba(167,201,87,0.8); }
-.lyric-ele-spring .star { display: inline-block; animation: kStarTwinkle 1.2s 0.5s ease-in-out forwards; opacity:0; }
-.lyric-ele-spring .star-sm { font-size: 0.6em; position: absolute; left: 15px; top: 15px; animation: kStarTwinkle 1s 0.7s ease-in-out forwards; opacity:0; }
+/* 春：浅粉与水蓝双色小花 */
+.lyric-ele-spring { right: -30px; top: -10px; font-family: sans-serif; }
+.lyric-ele-spring .star { display: inline-block; animation: kStarTwinkle 1.2s 0.5s ease-in-out forwards; opacity:0; color: #ffb6c1; text-shadow:0 0 10px rgba(255,182,193,0.8); }
+.lyric-ele-spring .star-sm { font-size: 0.6em; position: absolute; left: 15px; top: 15px; animation: kStarTwinkle 1s 0.7s ease-in-out forwards; opacity:0; color: #87cefa; text-shadow:0 0 10px rgba(135,206,250,0.8); }
 @keyframes kStarTwinkle { 0%{opacity:0; transform:scale(0) rotate(0deg)} 50%{opacity:1; transform:scale(1.2) rotate(45deg)} 100%{opacity:0; transform:scale(0) rotate(90deg)} }
 
 /* 夏：双子流星划过 */
