@@ -214,9 +214,9 @@
 ## ⏱️ 实用效率工具 · 陪伴你的专注与小憩
 <sub>Practical Tools · For Focus and Rest</sub>
 
-> TA 不仅仅是个有趣的玩具，更是你桌面上的效率小助手。
+> 除了日常的温馨陪伴，TA 也能化身为贴心的效率小助手，陪你一起专注与成长。
 > 
-> <sub>TA is not just a fun toy, but also a productivity assistant on your desktop.</sub>
+> <sub>Beyond providing warm daily companionship, TA also transforms into a thoughtful productivity assistant, focusing and growing alongside you.</sub>
 
 <p align="center">
   <img src="docs/pomodoro.png" width="650" alt="番茄钟与快捷倒计时" />
