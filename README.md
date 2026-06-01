@@ -159,9 +159,16 @@
 在个人中心的「聊天」页里和 TA 说话，TA 的回复会同时以气泡形式弹出在桌宠旁边。聊天过程中 TA 还会自动从对话里提取关键信息，转化为长期记忆。
 <br><sub>Talk to TA in the "Chat" tab of the Profile Center. TA's replies also pop up as bubbles beside the pet. During conversation, TA automatically extracts key information and turns it into long-term memory.</sub>
 
-<p align="center">
-  <img src="docs/panel-chat.png" width="350" alt="聊天界面" />
-</p>
+<table>
+  <tr>
+    <td align="center" width="50%">
+      <img src="docs/panel-settings.png" width="320" alt="API 设置" />
+    </td>
+    <td align="center" width="50%">
+      <img src="docs/panel-chat.png" width="320" alt="聊天界面" />
+    </td>
+  </tr>
+</table>
 
 - **面板对话**：右键桌宠 → 个人中心 → 聊天，在这里输入文字和 TA 交流，所有对话记录完整保留，随时可翻看
   <br><sub>Panel chat: right-click pet → Profile Center → Chat. Type to talk; full history is preserved and scrollable</sub>
