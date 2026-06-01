@@ -36,7 +36,7 @@
 - `src/reminder_window.py` —— 独立窗口:快捷倒计时 / 番茄钟 / 提醒 / 备忘录 控制台。
 
 改动既有:
-- `src/user_data.py` —— 新增 `reminder_data_path()` → `geren/reminder_data.json`。
+- `src/user_data.py` —— 新增 `pomodoro_config_path()` → `geren/pomodoro_config.json`(番茄钟配置,独立文件);P3/P5 再加 `reminder_data_path()` → `geren/reminder_data.json`(提醒/备忘录内容)。
 - `main.py` —— 持有 ReminderSystem + Pomodoro + 前台计时器状态;主循环每秒检测到点;接气泡 / 浮窗;托盘加入口;触发桌宠联动动画。
 - `src/chat_service.py` —— 系统提示词加一句"识别到提醒意图就输出标记"(聊天路径)。
 - `src/status_panel.py` —— 聊天回复处理里扫描标记 → 创建提醒、隐藏标记;注入 `reminder_system`。
@@ -55,7 +55,9 @@
 
 ## 3. 数据模型与持久化
 
-文件:`geren/reminder_data.json`(便携,跟随程序)。
+两个独立文件(便携,跟随程序;配置与内容分开存放):
+- `geren/pomodoro_config.json` —— 番茄钟配置(P2,已实现):`focus_min` / `short_break_min` / `long_break_min` / `cycles_before_long` 四个整数(默认 25/5/15/4)。独立成文件:老用户迁移旧 `geren/` 缺它会自动回落默认,单独删它只重置番茄钟、不碰其它数据,读取做满防御。
+- `geren/reminder_data.json` —— 提醒 + 备忘录内容(P3/P5),结构如下:
 
 ```jsonc
 {
@@ -71,15 +73,11 @@
   }],
   "memos": [{
     "id": "m_<ts>_<rand>", "text": "...", "created_ts": 0.0, "updated_ts": 0.0
-  }],
-  "pomodoro": {                  // 仅配置持久化,会话本身不持久
-    "focus_min": 25, "short_break_min": 5,
-    "long_break_min": 15, "cycles_before_long": 4
-  }
+  }]
 }
 ```
 
-`kind` / `clock` 字段从 P1 起就预留,P4 加绝对 / 每日时不必迁移数据。快捷倒计时、番茄钟会话本身不写盘(临时);仅番茄钟时长配置持久。
+`kind` / `clock` 字段从设计起就预留,P4 加绝对 / 每日时不必迁移数据。快捷倒计时、番茄钟会话本身不写盘(临时);仅番茄钟时长配置持久(独立存 `pomodoro_config.json`)。
 
 ## 4. 标记 / 解析
 

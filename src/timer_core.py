@@ -50,10 +50,6 @@ class Countdown:
         return self._running and self.remaining <= 0.0
 
     @property
-    def duration(self) -> float:
-        return self._duration
-
-    @property
     def fraction(self) -> float:
         if self._duration <= 0:
             return 1.0
