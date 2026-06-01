@@ -100,13 +100,7 @@ body:not(.loaded){position:fixed!important;inset:0!important;overflow:hidden!imp
   animation: kAmbientGlow 7s ease-in-out forwards;
 }
 
-/* 3D 鼠标视差容器 */
-.LS-parallax {
-  position: absolute; inset: 0;
-  perspective: 1200px;
-  transform-style: preserve-3d;
-  will-change: transform;
-}
+
 @keyframes kAmbientGlow {
   0%   { background-color: transparent; }
   10%  { background-color: rgba(167,201,87,0.06); } /* 春：浅绿 #a7c957 */
@@ -1240,7 +1234,6 @@ body.loaded .hc>*:nth-child(6){animation-delay:.42s}
 <!-- Loading Screen — Astrolabe -->
 <div class="LS" id="loadingScreen">
   <div class="LS-ambient"></div>
-  <div class="LS-parallax" id="lsParallax">
   <div class="LS-w LS-w1"><div class="LS-l1"></div></div>
   <div class="LS-w LS-w2"><div class="LS-l2"></div></div>
   <div class="LS-w LS-w3"><div class="LS-l3"></div></div>
@@ -1290,7 +1283,6 @@ body.loaded .hc>*:nth-child(6){animation-delay:.42s}
       <div class="flash-y"></div>
       <div class="flash-core"></div>
     </div>
-  </div>
   </div>
 </div>
 
@@ -1789,10 +1781,6 @@ body.loaded .hc>*:nth-child(6){animation-delay:.42s}
       
       /* Loading Screen Interactivity */
       if(!document.body.classList.contains('loaded')){
-        var pWrap = document.getElementById('lsParallax');
-        if(pWrap) {
-          pWrap.style.transform = 'perspective(1200px) rotateX('+(-pctY*15)+'deg) rotateY('+(pctX*15)+'deg)';
-        }
         
         /* Trail Logic */
         clearTimeout(trailTimer);
