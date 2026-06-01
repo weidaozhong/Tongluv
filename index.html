@@ -281,11 +281,11 @@ body:not(.loaded){position:fixed!important;inset:0!important;overflow:hidden!imp
 }
 .lyric-text { position: relative; z-index: 2; }
 
-/* 顺序遮罩展开淡出，不重叠 */
-.LS-lyric--1{ top:25%; left:15%; animation: kLSLyricMask 1.8s 0.2s forwards; }
-.LS-lyric--2{ bottom:25%; right:15%; animation: kLSLyricMask 1.8s 2.0s forwards; }
-.LS-lyric--3{ top:20%; right:15%; animation: kLSLyricMask 1.8s 3.8s forwards; }
-.LS-lyric--4{ bottom:20%; left:25%; animation: kLSLyricMask 1.8s 5.6s forwards; }
+/* 顺序遮罩展开淡出，打破对称，改为自上而下的错落排布 */
+.LS-lyric--1{ top:15%; left:12%; animation: kLSLyricMask 1.8s 0.2s forwards; }
+.LS-lyric--2{ top:38%; right:10%; animation: kLSLyricMask 1.8s 2.0s forwards; }
+.LS-lyric--3{ top:65%; left:8%; animation: kLSLyricMask 1.8s 3.8s forwards; }
+.LS-lyric--4{ top:82%; right:15%; animation: kLSLyricMask 1.8s 5.6s forwards; }
 
 @keyframes kLSLyricMask {
   0%   { clip-path: polygon(0 -50%, 0 -50%, 0 150%, 0 150%); opacity:0; transform:translateX(-10px); }
