@@ -119,6 +119,7 @@ from src.timer_core import Countdown, format_remaining
 from src.countdown_float import CountdownFloat
 from src.reminder_bubble import ReminderBubbleManager
 from src.reminder_window import ReminderWindow
+from src.pomodoro import PomodoroTimer, FOCUS, SHORT_BREAK
 
 PET_SIZE = 210   # 基准值，main() 中根据屏幕逻辑高度重新计算
 PET_WINDOW_MARGIN = 20   # 窗口四周透明 padding，_sync_window_pos 中用到
@@ -430,6 +431,10 @@ class PetWindow(QWidget):
         self.reminder_window.start_countdown.connect(self._on_start_countdown)
         self.reminder_window.toggle_pause.connect(self._on_toggle_pause)
         self.reminder_window.reset_timer.connect(self._on_reset_countdown)
+        self.pomodoro         = PomodoroTimer()
+        self.reminder_window.start_pomodoro.connect(self._on_start_pomodoro)
+        self.reminder_window.toggle_pomodoro_pause.connect(self._on_toggle_pomodoro_pause)
+        self.reminder_window.reset_pomodoro.connect(self._on_reset_pomodoro)
 
         self.input_state = InputState()
 
@@ -681,7 +686,7 @@ class PetWindow(QWidget):
         self._tick_auto_walk(dt)
         self._apply_walk_movement()
         self._sync_window_pos()
-        self._tick_countdown()
+        self._tick_foreground()
         self._restack_above_pet()
 
         if hasattr(self.renderer, 'update'):
@@ -1566,6 +1571,10 @@ class PetWindow(QWidget):
     # ── 提醒·番茄钟(P1)────────────────────────────────────────────────
     def _on_start_countdown(self, seconds: float, label: str):
         """独立窗口请求开始一个快捷倒计时(前台计时器,替换式)。"""
+        if self.pomodoro.active:            # 前台互斥:停掉番茄钟
+            self.pomodoro.reset()
+            self.reminder_window.set_pomodoro_state(False, False)
+            self.reminder_window.set_pomodoro_status("未开始")
         self.countdown.start(seconds, label)
         self._countdown_active = True
         self._countdown_paused = False
@@ -1609,6 +1618,67 @@ class PetWindow(QWidget):
             return
         rem = format_remaining(self.countdown.remaining)
         self.countdown_float.set_text(f"⏰ {label} {rem}" if label else f"⏰ {rem}")
+
+    def _tick_foreground(self):
+        """前台计时器(番茄钟 或 快捷倒计时,二选一)驱动头顶浮窗。"""
+        if self.pomodoro.active:
+            self._tick_pomodoro()
+        else:
+            self._tick_countdown()
+
+    # ── 番茄钟(P2)─────────────────────────────────────────────────────
+    def _on_start_pomodoro(self, cfg: dict):
+        if self._countdown_active:          # 前台互斥:停掉快捷倒计时
+            self._countdown_active = False
+            self._countdown_paused = False
+            self.countdown.stop()
+            self.reminder_window.set_timer_state(False, False)
+        self.pomodoro.cfg.update(cfg)
+        self.pomodoro.start()
+        self.reminder_window.set_pomodoro_state(True, False)
+        self._say("开始专注!我陪你~📖", mood="happy", trigger_anim=False)
+        self.renderer.trigger("study")
+        self.state.current_action = PetAction.STUDY
+
+    def _on_toggle_pomodoro_pause(self):
+        if not self.pomodoro.active:
+            return
+        if self.pomodoro.paused:
+            self.pomodoro.resume()
+        else:
+            self.pomodoro.pause()
+        self.reminder_window.set_pomodoro_state(True, self.pomodoro.paused)
+
+    def _on_reset_pomodoro(self):
+        self.pomodoro.reset()
+        self.countdown_float.set_text("")
+        self.reminder_window.set_pomodoro_state(False, False)
+        self.reminder_window.set_pomodoro_status("未开始")
+
+    def _tick_pomodoro(self):
+        if self.pomodoro.paused:
+            rem = format_remaining(self.pomodoro.remaining)
+            self.countdown_float.set_text(f"⏸ {self.pomodoro.label} {rem}")
+            self.reminder_window.set_pomodoro_status(f"已暂停 · {self.pomodoro.label}")
+            return
+        new_phase = self.pomodoro.update()
+        if new_phase is not None:
+            self._on_pomodoro_phase(new_phase)
+        rem = format_remaining(self.pomodoro.remaining)
+        self.countdown_float.set_text(f"🍅 {self.pomodoro.label} {rem}")
+        self.reminder_window.set_pomodoro_status(
+            f"{self.pomodoro.label} · 已完成 {self.pomodoro.completed_focus} 轮专注")
+
+    def _on_pomodoro_phase(self, phase: str):
+        """阶段切换:自动淡出气泡播报 + 切桌宠动画(专注=study,休息=wake)。"""
+        if phase == FOCUS:
+            self._say("休息结束,继续加油!💪", mood="happy", trigger_anim=False)
+            self.renderer.trigger("study")
+            self.state.current_action = PetAction.STUDY
+        else:
+            tip = "专注结束,起来活动下~☕" if phase == SHORT_BREAK else "完成一组!好好长休一下~🌟"
+            self._say(tip, mood="happy", trigger_anim=False)
+            self.renderer.trigger("wake")
 
     def _restack_above_pet(self):
         """桌宠头顶浮动元素竖直堆叠,避免重叠。
