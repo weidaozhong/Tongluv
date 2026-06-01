@@ -82,12 +82,34 @@ body:not(.loaded){position:fixed!important;inset:0!important;overflow:hidden!imp
   perspective: 1200px;
   transform-style: preserve-3d;
 }
-/* staggered start for compass assembly with gentle pulse */
-.LS-w1{animation:kLife 7s 0s    ease-in-out forwards; --pulse-amp: 0.02; transform-style: preserve-3d;}
-.LS-w2{animation:kLife 7s .1s   ease-in-out forwards; --pulse-amp: 0.02; transform-style: preserve-3d;}
-.LS-w3{animation:kLife 7s .2s   ease-in-out forwards; --pulse-amp: 0.02; transform-style: preserve-3d;}
-.LS-w4{animation:kLife 7s .3s   ease-in-out forwards; --pulse-amp: 0.02; transform-style: preserve-3d;}
-.LS-w5{animation:kLife 7s .4s   ease-in-out forwards; --pulse-amp: 0.02; transform-style: preserve-3d;}
+/* 星盘充能演进与扭矩进场 */
+.LS-w1{animation:kCharge 1.5s 0.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; transform-style: preserve-3d;}
+.LS-w2{animation:kCharge 1.5s 1.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; transform-style: preserve-3d;}
+.LS-w3{animation:kCharge 1.5s 3.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; transform-style: preserve-3d;}
+.LS-w4{animation:kCharge 1.5s 4.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; transform-style: preserve-3d;}
+.LS-w5{animation:kCharge 1.5s 5.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; transform-style: preserve-3d;}
+
+@keyframes kCharge {
+  0%   { scale:0.5; opacity:0; transform: rotate(-60deg); filter: brightness(0.5); }
+  100% { scale:1; opacity:1; transform: rotate(0deg); filter: brightness(1); }
+}
+
+/* ── 进阶环境氛围：四季光晕联动 ───────────────────────────── */
+.LS-ambient {
+  position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  animation: kAmbientGlow 7s ease-in-out forwards;
+}
+@keyframes kAmbientGlow {
+  0%   { background-color: transparent; }
+  10%  { background-color: rgba(243,156,18,0.06); } /* 春：暖金 */
+  25%  { background-color: transparent; }
+  35%  { background-color: rgba(52,152,219,0.06); } /* 夏：清透蓝 */
+  50%  { background-color: transparent; }
+  65%  { background-color: rgba(231,76,60,0.06); }  /* 秋：柔红 */
+  75%  { background-color: transparent; }
+  85%  { background-color: rgba(255,255,255,0.4); } /* 冬：极致冰白 */
+  100% { background-color: transparent; }
+}
 
 /* L1: Outer Gold Ring (3D Axis 1) */
 .LS-l1{
@@ -1178,6 +1200,7 @@ body.loaded .hc>*:nth-child(6){animation-delay:.42s}
 
 <!-- Loading Screen — Astrolabe -->
 <div class="LS" id="loadingScreen">
+  <div class="LS-ambient"></div>
   <div class="LS-w LS-w1"><div class="LS-l1"></div></div>
   <div class="LS-w LS-w2"><div class="LS-l2"></div></div>
   <div class="LS-w LS-w3"><div class="LS-l3"></div></div>
