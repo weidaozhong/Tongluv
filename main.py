@@ -1942,7 +1942,7 @@ class PetWindow(QWidget):
         self.panel.raise_()
 
     def _show_context_menu(self, global_pos: QPoint):
-        from PyQt5.QtWidgets import QHBoxLayout
+        from PyQt5.QtWidgets import QHBoxLayout, QPushButton
         menu = QMenu(self)
         menu.setWindowFlags(Qt.Popup | Qt.FramelessWindowHint | Qt.NoDropShadowWindowHint)
         menu.setAttribute(Qt.WA_TranslucentBackground)
@@ -1965,10 +1965,19 @@ class PetWindow(QWidget):
         sld.setFixedWidth(_p(90)); sld.valueChanged.connect(self._set_opacity)
         ol.addWidget(lbl); ol.addWidget(sld)
         wa = QWidgetAction(self); wa.setDefaultWidget(ow); menu.addAction(wa)
-        # ── 提醒·番茄钟(紧贴不透明度下方)──
-        a_rem = QAction("提醒·番茄钟", self)
-        a_rem.triggered.connect(self._show_reminder_window)
-        menu.addAction(a_rem)
+        # ── 提醒·番茄钟(与不透明度同款行:灰字 + 同左边距 + 右侧"打开"按钮平衡滑块)──
+        rw = QWidget(); rw.setAttribute(Qt.WA_TranslucentBackground)
+        rl = QHBoxLayout(rw); rl.setContentsMargins(_p(16), _p(4), _p(16), _p(4)); rl.setSpacing(_p(8))
+        rlbl = QLabel("提醒·番茄钟")
+        rlbl.setStyleSheet(f"color:#8a96b0; font-size:{_f(12)}px; background:transparent;")
+        ropen = QPushButton("打开"); ropen.setCursor(Qt.PointingHandCursor); ropen.setFixedSize(_p(58), _p(24))
+        ropen.setStyleSheet(
+            f"QPushButton{{background:#dce8fa; color:#2a5bb5; border:none;"
+            f"border-radius:{_p(6)}px; font-size:{_f(11)}px;}}"
+            f"QPushButton:hover{{background:#c9ddf6;}}")
+        ropen.clicked.connect(lambda *_: (menu.close(), QTimer.singleShot(0, self._show_reminder_window)))
+        rl.addWidget(rlbl); rl.addStretch(); rl.addWidget(ropen)
+        rwa = QWidgetAction(self); rwa.setDefaultWidget(rw); menu.addAction(rwa)
         menu.addSeparator()
         # ── 互动 ──
         for label, slot in [("✋ 摸摸头", self._on_pet),
