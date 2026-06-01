@@ -79,63 +79,177 @@ body:not(.loaded){position:fixed!important;inset:0!important;overflow:hidden!imp
   position:absolute;top:50%;left:50%;
   translate:-50% -50%;
   scale:0;opacity:0;
+  perspective: 1200px;
+  transform-style: preserve-3d;
 }
-/* staggered start → heartbeat ripples outward from center with increasing intensity */
-.LS-w1{animation:kLife 7s 0s    ease-in-out forwards; --pulse-amp: 0.04;}
-.LS-w2{animation:kLife 7s .15s  ease-in-out forwards; --pulse-amp: 0.08;}
-.LS-w3{animation:kLife 7s .3s   ease-in-out forwards; --pulse-amp: 0.12;}
-.LS-w4{animation:kLife 7s .5s   ease-in-out forwards; --pulse-amp: 0.16;}
-.LS-w5{animation:kLife 7s .75s  ease-in-out forwards; --pulse-amp: 0.22;}
+/* 星盘充能演进与扭矩进场 */
+.LS-w1{animation:kCharge 1.5s 0.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; transform-style: preserve-3d;}
+.LS-w2{animation:kCharge 1.5s 1.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; transform-style: preserve-3d;}
+.LS-w3{animation:kCharge 1.5s 3.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; transform-style: preserve-3d;}
+.LS-w4{animation:kCharge 1.5s 4.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; transform-style: preserve-3d;}
+.LS-w5{animation:kCharge 1.5s 5.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; transform-style: preserve-3d;}
 
-/* L1: gold center dot */
+@keyframes kCharge {
+  0%   { scale:0.5; opacity:0; transform: rotate(-60deg); filter: brightness(0.5); }
+  100% { scale:1; opacity:1; transform: rotate(0deg); filter: brightness(1); }
+}
+
+/* ── 进阶环境氛围：四季光晕联动 ───────────────────────────── */
+.LS-ambient {
+  position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  animation: kAmbientGlow 7s ease-in-out forwards;
+}
+
+
+@keyframes kAmbientGlow {
+  0%   { background-color: transparent; }
+  10%  { background-color: rgba(167,201,87,0.06); } /* 春：浅绿 #a7c957 */
+  25%  { background-color: transparent; }
+  35%  { background-color: rgba(52,152,219,0.06); } /* 夏：清透蓝 */
+  50%  { background-color: transparent; }
+  65%  { background-color: rgba(160,82,45,0.06); }  /* 秋：大地棕 #a0522d */
+  75%  { background-color: transparent; }
+  85%  { background-color: rgba(255,255,255,0.4); } /* 冬：极致冰白 */
+  100% { background-color: transparent; }
+}
+
+/* L1: Outer Gold Ring (3D Axis 1) */
 .LS-l1{
-  width:14px;height:14px;border-radius:50%;
-  background:var(--gold);
-  box-shadow:0 0 20px rgba(184,146,63,.35),0 0 40px rgba(184,146,63,.12);
+  width:220px;height:220px;border-radius:50%;
+  border: 3px solid transparent;
+  border-top-color: rgba(184,146,63,0.8);
+  border-bottom-color: rgba(184,146,63,0.8);
+  box-shadow: 0 0 25px rgba(184,146,63,0.3), inset 0 0 25px rgba(184,146,63,0.3);
+  animation:kAstro1 10s linear infinite;
+}
+.LS-l1::before{
+  content:''; position:absolute; inset: 8px; border-radius:50%;
+  border: 1.5px dashed var(--gold); opacity: 0.5;
 }
 
-/* L2: 6 mint rays — conic gradient masked to ring */
+/* L2: Middle Ocean Ring (3D Axis 2) */
 .LS-l2{
-  width:72px;height:72px;border-radius:50%;
-  background:repeating-conic-gradient(from 0deg,var(--mint) 0deg 2.5deg,transparent 2.5deg 60deg);
-  -webkit-mask:radial-gradient(circle,transparent 12px,#000 14px,#000 32px,transparent 34px);
-  mask:radial-gradient(circle,transparent 12px,#000 14px,#000 32px,transparent 34px);
-  animation:kCW 8s linear infinite;
+  width:160px;height:160px;border-radius:50%;
+  border: 2px solid transparent;
+  border-left-color: var(--ocean);
+  border-right-color: var(--ocean);
+  box-shadow: 0 0 20px rgba(94,123,168,.4), inset 0 0 20px rgba(94,123,168,.4);
+  animation:kAstro2 14s linear infinite;
+}
+.LS-l2::before{
+  content:''; position:absolute; inset: 5px; border-radius:50%;
+  border: 2px dotted var(--mint); opacity: 0.6;
 }
 
-/* L3: ocean dashed ring */
+/* L3: Inner Mint Ring (3D Axis 3) */
 .LS-l3{
-  width:96px;height:96px;border-radius:50%;
-  border:1.5px dashed var(--ocean);
-  animation:kCCW 6s linear infinite;
+  width:110px;height:110px;border-radius:50%;
+  border: 1.5px solid var(--green-light);
+  box-shadow: 0 0 15px rgba(122,173,126,.6);
+  animation:kAstro3 8s linear infinite;
+}
+.LS-l3::after{
+  content:''; position:absolute; top:-4px; left:50%; width:8px; height:8px;
+  background: var(--gold); border-radius:50%; translate:-50% 0;
+  box-shadow: 0 0 10px var(--gold);
 }
 
-/* L4: 6 green wedge segments */
+/* L4: The Glowing Core & Needle */
 .LS-l4{
-  width:140px;height:140px;border-radius:50%;
-  background:repeating-conic-gradient(from 15deg,var(--green-light) 0deg 6deg,transparent 6deg 60deg);
-  -webkit-mask:radial-gradient(circle,transparent 54px,#000 56px,#000 66px,transparent 68px);
-  mask:radial-gradient(circle,transparent 54px,#000 56px,#000 66px,transparent 68px);
-  animation:kCW 4s linear infinite;
+  width:36px;height:36px;border-radius:50%;
+  background: radial-gradient(circle at 30% 30%, #fff, var(--mint) 30%, var(--ocean) 70%);
+  box-shadow: 0 0 40px var(--mint), 0 0 80px var(--ocean);
+  animation:kCoreFloat 4s ease-in-out infinite;
+  transform-style: preserve-3d;
+}
+.LS-l4::before{
+  content:''; position:absolute; top:50%; left:50%;
+  width:4px; height:120px;
+  background: linear-gradient(to bottom, var(--gold) 50%, var(--ocean) 50%);
+  clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+  animation: kAstroNeedle 6s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
 }
 
-/* L5: flowing gradient ring */
+/* L5: Giant Magic Array (Ground Plane) */
 .LS-l5{
-  width:186px;height:186px;border-radius:50%;
-  background:conic-gradient(from 0deg,var(--mint),var(--gold),var(--ocean),var(--green-light),var(--mint));
-  -webkit-mask:radial-gradient(circle,transparent 84px,#000 86px,#000 91px,transparent 93px);
-  mask:radial-gradient(circle,transparent 84px,#000 86px,#000 91px,transparent 93px);
-  animation:kCCW 10s linear infinite;
+  width:360px;height:360px;border-radius:50%;
+  background: repeating-conic-gradient(from 0deg, var(--gold) 0deg 2deg, transparent 2deg 12deg);
+  -webkit-mask: radial-gradient(circle, transparent 176px, #000 178px);
+  mask: radial-gradient(circle, transparent 176px, #000 178px);
+  transform: rotateX(75deg);
+  animation:kAstroFlat 25s linear infinite;
+  opacity: 0.25;
+}
+.LS-l5::before{
+  content:''; position:absolute; inset: 24px; border-radius:50%;
+  background: repeating-conic-gradient(from 0deg, var(--ocean) 0deg 1deg, transparent 1deg 6deg);
+  -webkit-mask: radial-gradient(circle, transparent 152px, #000 154px);
+  mask: radial-gradient(circle, transparent 152px, #000 154px);
+  animation: kAstroFlatRev 18s linear infinite;
 }
 
-/* expand outward — inner first, outer last */
-.LS.exit .LS-w{animation:kExpand .5s cubic-bezier(.23,1,.32,1) both}
+@keyframes kAstro1 {
+  0% { transform: rotateX(65deg) rotateY(0deg) rotateZ(0deg); }
+  100% { transform: rotateX(65deg) rotateY(360deg) rotateZ(360deg); }
+}
+@keyframes kAstro2 {
+  0% { transform: rotateX(0deg) rotateY(65deg) rotateZ(0deg); }
+  100% { transform: rotateX(360deg) rotateY(65deg) rotateZ(360deg); }
+}
+@keyframes kAstro3 {
+  0% { transform: rotateX(45deg) rotateY(45deg) rotateZ(0deg); }
+  100% { transform: rotateX(45deg) rotateY(45deg) rotateZ(360deg); }
+}
+@keyframes kAstroFlat {
+  0% { transform: rotateX(75deg) rotateZ(0deg); }
+  100% { transform: rotateX(75deg) rotateZ(360deg); }
+}
+@keyframes kAstroFlatRev {
+  0% { transform: rotateZ(360deg); }
+  100% { transform: rotateZ(0deg); }
+}
+@keyframes kCoreFloat {
+  0%, 100% { transform: translateY(-15px) scale(1); filter: brightness(1); }
+  50% { transform: translateY(15px) scale(1.1); filter: brightness(1.3); }
+}
+@keyframes kAstroNeedle {
+  0%, 100% { transform: translate(-50%, -50%) rotateZ(0deg) rotateY(0deg); }
+  25% { transform: translate(-50%, -50%) rotateZ(90deg) rotateY(180deg); }
+  50% { transform: translate(-50%, -50%) rotateZ(180deg) rotateY(360deg); }
+  75% { transform: translate(-50%, -50%) rotateZ(270deg) rotateY(540deg); }
+}
+
+/* Magic Mouse Trail on Loading Screen */
+.LS-trail-dot {
+  position: absolute;
+  pointer-events: none;
+  z-index: 10002;
+  font-size: 16px;
+  line-height: 1;
+  will-change: transform, opacity;
+  animation: kTrailFade 1.2s ease-out forwards;
+}
+@keyframes kTrailFade {
+  0% { transform: translate(-50%, -50%) scale(var(--s)) rotate(0deg); opacity: 0.8; }
+  100% { transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy) + 20px)) scale(0.1) rotate(var(--r)); opacity: 0; }
+}
+
+/* 焦外呼吸转场：星盘散开模糊 */
+.LS.exit { animation: kLSBgExit 1.2s ease-in-out forwards; }
+@keyframes kLSBgExit { to { opacity: 0; visibility: hidden; } }
+
+.LS.exit .LS-w{animation:kLSWBlurExit 1s cubic-bezier(0.4, 0, 0.2, 1) forwards}
 .LS.exit .LS-w1{animation-delay:0s}
 .LS.exit .LS-w2{animation-delay:.06s}
 .LS.exit .LS-w3{animation-delay:.12s}
 .LS.exit .LS-w4{animation-delay:.18s}
 .LS.exit .LS-w5{animation-delay:.24s}
-.LS.exit::before{animation:kExpand .5s .1s cubic-bezier(.23,1,.32,1) both}
+.LS.exit::before{animation:kLSWBlurExit 1s .1s cubic-bezier(0.4, 0, 0.2, 1) forwards}
+
+@keyframes kLSWBlurExit {
+  0% { transform: scale(1); opacity: 1; filter: blur(0); }
+  100% { transform: scale(1.5); opacity: 0; filter: blur(20px); }
+}
 /* 加载屏落叶退出：随主体一同淡出消散 */
 .LS.exit .LS-leaf{animation:kLSLeafExit .35s ease-in both!important}
 
@@ -175,33 +289,98 @@ body:not(.loaded){position:fixed!important;inset:0!important;overflow:hidden!imp
   to{opacity:0;transform:translateY(-20px) scale(.4)}
 }
 
-/* ── 加载屏歌词 ───────────────────────────── */
-/* NOTE: 四句歌词分布在四个对角区域，依次淡入淡出，填充加载等待时间 */
+/* ── 加载屏歌词与伴生小元素 ───────────────────────────── */
 .LS-lyric{
   position:absolute;
-  font-family:'Noto Serif SC',var(--serif-cn),serif;
-  font-size:clamp(.85rem, 2vw, 1.1rem);
+  font-family: 'Kaiti SC', 'STKaiti', 'KaiTi', '楷体', serif;
+  font-size:clamp(1.2rem, 3vw, 1.5rem);
   font-weight:400;
-  letter-spacing:.12em;
-  color:rgba(90,80,70,.55);
+  letter-spacing:.15em;
+  color:#4a4036; /* 极深茶色，绝对清晰 */
   opacity:0;
   pointer-events:none;
   white-space:nowrap;
-  animation:kLSLyric 1.5s ease-in-out forwards;
+  display: flex;
+  align-items: center;
 }
-/* 四个位置：左上、右下、右上、左下 */
-.LS-lyric--1{top:22%;left:12%;animation-delay:.5s}
-.LS-lyric--2{bottom:32%;right:10%;animation-delay:2s}
-.LS-lyric--3{top:18%;right:8%;animation-delay:3.5s}
-.LS-lyric--4{bottom:18%;left:10%;animation-delay:5s}
-@keyframes kLSLyric{
-  0%{opacity:0;transform:translateY(12px);filter:blur(4px)}
-  27%{opacity:1;transform:translateY(0);filter:blur(0)}
-  73%{opacity:1;transform:translateY(0);filter:blur(0)}
-  100%{opacity:0;transform:translateY(-10px);filter:blur(3px)}
+.lyric-text { position: relative; z-index: 2; }
+
+/* 顺序遮罩展开淡出，打破对称，改为自上而下的错落排布 */
+.LS-lyric--1{ top:15%; left:12%; animation: kLSLyricMask 1.8s 0.2s forwards; }
+.LS-lyric--2{ top:38%; right:10%; animation: kLSLyricMask 1.8s 2.0s forwards; }
+.LS-lyric--3{ top:65%; left:8%; animation: kLSLyricMask 1.8s 3.8s forwards; }
+.LS-lyric--4{ top:82%; right:15%; animation: kLSLyricMask 1.8s 5.6s forwards; }
+
+@keyframes kLSLyricMask {
+  0%   { clip-path: polygon(0 -50%, 0 -50%, 0 150%, 0 150%); opacity:0; transform:translateX(-10px); }
+  10%  { opacity:1; }
+  35%  { clip-path: polygon(0 -50%, 120% -50%, 120% 150%, 0 150%); transform:translateX(0); }
+  75%  { opacity:1; clip-path: polygon(0 -50%, 120% -50%, 120% 150%, 0 150%); transform:translateX(0); }
+  100% { opacity:0; clip-path: polygon(0 -50%, 120% -50%, 120% 150%, 0 150%); transform:translateX(0); }
 }
-/* 退出时歌词也跟随淡出 */
-.LS.exit .LS-lyric{animation:kLSLeafExit .35s ease-in both!important}
+
+/* 伴生小元素统一样式 */
+.lyric-ele { position: absolute; z-index: 1; pointer-events: none; }
+
+/* 春：浅粉与水蓝双色小花 */
+.lyric-ele-spring { right: -30px; top: -10px; font-family: sans-serif; }
+.lyric-ele-spring .star { display: inline-block; animation: kStarTwinkle 1.2s 0.5s ease-in-out forwards; opacity:0; color: #ffb6c1; text-shadow:0 0 10px rgba(255,182,193,0.8); }
+.lyric-ele-spring .star-sm { font-size: 0.6em; position: absolute; left: 15px; top: 15px; animation: kStarTwinkle 1s 0.7s ease-in-out forwards; opacity:0; color: #87cefa; text-shadow:0 0 10px rgba(135,206,250,0.8); }
+@keyframes kStarTwinkle { 0%{opacity:0; transform:scale(0) rotate(0deg)} 50%{opacity:1; transform:scale(1.2) rotate(45deg)} 100%{opacity:0; transform:scale(0) rotate(90deg)} }
+
+/* 夏：双子流星划过 */
+.lyric-ele-summer { left: 0; top: 0; width: 100%; height: 100%; pointer-events: none; }
+.lyric-ele-summer .meteor {
+  position: absolute; height: 1.5px;
+  background: linear-gradient(to right, transparent, rgba(52,152,219,0.6) 80%, #fff 100%);
+  opacity: 0; border-radius: 2px;
+}
+.lyric-ele-summer .meteor::after {
+  content: ''; position: absolute; right: -1px; top: 50%; transform: translateY(-50%);
+  width: 4px; height: 4px; border-radius: 50%; background: #fff;
+  box-shadow: 0 0 10px 2px rgba(52,152,219,0.8);
+}
+.lyric-ele-summer .m1 { right: -20px; top: 5px; width: 120px; animation: kMeteor 1.2s 2.0s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+.lyric-ele-summer .m2 { right: 30px; top: -15px; width: 80px; animation: kMeteor 1s 2.4s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+@keyframes kMeteor {
+  0%   { transform: rotate(-25deg) translateX(-200px); opacity: 0; }
+  30%  { opacity: 1; }
+  100% { transform: rotate(-25deg) translateX(100px); opacity: 0; }
+}
+
+/* 秋：落叶画圈 */
+.lyric-ele-autumn { right: -20px; top: -10px; width: 35px; height: 35px; }
+.lyric-ele-autumn svg { width:100%; height:100%; overflow:visible; }
+.lyric-ele-autumn circle { fill:none; stroke:#a0522d; stroke-width:1.5; stroke-dasharray:302; stroke-dashoffset:302; animation: kDrawCircle 1.2s 4.1s cubic-bezier(0.4, 0, 0.2, 1) forwards; opacity:0.8;}
+@keyframes kDrawCircle { to { stroke-dashoffset: 0; } }
+
+/* 冬：冰封十字爆闪 */
+.lyric-ele-winter { right: -15px; top: 50%; }
+.lyric-ele-winter .flash-x, .lyric-ele-winter .flash-y {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  background: #fff; border-radius: 50%; opacity: 0;
+  box-shadow: 0 0 15px #fff, 0 0 25px rgba(255,255,255,0.8);
+}
+.lyric-ele-winter .flash-x { width: 0; height: 1.5px; animation: kFlashX 1.2s 5.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+.lyric-ele-winter .flash-y { width: 1.5px; height: 0; animation: kFlashY 1.2s 5.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+.lyric-ele-winter .flash-core {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  width: 0; height: 0; background: #fff; border-radius: 50%;
+  box-shadow: 0 0 40px 15px rgba(243,156,18,0.6);
+  animation: kFlashCore 1.2s 5.5s ease-out forwards; opacity: 0;
+}
+@keyframes kFlashX { 0%{width:0;opacity:1} 40%{width:120px;opacity:1} 100%{width:0;opacity:0} }
+@keyframes kFlashY { 0%{height:0;opacity:1} 40%{height:120px;opacity:1} 100%{height:0;opacity:0} }
+@keyframes kFlashCore { 0%{width:0;height:0;opacity:1} 20%{width:15px;height:15px;opacity:1} 100%{width:0;height:0;opacity:0} }
+
+/* 焦外呼吸转场时歌词如果还没消失则跟随模糊淡出 */
+.LS.exit .LS-lyric{
+  animation:kLSLyricExit .6s ease-in forwards;
+}
+@keyframes kLSLyricExit{
+  to { opacity:0; filter:blur(15px); }
+}
+
 
 @keyframes kBloom{
   0%{scale:0;opacity:0}
@@ -681,14 +860,17 @@ body.loaded .hc>*:nth-child(6){animation-delay:.42s}
   transform-style:preserve-3d;
 }
 .feat-card:hover{
-  box-shadow:0 24px 48px rgba(0,0,0,.08),inset 0 0 0 1px rgba(0,0,0,.05);
-  border-color:rgba(94,123,168,.15);
+  background: radial-gradient(800px circle at var(--mx, 50%) var(--my, 50%), rgba(255,255,255,0.95), rgba(255,255,255,0.6));
+  box-shadow:0 24px 48px rgba(94,123,168,.08),inset 0 0 0 1px rgba(184,146,63,.15);
+  border-color:rgba(184,146,63,.3);
 }
 .tilt-glare{
   position:absolute;inset:0;border-radius:inherit;
   pointer-events:none;mix-blend-mode:overlay;
   opacity:0;transition:opacity .3s;z-index:1;
 }
+/* 隐藏文本卡片的附加图层，改用背景变量，确保文字 100% 清晰 */
+.feat-card .tilt-glare, .hub-card .tilt-glare { display: none; }
 .feat-ico{
   font-size:30px;display:block;margin-bottom:14px;line-height:1;
   transition:transform .6s cubic-bezier(0.34,1.56,0.64,1);
@@ -712,6 +894,8 @@ body.loaded .hc>*:nth-child(6){animation-delay:.42s}
 .feat-grid .reveal:nth-child(2){transition-delay:.08s}
 .feat-grid .reveal:nth-child(3){transition-delay:.16s}
 .feat-grid .reveal:nth-child(4){transition-delay:.24s}
+.feat-grid .reveal:nth-child(5){transition-delay:.32s}
+.feat-grid .reveal:nth-child(6){transition-delay:.40s}
 
 /* ── Panel Strip ─────────────────────────── */
 .panels-strip{
@@ -761,6 +945,7 @@ body.loaded .hc>*:nth-child(6){animation-delay:.42s}
   position:relative;
 }
 .hub-card:hover{
+  background: radial-gradient(800px circle at var(--mx, 50%) var(--my, 50%), rgba(255,255,255,0.95), rgba(255,255,255,0.7));
   transform:translateY(-6px);
   box-shadow:0 24px 48px rgba(0,0,0,.08),inset 0 0 0 1px rgba(0,0,0,.05);
 }
@@ -1050,8 +1235,9 @@ body.loaded .hc>*:nth-child(6){animation-delay:.42s}
 </head>
 <body>
 
-<!-- Loading Screen — Kaleidoscope -->
+<!-- Loading Screen — Astrolabe -->
 <div class="LS" id="loadingScreen">
+  <div class="LS-ambient"></div>
   <div class="LS-w LS-w1"><div class="LS-l1"></div></div>
   <div class="LS-w LS-w2"><div class="LS-l2"></div></div>
   <div class="LS-w LS-w3"><div class="LS-l3"></div></div>
@@ -1078,11 +1264,30 @@ body.loaded .hc>*:nth-child(6){animation-delay:.42s}
   <div class="LS-leaf" style="left:78%;width:12px;height:12px;background:#f1c40f;animation:kLSLeafC 10s -7s ease-in-out infinite"></div>
   <div class="LS-leaf" style="left:88%;width:5px;height:5px;background:#1abc9c;animation:kLSLeafA 7.5s -3s ease-in-out infinite"></div>
   <div class="LS-leaf" style="left:96%;width:15px;height:15px;background:#e74c3c;animation:kLSLeafB 9s -5s ease-in-out infinite"></div>
-  <!-- 歌词：四季依次淡入淡出，填充加载等待时间 -->
-  <div class="LS-lyric LS-lyric--1">春天　就让这繁花都开遍</div>
-  <div class="LS-lyric LS-lyric--2">夏天　我想你想了千万遍</div>
-  <div class="LS-lyric LS-lyric--3">秋天　当落叶画成一个圈</div>
-  <div class="LS-lyric LS-lyric--4">冬天　就在这冰封一瞬间</div>
+  <!-- 歌词：四季依次淡入展开，带有专属伴生小元素 -->
+  <div class="LS-lyric LS-lyric--1">
+    <div class="lyric-text">春天　就让这繁花都开遍</div>
+    <div class="lyric-ele lyric-ele-spring"><span class="star">❀</span><span class="star star-sm">❀</span></div>
+  </div>
+  <div class="LS-lyric LS-lyric--2">
+    <div class="lyric-text">夏天　我想你想了千万遍</div>
+    <div class="lyric-ele lyric-ele-summer">
+      <div class="meteor m1"></div>
+      <div class="meteor m2"></div>
+    </div>
+  </div>
+  <div class="LS-lyric LS-lyric--3">
+    <div class="lyric-text">秋天　当落叶画成一个圈</div>
+    <div class="lyric-ele lyric-ele-autumn"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="48" /></svg></div>
+  </div>
+  <div class="LS-lyric LS-lyric--4">
+    <div class="lyric-text">冬天　就在这冰封一瞬间</div>
+    <div class="lyric-ele lyric-ele-winter">
+      <div class="flash-x"></div>
+      <div class="flash-y"></div>
+      <div class="flash-core"></div>
+    </div>
+  </div>
 </div>
 
 <!-- Background layers -->
@@ -1234,6 +1439,24 @@ body.loaded .hc>*:nth-child(6){animation-delay:.42s}
           <p class="feat-name-en">Window Snap</p>
           <p class="feat-desc">TA 会自动吸附到你正在用的窗口上方，切换为趴趴姿态。窗口移到哪，TA 就跟到哪。想让 TA 下来？直接拖拽甩出去。</p>
           <p class="feat-desc-en">TA snaps to your active window's title bar and follows wherever it goes. Drag and fling with physics!</p>
+        </div>
+      </div>
+      <div class="reveal">
+        <div class="feat-card tilt-card">
+          <span class="feat-ico">🍅</span>
+          <h3 class="feat-name">沉浸式番茄钟</h3>
+          <p class="feat-name-en">Pomodoro Timer</p>
+          <p class="feat-desc">内置沉浸式番茄钟，工作时 TA 会安静陪伴，休息时主动提醒你放松。让你的学习和工作更有节奏。</p>
+          <p class="feat-desc-en">Built-in Pomodoro timer. TA stays quiet while you focus and reminds you to take a break. Enhance your productivity.</p>
+        </div>
+      </div>
+      <div class="reveal">
+        <div class="feat-card tilt-card">
+          <span class="feat-ico">⏱️</span>
+          <h3 class="feat-name">贴心快捷倒计时</h3>
+          <p class="feat-name-en">Quick Countdown</p>
+          <p class="feat-desc">泡面、敷面膜还是小憩？只需轻轻一点，快捷设置倒计时。时间一到，TA 会第一时间在屏幕上呼唤你。</p>
+          <p class="feat-desc-en">Quickly set a countdown for daily tasks. TA will pop up to notify you exactly when time is up.</p>
         </div>
       </div>
     </div>
@@ -1513,8 +1736,10 @@ body.loaded .hc>*:nth-child(6){animation-delay:.42s}
         card.style.transform = 'perspective(800px) rotateY('+(xPct*10)+'deg) rotateX('+(-yPct*10)+'deg) translateY(-4px)';
 
         var gx = (xPct+0.5)*100, gy = (yPct+0.5)*100;
-        glare.style.background = 'radial-gradient(circle at '+gx+'% '+gy+'%,rgba(255,255,255,0.3),transparent 50%)';
+        glare.style.background = 'radial-gradient(circle at '+gx+'% '+gy+'%, rgba(255,255,255,0.3), transparent 60%)';
         glare.style.opacity = '1';
+        card.style.setProperty('--mx', gx + '%');
+        card.style.setProperty('--my', gy + '%');
       });
 
       card.addEventListener('mouseleave', function(){
@@ -1533,7 +1758,7 @@ body.loaded .hc>*:nth-child(6){animation-delay:.42s}
         var rect = btn.getBoundingClientRect();
         var dx = e.clientX - rect.left - rect.width/2;
         var dy = e.clientY - rect.top - rect.height/2;
-        btn.style.transform = 'translate('+(dx*0.3)+'px,'+(dy*0.3)+'px)';
+        btn.style.transform = 'translate('+(dx*0.3)+'px,'+(dy*0.3)+'px) scale(1.03)';
       });
       btn.addEventListener('mouseleave', function(){
         btn.style.transform = '';
@@ -1541,13 +1766,56 @@ body.loaded .hc>*:nth-child(6){animation-delay:.42s}
     });
   }
 
-  /* ── Hero Parallax Icon ────────────────── */
+  /* ── Hero & Loading Parallax ───────────── */
   if(!isMobile){
     var heroIcon = document.querySelector('.hero-icon');
+    var lsWrappers = document.querySelectorAll('.LS-w');
+    var lsScreen = document.getElementById('loadingScreen');
+    
+    var trailColors = ['rgba(255,215,0,0.9)', 'rgba(80,170,255,0.9)', 'rgba(255,160,190,0.9)'];
+    var trailIdx = 0;
+    var trailTimer = null;
+    var lastTrailTime = 0;
+
     document.addEventListener('mousemove', function(e){
       var pctX = (e.clientX / window.innerWidth)*2 - 1;
       var pctY = (e.clientY / window.innerHeight)*2 - 1;
-      heroIcon.style.transform = 'translate('+(-pctX*18)+'px,'+(-pctY*18)+'px) rotate('+(-pctX*5)+'deg)';
+      
+      if(heroIcon) {
+        heroIcon.style.transform = 'translate('+(-pctX*18)+'px,'+(-pctY*18)+'px) rotate('+(-pctX*5)+'deg)';
+      }
+      
+      /* Loading Screen Interactivity */
+      if(!document.body.classList.contains('loaded')){
+        
+        /* Trail Logic */
+        clearTimeout(trailTimer);
+        trailTimer = setTimeout(function(){
+          trailIdx = (trailIdx + 1) % 3;
+        }, 150);
+        
+        var now = Date.now();
+        if(now - lastTrailTime > 25 && lsScreen) {
+          lastTrailTime = now;
+          var dot = document.createElement('div');
+          dot.className = 'LS-trail-dot';
+          dot.innerHTML = '✦';
+          dot.style.left = e.clientX + 'px';
+          dot.style.top = e.clientY + 'px';
+          dot.style.color = '#fff';
+          dot.style.textShadow = '0 0 4px ' + trailColors[trailIdx] + ', 0 0 8px ' + trailColors[trailIdx];
+          
+          var dx = (Math.random() - 0.5) * 40;
+          var dy = (Math.random() - 0.5) * 40;
+          dot.style.setProperty('--dx', dx + 'px');
+          dot.style.setProperty('--dy', dy + 'px');
+          dot.style.setProperty('--r', (Math.random() * 90 - 45) + 'deg'); 
+          dot.style.setProperty('--s', (Math.random() * 0.8 + 0.4));
+          
+          lsScreen.appendChild(dot);
+          setTimeout((function(d){ return function(){ d.remove(); } })(dot), 1200);
+        }
+      }
     });
   }
 
