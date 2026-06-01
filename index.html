@@ -860,16 +860,17 @@ body.loaded .hc>*:nth-child(6){animation-delay:.42s}
   transform-style:preserve-3d;
 }
 .feat-card:hover{
+  background: radial-gradient(800px circle at var(--mx, 50%) var(--my, 50%), rgba(255,255,255,0.95), rgba(255,255,255,0.6));
   box-shadow:0 24px 48px rgba(94,123,168,.08),inset 0 0 0 1px rgba(184,146,63,.15);
   border-color:rgba(184,146,63,.3);
 }
 .tilt-glare{
   position:absolute;inset:0;border-radius:inherit;
   pointer-events:none;mix-blend-mode:overlay;
-  background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0) 60%);
-  background-size: 200% 200%;
   opacity:0;transition:opacity .3s;z-index:1;
 }
+/* 隐藏文本卡片的附加图层，改用背景变量，确保文字 100% 清晰 */
+.feat-card .tilt-glare, .hub-card .tilt-glare { display: none; }
 .feat-ico{
   font-size:30px;display:block;margin-bottom:14px;line-height:1;
   transition:transform .6s cubic-bezier(0.34,1.56,0.64,1);
@@ -944,6 +945,7 @@ body.loaded .hc>*:nth-child(6){animation-delay:.42s}
   position:relative;
 }
 .hub-card:hover{
+  background: radial-gradient(800px circle at var(--mx, 50%) var(--my, 50%), rgba(255,255,255,0.95), rgba(255,255,255,0.7));
   transform:translateY(-6px);
   box-shadow:0 24px 48px rgba(0,0,0,.08),inset 0 0 0 1px rgba(0,0,0,.05);
 }
@@ -1734,8 +1736,10 @@ body.loaded .hc>*:nth-child(6){animation-delay:.42s}
         card.style.transform = 'perspective(800px) rotateY('+(xPct*10)+'deg) rotateX('+(-yPct*10)+'deg) translateY(-4px)';
 
         var gx = (xPct+0.5)*100, gy = (yPct+0.5)*100;
-        glare.style.background = 'radial-gradient(circle at '+gx+'% '+gy+'%, rgba(255,255,255,0.9), transparent 60%)';
+        glare.style.background = 'radial-gradient(circle at '+gx+'% '+gy+'%, rgba(255,255,255,0.3), transparent 60%)';
         glare.style.opacity = '1';
+        card.style.setProperty('--mx', gx + '%');
+        card.style.setProperty('--my', gy + '%');
       });
 
       card.addEventListener('mouseleave', function(){
