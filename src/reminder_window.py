@@ -170,6 +170,21 @@ class ReminderWindow(QWidget):
         title_row.addWidget(rb)
         cl.addLayout(title_row)
 
+        pgrid = QGridLayout(); pgrid.setSpacing(_s(8))
+        for i, (label, cfg) in enumerate([
+                ("经典 25/5", (25, 5, 15, 4)),
+                ("深度 50/10", (50, 10, 20, 3)),
+                ("轻量 15/3", (15, 3, 10, 4)),
+                ("长时 45/15", (45, 15, 25, 2))]):
+            b = QPushButton(label); b.setFixedHeight(_s(42)); b.setCursor(Qt.PointingHandCursor)
+            b.setFont(QFont("Microsoft YaHei", _fs(10), QFont.Bold))
+            b.setStyleSheet(self._soft_css())
+            f, sh, lo, cy = cfg
+            b.setToolTip(f"专注 {f} · 短休 {sh} · 长休 {lo} · 每 {cy} 轮长休")
+            b.clicked.connect(lambda _, c=cfg: self._apply_pomo_preset(c))
+            pgrid.addWidget(b, i // 2, i % 2)
+        cl.addLayout(pgrid)
+
         self._foc_inp = self._num_input("25")
         self._sht_inp = self._num_input("5")
         self._lng_inp = self._num_input("15")
@@ -262,6 +277,11 @@ class ReminderWindow(QWidget):
         self._sht_inp.setText(str(cfg.get("short_break_min", 5)))
         self._lng_inp.setText(str(cfg.get("long_break_min", 15)))
         self._cyc_inp.setText(str(cfg.get("cycles_before_long", 4)))
+
+    def _apply_pomo_preset(self, cfg):
+        f, sh, lo, cy = cfg
+        self._foc_inp.setText(str(f)); self._sht_inp.setText(str(sh))
+        self._lng_inp.setText(str(lo)); self._cyc_inp.setText(str(cy))
 
     # ── 触发 ──
     def _start_custom(self):

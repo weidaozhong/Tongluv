@@ -1892,9 +1892,6 @@ class PetWindow(QWidget):
         a_mem = QAction("📝 记忆管理", self)
         a_mem.triggered.connect(self._open_memory_from_tray)
         menu.addAction(a_mem)
-        a_rem = QAction("⏰ 提醒·番茄钟", self)
-        a_rem.triggered.connect(self._show_reminder_window)
-        menu.addAction(a_rem)
         menu.addSeparator()
         a_quit = QAction("❌ 退出", self); a_quit.triggered.connect(self._quit)
         menu.addAction(a_quit)
@@ -1968,6 +1965,10 @@ class PetWindow(QWidget):
         sld.setFixedWidth(_p(90)); sld.valueChanged.connect(self._set_opacity)
         ol.addWidget(lbl); ol.addWidget(sld)
         wa = QWidgetAction(self); wa.setDefaultWidget(ow); menu.addAction(wa)
+        # ── 提醒·番茄钟(紧贴不透明度下方)──
+        a_rem = QAction("⏰ 提醒·番茄钟", self)
+        a_rem.triggered.connect(self._show_reminder_window)
+        menu.addAction(a_rem)
         menu.addSeparator()
         # ── 互动 ──
         for label, slot in [("✋ 摸摸头", self._on_pet),
