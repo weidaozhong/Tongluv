@@ -199,12 +199,11 @@ body:not(.loaded){position:fixed!important;inset:0!important;overflow:hidden!imp
 .LS-cursor-light {
   position: absolute;
   width: 500px; height: 500px;
-  background: radial-gradient(circle, rgba(184,146,63,0.15) 0%, rgba(94,123,168,0.1) 40%, transparent 70%);
+  background: radial-gradient(circle, rgba(184,146,63,0.3) 0%, rgba(94,123,168,0.15) 30%, transparent 70%);
   border-radius: 50%;
   pointer-events: none;
   translate: -50% -50%;
   z-index: 10002;
-  mix-blend-mode: screen;
   transition: opacity 0.3s;
   opacity: 0;
 }
@@ -1660,7 +1659,7 @@ body.loaded .hc>*:nth-child(6){animation-delay:.42s}
       /* Loading Screen Interactivity */
       if(!document.body.classList.contains('loaded')){
         lsWrappers.forEach(function(w){
-          w.style.transform = 'rotateX('+(-pctY*18)+'deg) rotateY('+(pctX*18)+'deg)';
+          w.style.transform = 'perspective(1200px) rotateX('+(-pctY*25)+'deg) rotateY('+(pctX*25)+'deg)';
         });
         if(lsLight){
           lsLight.style.left = e.clientX + 'px';
