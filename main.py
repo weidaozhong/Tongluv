@@ -1966,7 +1966,7 @@ class PetWindow(QWidget):
         ol.addWidget(lbl); ol.addWidget(sld)
         wa = QWidgetAction(self); wa.setDefaultWidget(ow); menu.addAction(wa)
         # ── 提醒·番茄钟(紧贴不透明度下方)──
-        a_rem = QAction("⏰ 提醒·番茄钟", self)
+        a_rem = QAction("提醒·番茄钟", self)
         a_rem.triggered.connect(self._show_reminder_window)
         menu.addAction(a_rem)
         menu.addSeparator()
