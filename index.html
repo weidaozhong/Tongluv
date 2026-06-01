@@ -195,6 +195,20 @@ body:not(.loaded){position:fixed!important;inset:0!important;overflow:hidden!imp
   75% { transform: translate(-50%, -50%) rotateZ(270deg) rotateY(540deg); }
 }
 
+/* Magic Cursor Light on Loading Screen */
+.LS-cursor-light {
+  position: absolute;
+  width: 500px; height: 500px;
+  background: radial-gradient(circle, rgba(184,146,63,0.15) 0%, rgba(94,123,168,0.1) 40%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+  translate: -50% -50%;
+  z-index: 10002;
+  mix-blend-mode: screen;
+  transition: opacity 0.3s;
+  opacity: 0;
+}
+
 /* expand outward — inner first, outer last */
 .LS.exit .LS-w{animation:kExpand .5s cubic-bezier(.23,1,.32,1) both}
 .LS.exit .LS-w1{animation-delay:0s}
@@ -1119,8 +1133,9 @@ body.loaded .hc>*:nth-child(6){animation-delay:.42s}
 </head>
 <body>
 
-<!-- Loading Screen — Kaleidoscope -->
+<!-- Loading Screen — Astrolabe -->
 <div class="LS" id="loadingScreen">
+  <div class="LS-cursor-light"></div>
   <div class="LS-w LS-w1"><div class="LS-l1"></div></div>
   <div class="LS-w LS-w2"><div class="LS-l2"></div></div>
   <div class="LS-w LS-w3"><div class="LS-l3"></div></div>
@@ -1628,13 +1643,31 @@ body.loaded .hc>*:nth-child(6){animation-delay:.42s}
     });
   }
 
-  /* ── Hero Parallax Icon ────────────────── */
+  /* ── Hero & Loading Parallax ───────────── */
   if(!isMobile){
     var heroIcon = document.querySelector('.hero-icon');
+    var lsWrappers = document.querySelectorAll('.LS-w');
+    var lsLight = document.querySelector('.LS-cursor-light');
+
     document.addEventListener('mousemove', function(e){
       var pctX = (e.clientX / window.innerWidth)*2 - 1;
       var pctY = (e.clientY / window.innerHeight)*2 - 1;
-      heroIcon.style.transform = 'translate('+(-pctX*18)+'px,'+(-pctY*18)+'px) rotate('+(-pctX*5)+'deg)';
+      
+      if(heroIcon) {
+        heroIcon.style.transform = 'translate('+(-pctX*18)+'px,'+(-pctY*18)+'px) rotate('+(-pctX*5)+'deg)';
+      }
+      
+      /* Loading Screen Interactivity */
+      if(!document.body.classList.contains('loaded')){
+        lsWrappers.forEach(function(w){
+          w.style.transform = 'rotateX('+(-pctY*18)+'deg) rotateY('+(pctX*18)+'deg)';
+        });
+        if(lsLight){
+          lsLight.style.left = e.clientX + 'px';
+          lsLight.style.top = e.clientY + 'px';
+          lsLight.style.opacity = '1';
+        }
+      }
     });
   }
 
