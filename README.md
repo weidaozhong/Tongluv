@@ -203,9 +203,6 @@
 <details>
 <summary>📋 <b>首次配置 API</b> · <sub>First-Time API Setup</sub></summary>
 <br/>
-<p align="center">
-  <img src="docs/panel-settings.png" width="350" alt="API 设置" />
-</p>
 
 右键桌宠 → **个人中心** → **设置**，填写 API 地址、Key 和模型名称，点击「测试连接」即可。兼容 OpenAI 格式的接口（DeepSeek、ChatGPT、Claude 等均可）。
 <br><sub>Right-click pet → Profile Center → Settings. Enter the API endpoint, key, and model name, then click "Test Connection". Compatible with any OpenAI-format API (DeepSeek, ChatGPT, Claude, etc.).</sub>
