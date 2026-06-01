@@ -866,6 +866,8 @@ body.loaded .hc>*:nth-child(6){animation-delay:.42s}
 .tilt-glare{
   position:absolute;inset:0;border-radius:inherit;
   pointer-events:none;mix-blend-mode:overlay;
+  background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0) 60%);
+  background-size: 200% 200%;
   opacity:0;transition:opacity .3s;z-index:1;
 }
 .feat-ico{
@@ -1732,7 +1734,7 @@ body.loaded .hc>*:nth-child(6){animation-delay:.42s}
         card.style.transform = 'perspective(800px) rotateY('+(xPct*10)+'deg) rotateX('+(-yPct*10)+'deg) translateY(-4px)';
 
         var gx = (xPct+0.5)*100, gy = (yPct+0.5)*100;
-        glare.style.background = 'radial-gradient(circle at '+gx+'% '+gy+'%,rgba(255,255,255,0.3),transparent 50%)';
+        glare.style.background = 'radial-gradient(circle at '+gx+'% '+gy+'%, rgba(255,255,255,0.9), transparent 60%)';
         glare.style.opacity = '1';
       });
 
@@ -1752,7 +1754,7 @@ body.loaded .hc>*:nth-child(6){animation-delay:.42s}
         var rect = btn.getBoundingClientRect();
         var dx = e.clientX - rect.left - rect.width/2;
         var dy = e.clientY - rect.top - rect.height/2;
-        btn.style.transform = 'translate('+(dx*0.3)+'px,'+(dy*0.3)+'px)';
+        btn.style.transform = 'translate('+(dx*0.3)+'px,'+(dy*0.3)+'px) scale(1.03)';
       });
       btn.addEventListener('mouseleave', function(){
         btn.style.transform = '';
