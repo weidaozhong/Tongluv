@@ -74,7 +74,7 @@ jobs:
 
       - name: Delete old asset if exists
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.PAT }}
         run: |
           $tag = "${{ env.VERSION }}"
           $repo = "${{ github.repository }}"
@@ -118,6 +118,7 @@ jobs:
           name: 蓝色小嗵 ${{ env.VERSION }}
           body: ${{ steps.tag_msg.outputs.BODY }}
           files: dist/xiaotong-${{ env.VERSION }}.exe
+          token: ${{ secrets.PAT }}
 
       - name: Checkout gh-pages branch
         uses: actions/checkout@v4
