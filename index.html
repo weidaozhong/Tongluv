@@ -210,14 +210,22 @@ body:not(.loaded){position:fixed!important;inset:0!important;overflow:hidden!imp
   100% { transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy) + 20px)) scale(0.1) rotate(var(--r)); opacity: 0; }
 }
 
-/* expand outward — inner first, outer last */
-.LS.exit .LS-w{animation:kExpand .5s cubic-bezier(.23,1,.32,1) both}
+/* 焦外呼吸转场：星盘散开模糊 */
+.LS.exit { animation: kLSBgExit 1.2s ease-in-out forwards; }
+@keyframes kLSBgExit { to { opacity: 0; visibility: hidden; } }
+
+.LS.exit .LS-w{animation:kLSWBlurExit 1s cubic-bezier(0.4, 0, 0.2, 1) forwards}
 .LS.exit .LS-w1{animation-delay:0s}
 .LS.exit .LS-w2{animation-delay:.06s}
 .LS.exit .LS-w3{animation-delay:.12s}
 .LS.exit .LS-w4{animation-delay:.18s}
 .LS.exit .LS-w5{animation-delay:.24s}
-.LS.exit::before{animation:kExpand .5s .1s cubic-bezier(.23,1,.32,1) both}
+.LS.exit::before{animation:kLSWBlurExit 1s .1s cubic-bezier(0.4, 0, 0.2, 1) forwards}
+
+@keyframes kLSWBlurExit {
+  0% { transform: scale(1); opacity: 1; filter: blur(0); }
+  100% { transform: scale(1.5); opacity: 0; filter: blur(20px); }
+}
 /* 加载屏落叶退出：随主体一同淡出消散 */
 .LS.exit .LS-leaf{animation:kLSLeafExit .35s ease-in both!important}
 
@@ -257,33 +265,37 @@ body:not(.loaded){position:fixed!important;inset:0!important;overflow:hidden!imp
   to{opacity:0;transform:translateY(-20px) scale(.4)}
 }
 
-/* ── 加载屏歌词 ───────────────────────────── */
-/* NOTE: 四句歌词分布在四个对角区域，依次淡入淡出，填充加载等待时间 */
+/* ── 加载屏歌词进度条 ───────────────────────────── */
 .LS-lyric{
   position:absolute;
   font-family:'Noto Serif SC',var(--serif-cn),serif;
-  font-size:clamp(.85rem, 2vw, 1.1rem);
+  font-size:clamp(1rem, 2.5vw, 1.3rem);
   font-weight:400;
-  letter-spacing:.12em;
-  color:rgba(90,80,70,.55);
+  letter-spacing:.15em;
+  color:#a89f91;
   opacity:0;
   pointer-events:none;
   white-space:nowrap;
-  animation:kLSLyric 1.5s ease-in-out forwards;
+  animation: kLSLyricAppear 0.8s ease-out forwards;
 }
-/* 四个位置：左上、右下、右上、左下 */
-.LS-lyric--1{top:22%;left:12%;animation-delay:.5s}
-.LS-lyric--2{bottom:32%;right:10%;animation-delay:2s}
-.LS-lyric--3{top:18%;right:8%;animation-delay:3.5s}
-.LS-lyric--4{bottom:18%;left:10%;animation-delay:5s}
-@keyframes kLSLyric{
-  0%{opacity:0;transform:translateY(12px);filter:blur(4px)}
-  27%{opacity:1;transform:translateY(0);filter:blur(0)}
-  73%{opacity:1;transform:translateY(0);filter:blur(0)}
-  100%{opacity:0;transform:translateY(-10px);filter:blur(3px)}
+/* 四个位置：左上、右下、右上、左下，依次点亮作为进度提示 */
+.LS-lyric--1{top:25%;left:15%;animation-delay:.5s}
+.LS-lyric--2{bottom:25%;right:15%;animation-delay:2s}
+.LS-lyric--3{top:20%;right:15%;animation-delay:3.5s}
+.LS-lyric--4{bottom:20%;left:25%;animation-delay:5s}
+@keyframes kLSLyricAppear{
+  0%{opacity:0;transform:translateY(12px);filter:blur(6px);color:rgba(168,159,145,0.4);text-shadow:none}
+  100%{opacity:1;transform:translateY(0);filter:blur(0);color:#8e7a5d;text-shadow:0 0 15px rgba(184,146,63,0.5)}
 }
-/* 退出时歌词也跟随淡出 */
-.LS.exit .LS-lyric{animation:kLSLeafExit .35s ease-in both!important}
+/* 焦外呼吸转场时歌词跟随模糊淡出 */
+.LS.exit .LS-lyric{
+  animation:kLSLyricExit 1s ease-in forwards;
+}
+@keyframes kLSLyricExit{
+  0%{opacity:1;filter:blur(0);transform:translateY(0)}
+  100%{opacity:0;filter:blur(15px);transform:translateY(-15px)}
+}
+
 
 @keyframes kBloom{
   0%{scale:0;opacity:0}
@@ -763,8 +775,8 @@ body.loaded .hc>*:nth-child(6){animation-delay:.42s}
   transform-style:preserve-3d;
 }
 .feat-card:hover{
-  box-shadow:0 24px 48px rgba(0,0,0,.08),inset 0 0 0 1px rgba(0,0,0,.05);
-  border-color:rgba(94,123,168,.15);
+  box-shadow:0 24px 48px rgba(94,123,168,.08),inset 0 0 0 1px rgba(184,146,63,.15);
+  border-color:rgba(184,146,63,.3);
 }
 .tilt-glare{
   position:absolute;inset:0;border-radius:inherit;
