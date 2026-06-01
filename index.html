@@ -200,12 +200,14 @@ body:not(.loaded){position:fixed!important;inset:0!important;overflow:hidden!imp
   position: absolute;
   pointer-events: none;
   z-index: 10002;
+  font-size: 16px;
+  line-height: 1;
   will-change: transform, opacity;
   animation: kTrailFade 1.2s ease-out forwards;
 }
 @keyframes kTrailFade {
-  0% { transform: translate(-50%, -50%) scale(1); opacity: 1; filter: blur(0px); }
-  100% { transform: translate(-50%, -50%) scale(0.2); opacity: 0; filter: blur(2px); }
+  0% { transform: translate(-50%, -50%) scale(var(--s)) rotate(0deg); opacity: 0.8; }
+  100% { transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy) + 20px)) scale(0.1) rotate(var(--r)); opacity: 0; }
 }
 
 /* expand outward — inner first, outer last */
@@ -1647,7 +1649,7 @@ body.loaded .hc>*:nth-child(6){animation-delay:.42s}
     var lsWrappers = document.querySelectorAll('.LS-w');
     var lsScreen = document.getElementById('loadingScreen');
     
-    var trailColors = ['rgba(255,215,0,0.9)', 'rgba(80,170,255,0.9)', 'rgba(255,160,190,0.9)'];
+    var trailColors = ['rgba(255,215,0,0.6)', 'rgba(100,180,255,0.6)', 'rgba(255,180,200,0.6)'];
     var trailIdx = 0;
     var trailTimer = null;
     var lastTrailTime = 0;
@@ -1673,19 +1675,22 @@ body.loaded .hc>*:nth-child(6){animation-delay:.42s}
         }, 150);
         
         var now = Date.now();
-        if(now - lastTrailTime > 12 && lsScreen) {
+        if(now - lastTrailTime > 25 && lsScreen) {
           lastTrailTime = now;
           var dot = document.createElement('div');
           dot.className = 'LS-trail-dot';
+          dot.innerHTML = '✦';
           dot.style.left = e.clientX + 'px';
           dot.style.top = e.clientY + 'px';
-          dot.style.background = '#fff';
+          dot.style.color = '#fff';
+          dot.style.textShadow = '0 0 6px ' + trailColors[trailIdx];
           
-          var size = Math.random() * 4 + 6;
-          dot.style.width = size + 'px';
-          dot.style.height = size + 'px';
-          dot.style.borderRadius = '50%';
-          dot.style.boxShadow = '0 0 12px 4px ' + trailColors[trailIdx];
+          var dx = (Math.random() - 0.5) * 40;
+          var dy = (Math.random() - 0.5) * 40;
+          dot.style.setProperty('--dx', dx + 'px');
+          dot.style.setProperty('--dy', dy + 'px');
+          dot.style.setProperty('--r', (Math.random() * 90 - 45) + 'deg'); 
+          dot.style.setProperty('--s', (Math.random() * 0.8 + 0.4));
           
           lsScreen.appendChild(dot);
           setTimeout((function(d){ return function(){ d.remove(); } })(dot), 1200);
