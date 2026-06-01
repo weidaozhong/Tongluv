@@ -245,6 +245,12 @@ class ReminderWindow(QWidget):
     def set_pomodoro_status(self, text: str):
         self._pomo_status.setText(text)
 
+    def set_pomodoro_config(self, cfg: dict):
+        self._foc_inp.setText(str(cfg.get("focus_min", 25)))
+        self._sht_inp.setText(str(cfg.get("short_break_min", 5)))
+        self._lng_inp.setText(str(cfg.get("long_break_min", 15)))
+        self._cyc_inp.setText(str(cfg.get("cycles_before_long", 4)))
+
     # ── 触发 ──
     def _start_custom(self):
         def _v(e):

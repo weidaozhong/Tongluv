@@ -45,6 +45,9 @@ def pet_save_path() -> str:
 def game_data_path() -> str:
     return get_user_file("game_data.json")
 
+def reminder_data_path() -> str:
+    return get_user_file("reminder_data.json")
+
 def avatar_path() -> str:
     return get_user_file("avatar_custom.png")
 

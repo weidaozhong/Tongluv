@@ -120,6 +120,7 @@ from src.countdown_float import CountdownFloat
 from src.reminder_bubble import ReminderBubbleManager
 from src.reminder_window import ReminderWindow
 from src.pomodoro import PomodoroTimer, FOCUS, SHORT_BREAK
+from src import reminder_store
 
 PET_SIZE = 210   # 基准值，main() 中根据屏幕逻辑高度重新计算
 PET_WINDOW_MARGIN = 20   # 窗口四周透明 padding，_sync_window_pos 中用到
@@ -435,6 +436,10 @@ class PetWindow(QWidget):
         self.reminder_window.start_pomodoro.connect(self._on_start_pomodoro)
         self.reminder_window.toggle_pomodoro_pause.connect(self._on_toggle_pomodoro_pause)
         self.reminder_window.reset_pomodoro.connect(self._on_reset_pomodoro)
+        _saved_pomo = reminder_store.load_pomodoro_config()
+        if _saved_pomo:
+            self.pomodoro.cfg.update(_saved_pomo)
+            self.reminder_window.set_pomodoro_config(self.pomodoro.cfg)
 
         self.input_state = InputState()
 
@@ -632,7 +637,8 @@ class PetWindow(QWidget):
             self._say(_pick("typing"), mood="normal", trigger_anim=False)
 
     def _on_input_idle(self):
-        if self.state.is_sleeping or self._dragging or self._is_snapped:
+        if (self.state.is_sleeping or self._dragging or self._is_snapped
+                or self._pomodoro_focusing()):
             return
         self._say(_pick("idle"))
 
@@ -647,7 +653,8 @@ class PetWindow(QWidget):
         # ── 体力值自动睡觉/唤醒（优先级最高，在 animator.update 之前） ──
         # energy <= 20 → 自动入睡 ; energy >= 80 → 自动唤醒
         # NOTE: 使用冷却防止刚唤醒时 energy 短暂跌回阈值又立刻重新入睡
-        if not self.state.is_sleeping and self.state.energy <= 20:
+        if (not self.state.is_sleeping and self.state.energy <= 20
+                and not self._pomodoro_focusing()):
             if self._auto_sleep_cd <= 0:
                 self._on_sleep()
         elif self.state.is_sleeping and self.state.energy >= 80:
@@ -770,7 +777,7 @@ class PetWindow(QWidget):
 
     def _tick_auto_walk(self, dt: float):
         if self.state.is_sleeping or self._is_thrown or self._is_falling \
-                or self._dragging or self._is_snapped:
+                or self._dragging or self._is_snapped or self._pomodoro_focusing():
             return
         # 道具动画期间完全跳过 auto_walk
         if self._item_playing:
@@ -1490,7 +1497,8 @@ class PetWindow(QWidget):
 
     def _tick_dialogue(self, dt: float):
         # 道具动画播放 / 拖拽 / 吸附期间暂停自动对话
-        if self._item_playing or self._dragging or self._is_snapped:
+        if (self._item_playing or self._dragging or self._is_snapped
+                or self._pomodoro_focusing()):
             return
         # 期待动作期间（5 分钟内）暂停自动对话，避免随机动画干扰用户执行动作
         _pa = getattr(self.panel, '_pending_action', None)
@@ -1634,6 +1642,7 @@ class PetWindow(QWidget):
             self.countdown.stop()
             self.reminder_window.set_timer_state(False, False)
         self.pomodoro.cfg.update(cfg)
+        reminder_store.save_pomodoro_config(self.pomodoro.cfg)
         self.pomodoro.start()
         self.reminder_window.set_pomodoro_state(True, False)
         self._say("开始专注!我陪你~📖", mood="happy", trigger_anim=False)
@@ -1655,6 +1664,11 @@ class PetWindow(QWidget):
         self.reminder_window.set_pomodoro_state(False, False)
         self.reminder_window.set_pomodoro_status("未开始")
 
+    def _pomodoro_focusing(self) -> bool:
+        """番茄钟正处于专注阶段(未暂停)——此时抑制自动走动/说话/睡觉,保持学习姿势。"""
+        return (self.pomodoro.active and not self.pomodoro.paused
+                and self.pomodoro.phase == FOCUS)
+
     def _tick_pomodoro(self):
         if self.pomodoro.paused:
             rem = format_remaining(self.pomodoro.remaining)
@@ -1664,6 +1678,12 @@ class PetWindow(QWidget):
         new_phase = self.pomodoro.update()
         if new_phase is not None:
             self._on_pomodoro_phase(new_phase)
+        # 专注期间保持学习姿势:被打断回到 idle 时重新埋头
+        if (self.pomodoro.phase == FOCUS
+                and getattr(self.renderer, "_action", "idle") == "idle"
+                and not getattr(self.renderer, "_pending", [])):
+            self.renderer.trigger("study")
+            self.state.current_action = PetAction.STUDY
         rem = format_remaining(self.pomodoro.remaining)
         self.countdown_float.set_text(f"🍅 {self.pomodoro.label} {rem}")
         self.reminder_window.set_pomodoro_status(
