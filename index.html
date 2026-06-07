@@ -9,7 +9,7 @@
   <meta property="og:title" content="蓝色小嗵 XIAOTONG">
   <meta property="og:description" content="TA 从森林里来，因为想天天见到你。A spirit from the forest, here to stay by your side.">
   <meta property="og:image" content="icons/icon.png">
-  <meta property="og:url" content="https://weidaozhong.github.io/Tongluv/">
+  <meta property="og:url" content="https://tongluv.pages.dev/">
   <link rel="icon" href="icons/icon.png">
   <link rel="preload" href="icons/icon.png" as="image">
   <link rel="preconnect" href="https://fonts.loli.net">
@@ -629,7 +629,63 @@ body:not(.loaded){position:fixed!important;inset:0!important;overflow:hidden!imp
   overflow:hidden;
 }
 
-.hc{position:relative;z-index:5;will-change:transform}
+/* ── Cursor Showcase ─────────────────────── */
+.cursor-showcase{
+  margin-top:80px;
+  background:rgba(255,255,255,.6);
+  border-radius:24px;
+  padding:16px 24px;
+  display:flex;align-items:center;justify-content:space-between;
+  gap:24px;
+  border:1px solid rgba(0,0,0,.04);
+  box-shadow:0 12px 36px rgba(0,0,0,.04);
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  width:100%;max-width:960px;
+}
+.cs-preview{
+  width:72px;height:72px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  border-right:1px solid rgba(0,0,0,.06);padding-right:24px;
+}
+.cs-preview img{
+  width:100%;height:100%;object-fit:contain;
+  filter:drop-shadow(0 4px 12px rgba(0,0,0,.15));
+  transition:transform .2s;
+}
+.cs-left{flex:1;overflow:visible;}
+.cs-icons{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:6px 0;}
+.cs-icon{
+  width:32px;height:32px;object-fit:contain;cursor:pointer;
+  transition:transform .2s cubic-bezier(.23,1,.32,1), filter .2s;
+  position:relative;
+}
+.cs-icon:hover{transform:scale(1.6) translateY(-4px);filter:drop-shadow(0 6px 12px rgba(0,0,0,.15));z-index:10;}
+.cs-right{
+  display:flex;flex-direction:column;align-items:center;gap:10px;
+  min-width:160px;border-left:1px solid rgba(0,0,0,.06);padding-left:24px;
+}
+.cs-title{font-size:.85rem;font-weight:600;color:var(--text-2);letter-spacing:.02em;text-align:center;}
+.cs-dl-btn{
+  font-size:.8rem;padding:8px 18px;border-radius:12px;height:auto;
+  background:var(--text);color:#fff;
+  display:inline-flex;align-items:center;gap:6px;font-weight:600;
+  box-shadow:0 4px 12px rgba(0,0,0,.15);
+  transition:all .25s ease;
+}
+.cs-dl-btn::before { display: none !important; }
+.cs-dl-btn:hover{
+  filter:brightness(1.15);
+  color:#fff;transform:translateY(-1px);
+  box-shadow:0 6px 16px rgba(0,0,0,.25);
+}
+@media(max-width:860px){
+  .cursor-showcase{flex-direction:column;padding:20px;border-radius:20px;}
+  .cs-preview{border-right:none;border-bottom:1px solid rgba(0,0,0,.06);padding-right:0;padding-bottom:16px;width:100%;height:80px}
+  .cs-right{border-left:none;border-top:1px solid rgba(0,0,0,.06);padding-left:0;padding-top:16px;width:100%;align-items:center}
+  .cs-icons{justify-content:center;}
+}
+
+.hc{position:relative;z-index:5;will-change:transform;width:100%;display:flex;flex-direction:column;align-items:center}
 .hc>*{opacity:0;transform:translateY(18px)}
 body.loaded .hc>*{animation:fadeUp .6s cubic-bezier(.23,1,.32,1) forwards}
 body.loaded .hc>*:nth-child(1){animation-delay:0s}
@@ -638,6 +694,7 @@ body.loaded .hc>*:nth-child(3){animation-delay:.18s}
 body.loaded .hc>*:nth-child(4){animation-delay:.26s}
 body.loaded .hc>*:nth-child(5){animation-delay:.34s}
 body.loaded .hc>*:nth-child(6){animation-delay:.42s}
+body.loaded .hc>*:nth-child(7){animation-delay:.5s}
 
 .hero-icon-w{position:relative;display:inline-block;margin-bottom:32px}
 .hero-icon-w::before,.hero-icon-w::after{
@@ -1372,6 +1429,40 @@ body.loaded .hc>*:nth-child(6){animation-delay:.42s}
         Gitee
       </a>
     </div>
+
+    <!-- Cursor Showcase Bar -->
+    <div class="cursor-showcase">
+      <!-- 独立的左侧预览区 -->
+      <div class="cs-preview">
+        <img id="csPreviewImg" src="assets/cursors/01_normal.png" alt="Cursor Preview">
+      </div>
+      <div class="cs-left">
+        <div class="cs-icons" id="csIconList">
+          <img src="assets/cursors/01_normal.png" class="cs-icon" alt="normal" loading="lazy">
+          <img src="assets/cursors/02_text.png" class="cs-icon" alt="text" loading="lazy">
+          <img src="assets/cursors/03_link.png" class="cs-icon" alt="link" loading="lazy">
+          <img src="assets/cursors/04_unavailable.png" class="cs-icon" alt="unavailable" loading="lazy">
+          <img src="assets/cursors/05_alternate.png" class="cs-icon" alt="alternate" loading="lazy">
+          <img src="assets/cursors/06_help.png" class="cs-icon" alt="help" loading="lazy">
+          <img src="assets/cursors/07_background.png" class="cs-icon" alt="background" loading="lazy">
+          <img src="assets/cursors/08_precision.png" class="cs-icon" alt="precision" loading="lazy">
+          <img src="assets/cursors/09_handwriting.png" class="cs-icon" alt="handwriting" loading="lazy">
+          <img src="assets/cursors/10_busy.png" class="cs-icon" alt="busy" loading="lazy">
+          <img src="assets/cursors/11_diagonal_nwse.png" class="cs-icon" alt="diagonal_nwse" loading="lazy">
+          <img src="assets/cursors/12_diagonal_nesw.png" class="cs-icon" alt="diagonal_nesw" loading="lazy">
+          <img src="assets/cursors/13_move.png" class="cs-icon" alt="move" loading="lazy">
+          <img src="assets/cursors/14_vertical.png" class="cs-icon" alt="vertical" loading="lazy">
+          <img src="assets/cursors/15_horizontal.png" class="cs-icon" alt="horizontal" loading="lazy">
+        </div>
+      </div>
+      <div class="cs-right">
+        <p class="cs-title">📦 Windows桌面礼包上新：专属配套指针</p>
+        <a class="btn cs-dl-btn" href="https://pan.quark.cn/s/c39c349e3d42?pwd=3JvR" target="_blank" rel="noopener" id="cursorLink">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+          夸克网盘获取
+        </a>
+      </div>
+    </div>
   </div>
   <div class="hero-scroll" aria-hidden="true">
     <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/></svg>
@@ -1652,11 +1743,34 @@ body.loaded .hc>*:nth-child(6){animation-delay:.42s}
     var glowFollow = document.getElementById('glowFollow');
     var orb1 = document.querySelector('.orb-1');
     var orb2 = document.querySelector('.orb-2');
+    var fairy=document.getElementById('fairy');
+    if(!fairy)return;
+    var targetX=window.innerWidth/2;
+    var targetY=window.innerHeight/2;
+
+    // 指针展示区的交互
+    var previewImg = document.getElementById('csPreviewImg');
+    var icons = document.querySelectorAll('#csIconList .cs-icon');
+    if (previewImg && icons.length > 0) {
+      icons.forEach(function(icon) {
+        icon.addEventListener('mouseenter', function() {
+          previewImg.style.transform = 'scale(0.8)';
+          setTimeout(() => {
+            previewImg.src = icon.src;
+            previewImg.style.transform = 'scale(1.1)';
+          }, 80);
+        });
+        icon.addEventListener('mouseleave', function() {
+          previewImg.style.transform = 'scale(1)';
+        });
+      });
+    }
+
     var ox=0, oy=0, oTargetX=0, oTargetY=0;
     var gx=0, gy=0;
     var orbT = 0;
 
-    document.addEventListener('mousemove', function(e){
+    window.addEventListener('mousemove',function(e){
       oTargetX = e.clientX - window.innerWidth/2;
       oTargetY = e.clientY - window.innerHeight/2;
     });
