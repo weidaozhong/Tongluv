@@ -635,10 +635,11 @@ body:not(.loaded){position:fixed!important;inset:0!important;overflow:hidden!imp
   100% { transform: translateY(-6px); }
 }
 .cursor-stars {
-  display: flex; gap: 20px; justify-content: center;
-  margin-top: 60px; position: relative; z-index: 10;
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  pointer-events: none; z-index: 10;
 }
 .c-star {
+  position: absolute; pointer-events: auto;
   width: 56px; height: 56px; border-radius: 50%;
   background: rgba(255, 255, 255, 0.6);
   backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
@@ -665,9 +666,26 @@ body:not(.loaded){position:fixed!important;inset:0!important;overflow:hidden!imp
   filter: drop-shadow(0 2px 6px rgba(0,0,0,0.1));
 }
 
+@media (max-width: 860px) {
+  .cursor-stars {
+    position: relative; top: auto; left: auto; width: auto; height: auto;
+    display: flex; gap: 20px; justify-content: center;
+    margin-top: 40px; margin-bottom: -10px;
+    pointer-events: auto;
+  }
+  .c-star {
+    position: relative !important;
+    top: auto !important; bottom: auto !important;
+    left: auto !important; right: auto !important;
+  }
+  .cursor-showcase {
+    margin-top: 24px !important;
+  }
+}
+
 /* ── Cursor Showcase ─────────────────────── */
 .cursor-showcase{
-  margin-top:24px;
+  margin-top:100px;
   background:rgba(255,255,255,.6);
   border-radius:24px;
   padding:16px 24px;
@@ -1784,7 +1802,8 @@ body.loaded .hc>*:nth-child(7){animation-delay:.5s}
         downloadUrl: "https://pan.quark.cn/s/c39c349e3d42?pwd=3JvR",
         starIcon: "assets/cursors/transparent/01_normal.png",
         glow: "rgba(250, 212, 53, 0.7)", /* 参考黄色主指针和主体的高亮色 */
-        path: "assets/cursors/transparent"
+        path: "assets/cursors/transparent",
+        pos: { top: "35%", left: "10%" }
       },
       {
         id: "pink",
@@ -1792,7 +1811,8 @@ body.loaded .hc>*:nth-child(7){animation-delay:.5s}
         downloadUrl: "https://pan.quark.cn/s/def165ba0dcb?pwd=EsJi",
         starIcon: "assets/cursors/pink/03_link.png",
         glow: "rgba(255, 182, 193, 0.8)",
-        path: "assets/cursors/pink"
+        path: "assets/cursors/pink",
+        pos: { top: "45%", right: "12%" }
       }
     ];
 
@@ -1817,6 +1837,12 @@ body.loaded .hc>*:nth-child(7){animation-delay:.5s}
         const star = document.createElement('div');
         star.className = `c-star ${skin.id === currentSkinId ? 'active' : ''}`;
         star.style.setProperty('--star-glow', skin.glow);
+        if(skin.pos) {
+          if(skin.pos.top) star.style.top = skin.pos.top;
+          if(skin.pos.left) star.style.left = skin.pos.left;
+          if(skin.pos.right) star.style.right = skin.pos.right;
+          if(skin.pos.bottom) star.style.bottom = skin.pos.bottom;
+        }
         star.innerHTML = `<img src="${skin.starIcon}" alt="${skin.id}">`;
         
         star.addEventListener('click', () => {
