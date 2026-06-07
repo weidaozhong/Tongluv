@@ -629,9 +629,45 @@ body:not(.loaded){position:fixed!important;inset:0!important;overflow:hidden!imp
   overflow:hidden;
 }
 
+/* ── Cursor Stars ──────────────────────── */
+@keyframes floatOrb {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(-6px); }
+}
+.cursor-stars {
+  display: flex; gap: 20px; justify-content: center;
+  margin-top: 60px; position: relative; z-index: 10;
+}
+.c-star {
+  width: 56px; height: 56px; border-radius: 50%;
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 0 4px 16px var(--star-glow, rgba(255, 255, 255, 0.4));
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+  animation: floatOrb 3s ease-in-out infinite alternate;
+}
+.c-star:nth-child(2) { animation-delay: -1.5s; }
+.c-star:hover {
+  transform: translateY(-4px) scale(1.15) !important;
+  box-shadow: 0 8px 24px var(--star-glow, rgba(255, 255, 255, 0.7));
+  background: rgba(255, 255, 255, 0.9);
+}
+.c-star.active {
+  border: 2px solid var(--star-glow, rgba(255,255,255,0.8));
+  box-shadow: 0 0 24px var(--star-glow, rgba(255,255,255,0.8));
+  background: rgba(255,255,255,0.9);
+}
+.c-star img {
+  width: 28px; height: 28px; object-fit: contain; pointer-events: none;
+  filter: drop-shadow(0 2px 6px rgba(0,0,0,0.1));
+}
+
 /* ── Cursor Showcase ─────────────────────── */
 .cursor-showcase{
-  margin-top:80px;
+  margin-top:24px;
   background:rgba(255,255,255,.6);
   border-radius:24px;
   padding:16px 24px;
@@ -1430,34 +1466,25 @@ body.loaded .hc>*:nth-child(7){animation-delay:.5s}
       </a>
     </div>
 
+    <!-- Cursor Stars (Skin Selectors) -->
+    <div class="cursor-stars" id="cursorStars">
+      <!-- Stars will be injected by JS -->
+    </div>
+
     <!-- Cursor Showcase Bar -->
     <div class="cursor-showcase">
       <!-- 独立的左侧预览区 -->
       <div class="cs-preview">
-        <img id="csPreviewImg" src="assets/cursors/01_normal.png" alt="Cursor Preview">
+        <img id="csPreviewImg" src="assets/cursors/transparent/01_normal.png" alt="Cursor Preview">
       </div>
       <div class="cs-left">
         <div class="cs-icons" id="csIconList">
-          <img src="assets/cursors/01_normal.png" class="cs-icon" alt="normal" loading="lazy">
-          <img src="assets/cursors/02_text.png" class="cs-icon" alt="text" loading="lazy">
-          <img src="assets/cursors/03_link.png" class="cs-icon" alt="link" loading="lazy">
-          <img src="assets/cursors/04_unavailable.png" class="cs-icon" alt="unavailable" loading="lazy">
-          <img src="assets/cursors/05_alternate.png" class="cs-icon" alt="alternate" loading="lazy">
-          <img src="assets/cursors/06_help.png" class="cs-icon" alt="help" loading="lazy">
-          <img src="assets/cursors/07_background.png" class="cs-icon" alt="background" loading="lazy">
-          <img src="assets/cursors/08_precision.png" class="cs-icon" alt="precision" loading="lazy">
-          <img src="assets/cursors/09_handwriting.png" class="cs-icon" alt="handwriting" loading="lazy">
-          <img src="assets/cursors/10_busy.png" class="cs-icon" alt="busy" loading="lazy">
-          <img src="assets/cursors/11_diagonal_nwse.png" class="cs-icon" alt="diagonal_nwse" loading="lazy">
-          <img src="assets/cursors/12_diagonal_nesw.png" class="cs-icon" alt="diagonal_nesw" loading="lazy">
-          <img src="assets/cursors/13_move.png" class="cs-icon" alt="move" loading="lazy">
-          <img src="assets/cursors/14_vertical.png" class="cs-icon" alt="vertical" loading="lazy">
-          <img src="assets/cursors/15_horizontal.png" class="cs-icon" alt="horizontal" loading="lazy">
+          <!-- Icons injected by JS -->
         </div>
       </div>
       <div class="cs-right">
-        <p class="cs-title">📦 Windows桌面礼包上新：专属配套指针</p>
-        <a class="btn cs-dl-btn" href="https://pan.quark.cn/s/c39c349e3d42?pwd=3JvR" target="_blank" rel="noopener" id="cursorLink">
+        <p class="cs-title" id="csTitle">📦 Windows桌面礼包上新：专属配套指针</p>
+        <a class="btn cs-dl-btn" href="#" target="_blank" rel="noopener" id="cursorLink">
           <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
           夸克网盘获取
         </a>
@@ -1748,23 +1775,105 @@ body.loaded .hc>*:nth-child(7){animation-delay:.5s}
     var targetX=window.innerWidth/2;
     var targetY=window.innerHeight/2;
 
-    // 指针展示区的交互
-    var previewImg = document.getElementById('csPreviewImg');
-    var icons = document.querySelectorAll('#csIconList .cs-icon');
-    if (previewImg && icons.length > 0) {
-      icons.forEach(function(icon) {
-        icon.addEventListener('mouseenter', function() {
-          previewImg.style.transform = 'scale(0.8)';
-          setTimeout(() => {
-            previewImg.src = icon.src;
-            previewImg.style.transform = 'scale(1.1)';
-          }, 80);
+    // 动态星轨陈列系统配置
+    const cursorSkins = [
+      {
+        id: "transparent",
+        title: "📦 Windows桌面礼包上新：透明嗵专属配套指针",
+        downloadUrl: "https://pan.quark.cn/s/c39c349e3d42?pwd=3JvR",
+        starIcon: "assets/cursors/transparent/01_normal.png",
+        glow: "rgba(255,255,255,0.8)",
+        path: "assets/cursors/transparent"
+      },
+      {
+        id: "pink",
+        title: "🌸 Windows桌面礼包上新：粉色小嗵专属配套指针",
+        downloadUrl: "https://pan.quark.cn/s/def165ba0dcb?pwd=EsJi",
+        starIcon: "assets/cursors/pink/03_link.png",
+        glow: "rgba(255, 182, 193, 0.8)",
+        path: "assets/cursors/pink"
+      }
+    ];
+
+    const filenames = [
+      "01_normal.png", "02_text.png", "03_link.png", "04_unavailable.png", "05_alternate.png",
+      "06_help.png", "07_background.png", "08_precision.png", "09_handwriting.png", "10_busy.png",
+      "11_diagonal_nwse.png", "12_diagonal_nesw.png", "13_move.png", "14_vertical.png", "15_horizontal.png"
+    ];
+
+    const starsContainer = document.getElementById('cursorStars');
+    const iconListContainer = document.getElementById('csIconList');
+    const csTitle = document.getElementById('csTitle');
+    const cursorLink = document.getElementById('cursorLink');
+    const previewImg = document.getElementById('csPreviewImg');
+
+    let currentSkinId = "transparent";
+
+    function initCursorSystem() {
+      if (!starsContainer) return;
+      // 1. 生成星星入口
+      cursorSkins.forEach(skin => {
+        const star = document.createElement('div');
+        star.className = `c-star ${skin.id === currentSkinId ? 'active' : ''}`;
+        star.style.setProperty('--star-glow', skin.glow);
+        star.innerHTML = `<img src="${skin.starIcon}" alt="${skin.id}">`;
+        
+        star.addEventListener('click', () => {
+          window.open(skin.downloadUrl, '_blank');
         });
-        icon.addEventListener('mouseleave', function() {
-          previewImg.style.transform = 'scale(1)';
+
+        star.addEventListener('mouseenter', () => {
+          if (currentSkinId !== skin.id) {
+            document.querySelectorAll('.c-star').forEach(s => s.classList.remove('active'));
+            star.classList.add('active');
+            renderShowcase(skin);
+          }
         });
+
+        starsContainer.appendChild(star);
       });
+
+      // 2. 初始渲染默认皮肤
+      renderShowcase(cursorSkins[0]);
     }
+
+    function renderShowcase(skin) {
+      currentSkinId = skin.id;
+      if(csTitle) csTitle.textContent = skin.title;
+      if(cursorLink) cursorLink.href = skin.downloadUrl;
+      if(previewImg) {
+        previewImg.src = `${skin.path}/01_normal.png`;
+        previewImg.style.transform = 'scale(0.8)';
+        setTimeout(() => previewImg.style.transform = 'scale(1)', 80);
+      }
+
+      if(iconListContainer) {
+        iconListContainer.innerHTML = '';
+        filenames.forEach(file => {
+          const img = document.createElement('img');
+          img.src = `${skin.path}/${file}`;
+          img.className = 'cs-icon';
+          img.loading = 'lazy';
+          
+          img.addEventListener('mouseenter', () => {
+            if(previewImg) {
+              previewImg.style.transform = 'scale(0.8)';
+              setTimeout(() => {
+                previewImg.src = img.src;
+                previewImg.style.transform = 'scale(1.1)';
+              }, 80);
+            }
+          });
+          img.addEventListener('mouseleave', () => {
+            if(previewImg) previewImg.style.transform = 'scale(1)';
+          });
+          
+          iconListContainer.appendChild(img);
+        });
+      }
+    }
+
+    initCursorSystem();
 
     var ox=0, oy=0, oTargetX=0, oTargetY=0;
     var gx=0, gy=0;
