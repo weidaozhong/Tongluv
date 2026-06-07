@@ -1854,7 +1854,6 @@ body.loaded .hc>*:nth-child(7){animation-delay:.5s}
           const img = document.createElement('img');
           img.src = `${skin.path}/${file}`;
           img.className = 'cs-icon';
-          img.loading = 'lazy';
           
           img.addEventListener('mouseenter', () => {
             if(previewImg) {
@@ -2171,6 +2170,13 @@ body.loaded .hc>*:nth-child(7){animation-delay:.5s}
     document.querySelectorAll('img[loading="lazy"]').forEach(function(img){
       lazySrcs.push(img.getAttribute('src'));
     });
+    // 强制把所有皮肤指针图片塞进预加载队列，确保进主页前必定缓冲完毕
+    if(typeof cursorSkins !== 'undefined' && typeof filenames !== 'undefined') {
+      cursorSkins.forEach(skin => {
+        filenames.forEach(file => lazySrcs.push(`${skin.path}/${file}`));
+      });
+    }
+    
     var remaining = lazySrcs.length;
     if(remaining === 0){ preloadDone = true; }
     else {
