@@ -1875,27 +1875,35 @@ body.loaded .hc>*:nth-child(7){animation-delay:.5s}
       }
 
       if(iconListContainer) {
-        iconListContainer.innerHTML = '';
-        filenames.forEach(file => {
-          const img = document.createElement('img');
-          img.src = `${skin.path}/${file}`;
-          img.className = 'cs-icon';
-          
-          img.addEventListener('mouseenter', () => {
-            if(previewImg) {
-              previewImg.style.transform = 'scale(0.8)';
-              setTimeout(() => {
-                previewImg.src = img.src;
-                previewImg.style.transform = 'scale(1.1)';
-              }, 80);
-            }
+        if (iconListContainer.children.length === 0) {
+          // 首次初始化：创建 DOM 节点并绑定事件
+          filenames.forEach(file => {
+            const img = document.createElement('img');
+            img.src = `${skin.path}/${file}`;
+            img.className = 'cs-icon';
+            
+            img.addEventListener('mouseenter', () => {
+              if(previewImg) {
+                previewImg.style.transform = 'scale(0.8)';
+                setTimeout(() => {
+                  previewImg.src = img.src;
+                  previewImg.style.transform = 'scale(1.1)';
+                }, 80);
+              }
+            });
+            img.addEventListener('mouseleave', () => {
+              if(previewImg) previewImg.style.transform = 'scale(1)';
+            });
+            
+            iconListContainer.appendChild(img);
           });
-          img.addEventListener('mouseleave', () => {
-            if(previewImg) previewImg.style.transform = 'scale(1)';
+        } else {
+          // 后续切换：直接复用已有 DOM，极速只更新图片地址，杜绝重绘卡顿
+          const imgs = iconListContainer.querySelectorAll('.cs-icon');
+          imgs.forEach((img, index) => {
+            img.src = `${skin.path}/${filenames[index]}`;
           });
-          
-          iconListContainer.appendChild(img);
-        });
+        }
       }
     }
 
