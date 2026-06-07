@@ -642,8 +642,8 @@ body:not(.loaded){position:fixed!important;inset:0!important;overflow:hidden!imp
   width: 56px; height: 56px; border-radius: 50%;
   background: rgba(255, 255, 255, 0.6);
   backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.5);
-  box-shadow: 0 4px 16px var(--star-glow, rgba(255, 255, 255, 0.4));
+  border: 2px solid var(--star-glow, rgba(255, 255, 255, 0.5));
+  box-shadow: 0 4px 16px var(--star-glow, rgba(255, 255, 255, 0.4)), inset 0 0 8px rgba(255,255,255,0.5);
   display: flex; align-items: center; justify-content: center;
   cursor: pointer;
   transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
@@ -652,13 +652,13 @@ body:not(.loaded){position:fixed!important;inset:0!important;overflow:hidden!imp
 .c-star:nth-child(2) { animation-delay: -1.5s; }
 .c-star:hover {
   transform: translateY(-4px) scale(1.15) !important;
-  box-shadow: 0 8px 24px var(--star-glow, rgba(255, 255, 255, 0.7));
+  box-shadow: 0 8px 24px var(--star-glow, rgba(255, 255, 255, 0.8));
   background: rgba(255, 255, 255, 0.9);
 }
 .c-star.active {
   border: 2px solid var(--star-glow, rgba(255,255,255,0.8));
-  box-shadow: 0 0 24px var(--star-glow, rgba(255,255,255,0.8));
-  background: rgba(255,255,255,0.9);
+  box-shadow: 0 0 24px var(--star-glow, rgba(255,255,255,0.9)), inset 0 0 12px rgba(255,255,255,0.8);
+  background: rgba(255,255,255,1);
 }
 .c-star img {
   width: 28px; height: 28px; object-fit: contain; pointer-events: none;
@@ -692,6 +692,7 @@ body:not(.loaded){position:fixed!important;inset:0!important;overflow:hidden!imp
 .cs-icons{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:6px 0;}
 .cs-icon{
   width:32px;height:32px;object-fit:contain;cursor:pointer;
+  flex-shrink:0;min-width:32px;min-height:32px;
   transition:transform .2s cubic-bezier(.23,1,.32,1), filter .2s;
   position:relative;
 }
@@ -1782,7 +1783,7 @@ body.loaded .hc>*:nth-child(7){animation-delay:.5s}
         title: "📦 Windows桌面礼包上新：透明嗵专属配套指针",
         downloadUrl: "https://pan.quark.cn/s/c39c349e3d42?pwd=3JvR",
         starIcon: "assets/cursors/transparent/01_normal.png",
-        glow: "rgba(255,255,255,0.8)",
+        glow: "rgba(250, 212, 53, 0.7)", /* 参考黄色主指针和主体的高亮色 */
         path: "assets/cursors/transparent"
       },
       {
