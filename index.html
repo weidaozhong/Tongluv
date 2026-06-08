@@ -1741,6 +1741,15 @@ body.loaded .hc>*:nth-child(7){animation-delay:.5s}
         glow: "rgba(255, 182, 193, 0.8)",
         path: "assets/cursors/pink",
         pos: { top: "45%", right: "12%" }
+      },
+      {
+        id: "brown",
+        title: "🟤 Windows桌面礼包上新：棕嗵专属配套指针",
+        downloadUrl: "#",
+        starIcon: "assets/cursors/brown/04_unavailable.png",
+        glow: "rgba(139, 69, 19, 0.8)",
+        path: "assets/cursors/brown",
+        pos: { top: "15%", left: "55%" }
       }
     ];
 
@@ -1822,33 +1831,7 @@ body.loaded .hc>*:nth-child(7){animation-delay:.5s}
     var targetX=window.innerWidth/2;
     var targetY=window.innerHeight/2;
 
-    // 动态星轨陈列系统配置
-    const cursorSkins = [
-      {
-        id: "transparent",
-        title: "📦 Windows桌面礼包上新：透明嗵专属配套指针",
-        downloadUrl: "https://pan.quark.cn/s/c39c349e3d42?pwd=3JvR",
-        starIcon: "assets/cursors/transparent/01_normal.png",
-        glow: "rgba(250, 212, 53, 0.7)", /* 参考黄色主指针和主体的高亮色 */
-        path: "assets/cursors/transparent",
-        pos: { top: "35%", left: "10%" }
-      },
-      {
-        id: "pink",
-        title: "🌸 Windows桌面礼包上新：粉色小嗵专属配套指针",
-        downloadUrl: "https://pan.quark.cn/s/def165ba0dcb?pwd=EsJi",
-        starIcon: "assets/cursors/pink/03_link.png",
-        glow: "rgba(255, 182, 193, 0.8)",
-        path: "assets/cursors/pink",
-        pos: { top: "45%", right: "12%" }
-      }
-    ];
-
-    const filenames = [
-      "01_normal.png", "02_text.png", "03_link.png", "04_unavailable.png", "05_alternate.png",
-      "06_help.png", "07_background.png", "08_precision.png", "09_handwriting.png", "10_busy.png",
-      "11_diagonal_nwse.png", "12_diagonal_nesw.png", "13_move.png", "14_vertical.png", "15_horizontal.png"
-    ];
+    // （皮肤配置已提取至 window.cursorSkins 和 window.cursorFilenames 作为全局变量，以便预加载脚本使用）
 
     const starsContainer = document.getElementById('cursorStars');
     const iconListContainer = document.getElementById('csIconList');
@@ -1926,10 +1909,13 @@ body.loaded .hc>*:nth-child(7){animation-delay:.5s}
             iconListContainer.appendChild(img);
           });
         } else {
-          // 后续切换：直接复用已有 DOM，极速只更新图片地址，杜绝重绘卡顿
+          // 后续切换：极速更新图片并添加透明度动画消除错位
           const imgs = iconListContainer.querySelectorAll('.cs-icon');
           imgs.forEach((img, index) => {
-            img.src = `${skin.path}/${filenames[index]}`;
+            img.style.opacity = '0';
+            const newSrc = `${skin.path}/${window.cursorFilenames[index]}`;
+            img.onload = () => img.style.opacity = '1';
+            img.src = newSrc;
           });
         }
       }
@@ -2233,7 +2219,7 @@ body.loaded .hc>*:nth-child(7){animation-delay:.5s}
       lazySrcs.push(img.getAttribute('src'));
     });
     // 强制把所有皮肤指针图片塞进预加载队列，确保进主页前必定缓冲完毕
-    if(typeof cursorSkins !== 'undefined' && typeof filenames !== 'undefined') {
+    if(window.cursorSkins && window.cursorFilenames) {
       window.cursorSkins.forEach(skin => {
         window.cursorFilenames.forEach(file => lazySrcs.push(`${skin.path}/${file}`));
       });
