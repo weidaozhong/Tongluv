@@ -1720,9 +1720,37 @@ body.loaded .hc>*:nth-child(7){animation-delay:.5s}
   <p class="footer-copy">Apache 2.0 + 附加协议 · 蓝色小嗵 XIAOTONG</p>
 </footer>
 
-<script>
-(function(){
-  /* ── Helpers ───────────────────────────── */
+  <script>
+  (function(){
+    // 动态星轨陈列系统配置（全局预加载可用）
+    window.cursorSkins = [
+      {
+        id: "transparent",
+        title: "📦 Windows桌面礼包上新：透明嗵专属配套指针",
+        downloadUrl: "https://pan.quark.cn/s/c39c349e3d42?pwd=3JvR",
+        starIcon: "assets/cursors/transparent/01_normal.png",
+        glow: "rgba(250, 212, 53, 0.7)",
+        path: "assets/cursors/transparent",
+        pos: { top: "35%", left: "10%" }
+      },
+      {
+        id: "pink",
+        title: "🌸 Windows桌面礼包上新：粉色小嗵专属配套指针",
+        downloadUrl: "https://pan.quark.cn/s/def165ba0dcb?pwd=EsJi",
+        starIcon: "assets/cursors/pink/03_link.png",
+        glow: "rgba(255, 182, 193, 0.8)",
+        path: "assets/cursors/pink",
+        pos: { top: "45%", right: "12%" }
+      }
+    ];
+
+    window.cursorFilenames = [
+      "01_normal.png", "02_text.png", "03_link.png", "04_unavailable.png", "05_alternate.png",
+      "06_help.png", "07_background.png", "08_precision.png", "09_handwriting.png", "10_busy.png",
+      "11_diagonal_nwse.png", "12_diagonal_nesw.png", "13_move.png", "14_vertical.png", "15_horizontal.png"
+    ];
+
+    /* ── Helpers ───────────────────────────── */
   var raf = requestAnimationFrame;
   function lerp(a,b,t){return a+(b-a)*t}
   var isMobile = window.innerWidth < 541;
@@ -1833,7 +1861,7 @@ body.loaded .hc>*:nth-child(7){animation-delay:.5s}
     function initCursorSystem() {
       if (!starsContainer) return;
       // 1. 生成星星入口
-      cursorSkins.forEach(skin => {
+      window.cursorSkins.forEach(skin => {
         const star = document.createElement('div');
         star.className = `c-star ${skin.id === currentSkinId ? 'active' : ''}`;
         star.style.setProperty('--star-glow', skin.glow);
@@ -1861,7 +1889,7 @@ body.loaded .hc>*:nth-child(7){animation-delay:.5s}
       });
 
       // 2. 初始渲染默认皮肤
-      renderShowcase(cursorSkins[0]);
+      renderShowcase(window.cursorSkins[0]);
     }
 
     function renderShowcase(skin) {
@@ -1877,7 +1905,7 @@ body.loaded .hc>*:nth-child(7){animation-delay:.5s}
       if(iconListContainer) {
         if (iconListContainer.children.length === 0) {
           // 首次初始化：创建 DOM 节点并绑定事件
-          filenames.forEach(file => {
+          window.cursorFilenames.forEach(file => {
             const img = document.createElement('img');
             img.src = `${skin.path}/${file}`;
             img.className = 'cs-icon';
@@ -2206,8 +2234,8 @@ body.loaded .hc>*:nth-child(7){animation-delay:.5s}
     });
     // 强制把所有皮肤指针图片塞进预加载队列，确保进主页前必定缓冲完毕
     if(typeof cursorSkins !== 'undefined' && typeof filenames !== 'undefined') {
-      cursorSkins.forEach(skin => {
-        filenames.forEach(file => lazySrcs.push(`${skin.path}/${file}`));
+      window.cursorSkins.forEach(skin => {
+        window.cursorFilenames.forEach(file => lazySrcs.push(`${skin.path}/${file}`));
       });
     }
     
