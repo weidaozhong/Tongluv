@@ -1457,7 +1457,7 @@ body.loaded .hc>*:nth-child(7){animation-delay:.5s}
     <svg width="15" height="15" viewBox="0 0 1024 1024" fill="currentColor"><path d="M512 1024C229.222 1024 0 794.778 0 512S229.222 0 512 0s512 229.222 512 512-229.222 512-512 512zm259.149-568.883h-290.74a25.293 25.293 0 0 0-25.292 25.293l-.006 63.206c0 13.952 11.315 25.293 25.267 25.293h177.024c13.978 0 25.293 11.315 25.293 25.267v12.646a75.853 75.853 0 0 1-75.853 75.853h-240.23a25.293 25.293 0 0 1-25.267-25.293V417.203a75.853 75.853 0 0 1 75.827-75.853h353.946a25.293 25.293 0 0 0 25.267-25.292l.077-63.207a25.293 25.293 0 0 0-25.268-25.293H417.152a189.62 189.62 0 0 0-189.62 189.645V771.15c0 13.977 11.316 25.293 25.294 25.293h372.94a170.65 170.65 0 0 0 170.65-170.65V480.384a25.293 25.293 0 0 0-25.293-25.267z"/></svg>
     Gitee
   </a>
-  <a class="nav-dl mag-btn" href="/download">免费下载</a>
+  <a class="nav-dl mag-btn" href="#cursorShowcase">免费下载</a>
 </nav>
 
 <!-- ═══ Hero ═══ -->
@@ -1471,7 +1471,7 @@ body.loaded .hc>*:nth-child(7){animation-delay:.5s}
     <p class="hero-tl">TA 从森林里来，因为想天天见到你。</p>
     <p class="hero-tl-en">A spirit from the forest, here to stay by your side.</p>
     <div class="hero-cta">
-      <a class="btn btn-gold mag-btn" href="/download">
+      <a class="btn btn-gold mag-btn" href="#cursorShowcase">
         <svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 2a1 1 0 011 1v8.586l2.293-2.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L9 11.586V3a1 1 0 011-1z"/><path d="M5 16a1 1 0 100 2h10a1 1 0 100-2H5z"/></svg>
         下载
       </a>
@@ -1491,7 +1491,7 @@ body.loaded .hc>*:nth-child(7){animation-delay:.5s}
     </div>
 
     <!-- Cursor Showcase Bar -->
-    <div class="cursor-showcase">
+    <div class="cursor-showcase" id="cursorShowcase">
       <!-- 独立的左侧预览区 -->
       <div class="cs-preview">
         <img id="csPreviewImg" src="assets/cursors/transparent/01_normal.png" alt="Cursor Preview">
@@ -1675,7 +1675,7 @@ body.loaded .hc>*:nth-child(7){animation-delay:.5s}
     <div class="dl-left">
       <h2 class="dl-t" data-text="领养 TA">领养 TA</h2>
       <p class="dl-t-en">Adopt XIAOTONG</p>
-      <a class="dl-btn mag-btn" href="/download">
+      <a class="dl-btn mag-btn" href="#cursorShowcase">
         <svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 2a1 1 0 011 1v8.586l2.293-2.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L9 11.586V3a1 1 0 011-1z"/><path d="M5 16a1 1 0 100 2h10a1 1 0 100-2H5z"/></svg>
         下载最新版
       </a>
@@ -1856,8 +1856,23 @@ body.loaded .hc>*:nth-child(7){animation-delay:.5s}
         }
         star.innerHTML = `<img src="${skin.starIcon}" alt="${skin.id}">`;
         
-        star.addEventListener('click', () => {
-          window.open(skin.downloadUrl, '_blank');
+        star.addEventListener('click', (e) => {
+          if (window.innerWidth <= 860) {
+            if (currentSkinId !== skin.id) {
+              e.preventDefault();
+              document.querySelectorAll('.c-star').forEach(s => s.classList.remove('active'));
+              star.classList.add('active');
+              renderShowcase(skin);
+              const showcase = document.getElementById('cursorShowcase');
+              if (showcase) {
+                showcase.scrollIntoView({ behavior: 'smooth' });
+              }
+              return;
+            }
+          }
+          if (skin.downloadUrl && skin.downloadUrl !== '#') {
+            window.open(skin.downloadUrl, '_blank');
+          }
         });
 
         star.addEventListener('mouseenter', () => {
