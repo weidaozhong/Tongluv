@@ -1876,10 +1876,12 @@ body.loaded .hc>*:nth-child(7){animation-delay:.5s}
         });
 
         star.addEventListener('mouseenter', () => {
-          if (currentSkinId !== skin.id) {
-            document.querySelectorAll('.c-star').forEach(s => s.classList.remove('active'));
-            star.classList.add('active');
-            renderShowcase(skin);
+          if (window.innerWidth > 860) {
+            if (currentSkinId !== skin.id) {
+              document.querySelectorAll('.c-star').forEach(s => s.classList.remove('active'));
+              star.classList.add('active');
+              renderShowcase(skin);
+            }
           }
         });
 
