@@ -679,7 +679,7 @@ body:not(.loaded){position:fixed!important;inset:0!important;overflow:hidden!imp
     left: auto !important; right: auto !important;
   }
   .cursor-showcase {
-    margin-top: 24px !important;
+    display: none !important;
   }
 }
 
@@ -1827,9 +1827,9 @@ body.loaded .hc>*:nth-child(7){animation-delay:.5s}
     var orb1 = document.querySelector('.orb-1');
     var orb2 = document.querySelector('.orb-2');
     var fairy=document.getElementById('fairy');
+    if(!fairy)return;
     var targetX=window.innerWidth/2;
     var targetY=window.innerHeight/2;
-  }
 
     // （皮肤配置已提取至 window.cursorSkins 和 window.cursorFilenames 作为全局变量，以便预加载脚本使用）
 
@@ -1857,19 +1857,6 @@ body.loaded .hc>*:nth-child(7){animation-delay:.5s}
         star.innerHTML = `<img src="${skin.starIcon}" alt="${skin.id}">`;
         
         star.addEventListener('click', (e) => {
-          if (window.innerWidth <= 860) {
-            if (currentSkinId !== skin.id) {
-              e.preventDefault();
-              document.querySelectorAll('.c-star').forEach(s => s.classList.remove('active'));
-              star.classList.add('active');
-              renderShowcase(skin);
-              const showcase = document.getElementById('cursorShowcase');
-              if (showcase) {
-                showcase.scrollIntoView({ behavior: 'smooth' });
-              }
-              return;
-            }
-          }
           if (skin.downloadUrl && skin.downloadUrl !== '#') {
             window.open(skin.downloadUrl, '_blank');
           }
@@ -1940,7 +1927,6 @@ body.loaded .hc>*:nth-child(7){animation-delay:.5s}
 
     initCursorSystem();
 
-  if(!isMobile && typeof fairy !== 'undefined' && fairy){
     var ox=0, oy=0, oTargetX=0, oTargetY=0;
     var gx=0, gy=0;
     var orbT = 0;
@@ -2135,8 +2121,10 @@ body.loaded .hc>*:nth-child(7){animation-delay:.5s}
 
       /* hero parallax */
       if(y < window.innerHeight*1.2){
-        hc.style.transform = 'translateY('+y*0.12+'px)';
-        hc.style.opacity = Math.max(0, 1 - y/(window.innerHeight*.7));
+        if (!isMobile) {
+          hc.style.transform = 'translateY('+y*0.12+'px)';
+          hc.style.opacity = Math.max(0, 1 - y/(window.innerHeight*.7));
+        }
       }
       ticking = false;
     });ticking=true;}
