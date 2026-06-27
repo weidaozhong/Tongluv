@@ -1738,7 +1738,33 @@ body.loaded .hc>*:nth-child(7){animation-delay:.5s}
     }
 
     if (isDomestic) {
-      window.open('https://kkgithub.com/weidaozhong/Tongluv/releases/latest', '_blank');
+      var targetBtn = e.target.closest('a') || e.target;
+      targetBtn.style.opacity = '0.5';
+      targetBtn.style.pointerEvents = 'none';
+      
+      fetch('https://api.github.com/repos/weidaozhong/Tongluv/releases/latest')
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+          targetBtn.style.opacity = '1';
+          targetBtn.style.pointerEvents = 'auto';
+          var downloadUrl = '';
+          if (data && data.assets && data.assets.length > 0) {
+            downloadUrl = data.assets[0].browser_download_url;
+          } else if (data && data.zipball_url) {
+            downloadUrl = data.zipball_url;
+          }
+          if (downloadUrl) {
+            window.open('https://ghproxy.net/' + downloadUrl, '_self');
+          } else {
+            alert('未能找到最新版的下载文件。');
+          }
+        })
+        .catch(function(err) {
+          targetBtn.style.opacity = '1';
+          targetBtn.style.pointerEvents = 'auto';
+          alert('直连下载请求超时。将为您跳转至备用页面...');
+          window.open('https://gitee.com/weidaozhong/Tongluv/releases', '_blank');
+        });
     } else {
       window.open('https://github.com/weidaozhong/Tongluv/releases/latest', '_blank');
     }
