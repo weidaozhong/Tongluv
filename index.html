@@ -1457,7 +1457,7 @@ body.loaded .hc>*:nth-child(7){animation-delay:.5s}
     <svg width="15" height="15" viewBox="0 0 1024 1024" fill="currentColor"><path d="M512 1024C229.222 1024 0 794.778 0 512S229.222 0 512 0s512 229.222 512 512-229.222 512-512 512zm259.149-568.883h-290.74a25.293 25.293 0 0 0-25.292 25.293l-.006 63.206c0 13.952 11.315 25.293 25.267 25.293h177.024c13.978 0 25.293 11.315 25.293 25.267v12.646a75.853 75.853 0 0 1-75.853 75.853h-240.23a25.293 25.293 0 0 1-25.267-25.293V417.203a75.853 75.853 0 0 1 75.827-75.853h353.946a25.293 25.293 0 0 0 25.267-25.292l.077-63.207a25.293 25.293 0 0 0-25.268-25.293H417.152a189.62 189.62 0 0 0-189.62 189.645V771.15c0 13.977 11.316 25.293 25.294 25.293h372.94a170.65 170.65 0 0 0 170.65-170.65V480.384a25.293 25.293 0 0 0-25.293-25.267z"/></svg>
     Gitee
   </a>
-  <a class="nav-dl mag-btn" href="#" onclick="handleIntlDownload(event)">免费下载</a>
+  <a class="nav-dl mag-btn" href="/download">免费下载</a>
 </nav>
 
 <!-- ═══ Hero ═══ -->
@@ -1471,7 +1471,7 @@ body.loaded .hc>*:nth-child(7){animation-delay:.5s}
     <p class="hero-tl">TA 从森林里来，因为想天天见到你。</p>
     <p class="hero-tl-en">A spirit from the forest, here to stay by your side.</p>
     <div class="hero-cta">
-      <a class="btn btn-gold mag-btn" href="#" onclick="handleIntlDownload(event)">
+      <a class="btn btn-gold mag-btn" href="/download">
         <svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 2a1 1 0 011 1v8.586l2.293-2.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L9 11.586V3a1 1 0 011-1z"/><path d="M5 16a1 1 0 100 2h10a1 1 0 100-2H5z"/></svg>
         下载
       </a>
@@ -1675,7 +1675,7 @@ body.loaded .hc>*:nth-child(7){animation-delay:.5s}
     <div class="dl-left">
       <h2 class="dl-t" data-text="领养 TA">领养 TA</h2>
       <p class="dl-t-en">Adopt XIAOTONG</p>
-      <a class="dl-btn mag-btn" href="#" onclick="handleIntlDownload(event)">
+      <a class="dl-btn mag-btn" href="/download">
         <svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 2a1 1 0 011 1v8.586l2.293-2.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L9 11.586V3a1 1 0 011-1z"/><path d="M5 16a1 1 0 100 2h10a1 1 0 100-2H5z"/></svg>
         下载最新版
       </a>
@@ -1721,55 +1721,6 @@ body.loaded .hc>*:nth-child(7){animation-delay:.5s}
 </footer>
 
   <script>
-
-  /* ── Intelligent Download Routing ────────────────────────────── */
-  window.handleIntlDownload = function(e) {
-    if (e) e.preventDefault();
-    var isDomestic = false;
-    try {
-      var tz = Intl.DateTimeFormat().resolvedOptions().timeZone || "";
-      if (tz.indexOf('Asia/Shanghai') !== -1 || tz.indexOf('Chongqing') !== -1 || tz.indexOf('Harbin') !== -1 || tz.indexOf('Urumqi') !== -1 || tz.indexOf('Taipei') !== -1 || tz.indexOf('Macau') !== -1 || tz.indexOf('Hong_Kong') !== -1) {
-        isDomestic = true;
-      }
-    } catch(err) {}
-    
-    if (!isDomestic && navigator.language) {
-      isDomestic = navigator.language.toLowerCase().indexOf('zh') > -1;
-    }
-
-    if (isDomestic) {
-      var targetBtn = e.target.closest('a') || e.target;
-      targetBtn.style.opacity = '0.5';
-      targetBtn.style.pointerEvents = 'none';
-      
-      fetch('https://api.github.com/repos/weidaozhong/Tongluv/releases/latest')
-        .then(function(res) { return res.json(); })
-        .then(function(data) {
-          targetBtn.style.opacity = '1';
-          targetBtn.style.pointerEvents = 'auto';
-          var downloadUrl = '';
-          if (data && data.assets && data.assets.length > 0) {
-            downloadUrl = data.assets[0].browser_download_url;
-          } else if (data && data.zipball_url) {
-            downloadUrl = data.zipball_url;
-          }
-          if (downloadUrl) {
-            window.open('https://ghproxy.net/' + downloadUrl, '_self');
-          } else {
-            alert('未能找到最新版的下载文件。');
-          }
-        })
-        .catch(function(err) {
-          targetBtn.style.opacity = '1';
-          targetBtn.style.pointerEvents = 'auto';
-          alert('直连下载请求超时。将为您跳转至备用页面...');
-          window.open('https://gitee.com/weidaozhong/Tongluv/releases', '_blank');
-        });
-    } else {
-      window.open('https://github.com/weidaozhong/Tongluv/releases/latest', '_blank');
-    }
-  };
-
 
   (function(){
     // 动态星轨陈列系统配置（全局预加载可用）
